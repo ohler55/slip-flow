@@ -1,0 +1,86 @@
+# SLIP-Flow Notes
+
+ - flow package in separate repo
+  - design/model
+   - immutable bag or similar
+   - separate routine for each node/task
+    - or option for separate thread
+     - **maybe option for number of workers**
+      - 0 means inline, > 0 means work-queue (channel) and workers
+  - flow-manager
+   - logger
+   - map of flows by name
+  - flow
+   - name
+   - log level
+   - entry
+   - tasks
+  - task or node
+   - name
+   - links map[string]*Link
+   - actors []*flavors.Instance
+    - :receive
+     - calls :transition on parent task to move to linked task
+   - function (if using a function or lambda)
+   - queue chan *Box
+   - worker-count
+   - workers (if actor is an instance)
+    - instances in the worker loops if instances
+    - else just use the function
+  - link
+   - name
+   - target
+  - box
+   - content
+   - tracking-id
+   - error?
+
+  - config format (lisp or json)
+   - flow
+    - name
+    - log-level
+    - entry (string)
+    - tasks
+     - name
+     - log-level
+     - links (names and targets)
+     - function (optional)
+     - actor
+      - flavor
+      - init key/values
+     - worker-count
+
+   - json format in a bag with option for lisp
+
+  - classes/flavors
+   - task-flavor
+    - methods
+     - start
+      - starts processing loop
+     - stop
+     - submit box/data/bag
+      - drops data on to processing channel
+      - initially copy but later wrap with box that dups on set
+       - or maybe enhance bag to have option for copy on set (immuttable flag)
+     - handle-error
+     - flow return flow task is in
+     - links - returns link names with task as assoc list
+    - subclass for specific behavior
+  - flow-flavor
+   - init should take a config but allow for changes later
+   - can subclass for specific flows
+   - methods
+     - start (starts all tasks)
+     - stop &optional wait (all tasks)
+    - submit data &optional wait
+    - handle-error
+    - logger field points to gi/logger
+    - tasks
+    - add-task
+    - set-entry
+    - link name task (or task-name)
+     - optional flow for external links
+   - vars
+    - entry
+    - tasks
+  - syntax for describing, json or lisp
