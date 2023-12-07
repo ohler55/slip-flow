@@ -1,5 +1,10 @@
 # SLIP-Flow Notes
 
+- next
+ - flow-box-flavor
+ - has-logger-flavor (abstract flavor)
+
+- design
  - flow package in separate repo
   - design/model
    - immutable bag or similar
@@ -31,9 +36,25 @@
    - name
    - target
   - box
-   - content
-   - tracking-id
-   - error?
+   - error [var]
+	flavor.DefMethod(":init", "", initCaller{}) [provide tracking id or track from other box]
+	flavor.DefMethod(":set", "", setCaller{})
+	flavor.DefMethod(":parse", "", parseCaller{})
+	flavor.DefMethod(":read", "", readCaller{})
+	flavor.DefMethod(":get", "", getCaller{})
+	flavor.DefMethod(":has", "", hasCaller{})
+	flavor.DefMethod(":remove", "", removeCaller{})
+	flavor.DefMethod(":modify", "", modifyCaller{})
+	flavor.DefMethod(":native", "", nativeCaller{})
+	flavor.DefMethod(":write", "", writeCaller{})
+	flavor.DefMethod(":walk", "", walkCaller{})
+	flavor.DefMethod(":bag", "", bagCaller{})
+	flavor.DefMethod(":native", "", nativeCaller{})
+	flavor.DefMethod(":tracking-id", "", trackingIDCaller{})
+	flavor.DefMethod(":freeze", "", freezeCaller{})
+	flavor.DefMethod(":track", "", trackCaller{}) [instance]
+	flavor.DefMethod(":events", "", eventsCaller{})
+	flavor.DefMethod(":scan", "", scanCaller{}) [adds and entry to the track]
 
   - config format (lisp or json)
    - flow
@@ -52,7 +73,55 @@
 
    - json format in a bag with option for lisp
 
-  - classes/flavors
+ - classes/flavors
+  - flow-manager-flavor
+   - :init [directory of flows or config file or config args]
+   - :load [read/load a config file then add]
+   - :add [from a bag or lisp config]
+   - :find [get a flow by name]
+   - :flows [all flows, maybe with pattern to match]
+   - :remove
+   - :logger [return gi:logger of the manager]
+  - has-logger-flavor
+   - logger [read only and set by container or on create]
+   - :log-level
+   - :set-log-level
+   - :error
+   - :warn
+   - :info
+   - :debug
+  - flow-flavor (has-logger-flavor)
+   - :init [should take a config but allow for changes later]
+   - :start [starts all tasks]
+   - :stop &optional wait [all tasks]
+   - :submit (box &optional wait) [or call it receive to match tasks]
+   - :handle-error [called by tasks]
+   - :manager
+   - :tasks
+   - :add-task
+   - :remove-task
+   - :find-task
+   - :entry
+   - :link (source link-name target) [source and target can be name or task itself or another flow]
+    - maybe both target and source must be names to avoid cross linking
+    - still allow target to be a flow though
+   - :unlink (source link-name)
+   - :set-entry (task-name)
+
+  - flow-link-flavor or flow-transition-flavor
+
+  - flow-task-flavor (has-logger)
+   - :transition (box &optional wait)
+   - :flow [containing flow]
+   - actor [var]
+   - function [var]
+   -
+  - flow-box-flavor
+   - model after bag but add tracking-id
+   - keep flag to indicate if it is immutable
+    - set flag on call to transition or receive
+     - only need to set the flag if async (0 < workers or has a queue)
+
    - task-flavor
     - methods
      - start
