@@ -73,6 +73,11 @@
 
    - json format in a bag with option for lisp
 
+- actors
+ - queue input actor for trigger tasks
+ - splitter and merger
+ - ...
+
  - classes/flavors
   - flow-manager-flavor
    - :init [directory of flows or config file or config args]

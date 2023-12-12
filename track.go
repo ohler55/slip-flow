@@ -28,7 +28,7 @@ _flow-box-flavor_ is traverses a flow.`),
 	trackFlavor.Final = true
 	trackFlavor.GoMakeOnly = true
 	trackFlavor.DefMethod(":id", "", trackIDCaller{})
-	trackFlavor.DefMethod(":events", "", trackEventsCaller{})
+	trackFlavor.DefMethod(":events", "", trackEventsCaller{}) // TBD change to history?
 }
 
 type event struct {

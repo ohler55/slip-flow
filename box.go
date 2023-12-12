@@ -63,7 +63,6 @@ _flow-task-flavor_ in a flow.`),
 type box struct {
 	track   track
 	content any
-	// err     slip.Object
 }
 
 type boxInitCaller struct{}
