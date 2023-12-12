@@ -2,6 +2,8 @@
 
 - next
  - flow-box-flavor
+  - clos functions
+  - tests
  - has-logger-flavor (abstract flavor)
 
 - design
