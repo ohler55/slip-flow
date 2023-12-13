@@ -110,8 +110,7 @@ the task which will pick the appropriate transition.
 ### link (not a Flavor)
 
 Links exist but are not visible outside the internals of the
-package. They include a name, a target task, and optionally a target
-flow name.
+package. They include a name and a target task.
 
 ### box
 
@@ -198,7 +197,7 @@ becomes important the history can be overlaid on the flows.
 As a processing flow gets more complicated it is advantageous to be
 able to break the flow into sub-flows or nested flows. This allows for
 more understandable flows and for reuse of common flows. Nested flows
-are supported by the use of a flow manager.
+are supported by the use of a flow manager and a sub-flow actor.
 
 ### Parallel Paths
 

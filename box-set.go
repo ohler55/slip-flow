@@ -3,6 +3,7 @@
 package main
 
 import (
+	"github.com/ohler55/ojg/alt"
 	"github.com/ohler55/ojg/jp"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/bag"
@@ -83,10 +84,15 @@ func setBox(obj *flavors.Instance, value, path slip.Object) {
 	default:
 		slip.PanicType("path", p, "string")
 	}
+	bx := obj.Any.(*box)
+	if bx.frozen {
+		bx.content = alt.Dup(bx.content)
+		bx.frozen = false
+	}
 	v := bag.ObjectToBag(value)
 	if x == nil {
-		obj.Any.(*box).content = v
+		bx.content = v
 	} else {
-		x.MustSet(obj.Any.(*box).content, v)
+		x.MustSet(bx.content, v)
 	}
 }

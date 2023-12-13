@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/ohler55/ojg/alt"
 	"github.com/ohler55/ojg/jp"
 	"github.com/ohler55/ojg/oj"
 	"github.com/ohler55/ojg/pretty"
@@ -14,6 +15,7 @@ import (
 	"github.com/ohler55/slip/pkg/bag"
 	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/flavors"
+	"github.com/ohler55/slip/pkg/gi"
 )
 
 var (
@@ -28,7 +30,12 @@ func init() {
 			slip.List{
 				slip.Symbol(":documentation"),
 				slip.String(`A container for data passed between instances of the
-_flow-task-flavor_ in a flow.`),
+_flow-task-flavor_ in a flow. The content of the box can be frozen which forces a
+if an attempt is made to modify the content. Typically when transitioning from one
+task to another a shallow copy of the box is made and the new box as well as the
+original is frozen so that the original box content will not be modified by
+modifications to the new box.
+`),
 			},
 			slip.List{
 				slip.Symbol(":init-keywords"),
@@ -55,10 +62,13 @@ _flow-task-flavor_ in a flow.`),
 	boxFlavor.DefMethod(":walk", "", boxWalkCaller{})
 	boxFlavor.DefMethod(":bag", "", boxBagCaller{})
 	boxFlavor.DefMethod(":freeze", "", boxFreezeCaller{})
+	boxFlavor.DefMethod(":thaw", "", boxThawCaller{})
+	boxFlavor.DefMethod(":frozen", "", boxFrozenCaller{})
 	boxFlavor.DefMethod(":tracking-id", "", boxTrackingIDCaller{})
 	boxFlavor.DefMethod(":track", "", boxTrackCaller{})
 	boxFlavor.DefMethod(":history", "", boxHistoryCaller{})
 	boxFlavor.DefMethod(":scan", "", boxScanCaller{})
+	boxFlavor.DefMethod(":copy", "", boxCopyCaller{})
 }
 
 type box struct {
@@ -116,13 +126,16 @@ func (caller boxInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 			slip.PanicType("box :init", args[i], ":tracking-id", ":track", ":set")
 		}
 	}
+	if bx.track.id == nil {
+		bx.track.id = gi.NewUUID()
+	}
 	obj.Any = &bx
 	return nil
 }
 
 func (caller boxInitCaller) Docs() string {
-	return `__:init__ &key _set_ _tracking-id_ _track_
-   _:tracking-id_ sets the tracking id of the box to the provided value.
+	return `__:init__ &key _set_ _tracking-id_ _track_ _parse_ _read_
+   _:tracking-id_ sets the tracking id of the box to the provided value which can be a string, fixnum, or gi:uuid.
    _:track_ sets the tracking id and events of the box to the provided values.
    _:set_ the contents with the LISP or _bag-flavor_ instance.
    _:parse_ a JSON or SEN string to form the content of the box.
@@ -202,7 +215,7 @@ func (caller boxReadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 }
 
 func (caller boxReadCaller) Docs() string {
-	return `__:read__ _string_ &optional _path_ => _self_
+	return `__:read__ _stream_ &optional _path_ => _self_
   _stream_ The _input-stream_ to read and set in the instance according to the _path_.
   _path_ The path to the location in the box to set the readd value.
 The path must follow the JSONPath format.
@@ -264,7 +277,7 @@ Returns true if a value at the location described by _path_ exists.
 
 type boxRemoveCaller struct{}
 
-func (caller boxRemoveCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller boxRemoveCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) == 1 {
 		removeBox(obj, args[0])
@@ -285,7 +298,7 @@ Returns the object itself.
 
 type boxModifyCaller struct{}
 
-func (caller boxModifyCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
+func (caller boxModifyCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	modifyBox(s, obj, args, depth+1)
 	return obj
@@ -304,7 +317,7 @@ Returns the object itself.
 
 type boxNativeCaller struct{}
 
-func (caller boxNativeCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller boxNativeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		flavors.PanicMethodArgChoice(obj, ":native", len(args), "0")
@@ -321,7 +334,7 @@ Returns the box contents as a native LISP form.
 
 type boxWriteCaller struct{}
 
-func (caller boxWriteCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller boxWriteCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	return writeBox(obj, args)
 }
@@ -350,7 +363,7 @@ in the OjG package.
 
 type boxWalkCaller struct{}
 
-func (caller boxWalkCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
+func (caller boxWalkCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	walkBox(s, obj, args, depth)
 	return nil
@@ -369,10 +382,15 @@ Walks the values at the location described by _path_.
 
 type boxBagCaller struct{}
 
-func (caller boxBagCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
+func (caller boxBagCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	bg := bag.Flavor().MakeInstance().(*flavors.Instance)
-	bg.Any = obj.Any.(*box).content
+	bx := obj.Any.(*box)
+	if bx.frozen {
+		bx.content = alt.Dup(bx.content)
+		bx.frozen = false
+	}
+	bg.Any = bx.content
 
 	return bg
 }
@@ -387,7 +405,7 @@ Returns an instance of the _bag-flavor_ with the contents of the box.
 
 type boxFreezeCaller struct{}
 
-func (caller boxFreezeCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
+func (caller boxFreezeCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	obj.Any.(*box).frozen = true
 
@@ -402,9 +420,44 @@ Makes the box immutable.
 `
 }
 
+type boxThawCaller struct{}
+
+func (caller boxThawCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	obj.Any.(*box).frozen = false
+
+	return nil
+}
+
+func (caller boxThawCaller) Docs() string {
+	return `__:thaw__
+
+
+Makes the box mutable.
+`
+}
+
+type boxFrozenCaller struct{}
+
+func (caller boxFrozenCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if obj.Any.(*box).frozen {
+		value = slip.True
+	}
+	return
+}
+
+func (caller boxFrozenCaller) Docs() string {
+	return `__:frozen__ => _boolean_
+
+
+Returns true if the box is immutable.
+`
+}
+
 type boxTrackingIDCaller struct{}
 
-func (caller boxTrackingIDCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
+func (caller boxTrackingIDCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 
 	return obj.Any.(*box).track.id
@@ -420,7 +473,7 @@ Returns the tracking identifier of the box.
 
 type boxTrackCaller struct{}
 
-func (caller boxTrackCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
+func (caller boxTrackCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	trk := trackFlavor.MakeInstance().(*flavors.Instance)
 	trk.Any = &(obj.Any.(*box).track)
@@ -438,7 +491,7 @@ Returns the track instance of the box.
 
 type boxHistoryCaller struct{}
 
-func (caller boxHistoryCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
+func (caller boxHistoryCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 
 	return obj.Any.(*box).track.historyList()
@@ -455,7 +508,7 @@ the time, the task name, and the flow name.
 
 type boxScanCaller struct{}
 
-func (caller boxScanCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
+func (caller boxScanCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	var (
 		flowName string
@@ -481,6 +534,32 @@ func (caller boxScanCaller) Docs() string {
 
 
 Add a scan consisting of the current time, task name, and flow name.
+`
+}
+
+type boxCopyCaller struct{}
+
+func (caller boxCopyCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	orig := obj.Any.(*box)
+	inst := boxFlavor.MakeInstance().(*flavors.Instance)
+	bx := &box{track: track{id: orig.track.id}, frozen: true}
+	orig.frozen = true
+	bx.track.history = make([]*event, len(orig.track.history))
+	for i, ev := range orig.track.history {
+		nev := *ev
+		bx.track.history[i] = &nev
+	}
+	inst.Any = bx
+
+	return inst
+}
+
+func (caller boxCopyCaller) Docs() string {
+	return `__:copy__ => _box_
+
+
+Makes the copy of the box with shared content. Both the box and the copy are frozen.
 `
 }
 
@@ -516,10 +595,15 @@ func parseBox(obj *flavors.Instance, value, path slip.Object) {
 	if options.Converter != nil {
 		v = options.Converter.Convert(v)
 	}
+	bx := obj.Any.(*box)
+	if bx.frozen {
+		bx.content = alt.Dup(bx.content)
+		bx.frozen = false
+	}
 	if x == nil {
-		obj.Any.(*box).content = v
+		bx.content = v
 	} else {
-		x.MustSet(obj.Any.(*box).content, v)
+		x.MustSet(bx.content, v)
 	}
 }
 
@@ -542,10 +626,15 @@ func readBox(obj *flavors.Instance, value, path slip.Object) {
 	if options.Converter != nil {
 		v = options.Converter.Convert(v)
 	}
+	bx := obj.Any.(*box)
+	if bx.frozen {
+		bx.content = alt.Dup(bx.content)
+		bx.frozen = false
+	}
 	if x == nil {
-		obj.Any.(*box).content = v
+		bx.content = v
 	} else {
-		x.MustSet(obj.Any.(*box).content, v)
+		x.MustSet(bx.content, v)
 	}
 }
 
@@ -560,17 +649,21 @@ func getBox(obj *flavors.Instance, path slip.Object, asBag bool) slip.Object {
 	default:
 		slip.PanicType("path", p, "string", "bag-path")
 	}
+	bx := obj.Any.(*box)
 	var value any
 	if x == nil {
-		value = obj.Any
+		value = bx.content
 	} else {
-		value = x.First(obj.Any)
+		value = x.First(bx.content)
 	}
 	if value == nil {
 		return nil
 	}
 	if asBag {
 		obj = bag.Flavor().MakeInstance().(*flavors.Instance)
+		if bx.frozen {
+			value = alt.Dup(value)
+		}
 		obj.Any = value
 
 		return obj
@@ -606,10 +699,18 @@ func removeBox(obj *flavors.Instance, path slip.Object) {
 	default:
 		slip.PanicType("path", p, "string")
 	}
+	bx := obj.Any.(*box)
 	if x == nil {
-		obj.Any = nil
+		if bx.frozen {
+			bx.frozen = false
+		}
+		bx.content = nil
 	} else {
-		obj.Any = x.MustRemove(obj.Any)
+		if bx.frozen {
+			bx.content = alt.Dup(bx.content)
+			bx.frozen = false
+		}
+		bx.content = x.MustRemove(bx.content)
 	}
 }
 
@@ -646,10 +747,15 @@ func modifyBox(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) 
 			}
 		}
 	}
+	bx := obj.Any.(*box)
+	if bx.frozen {
+		bx.content = alt.Dup(bx.content)
+		bx.frozen = false
+	}
 	if x == nil {
-		obj.Any = modifyValue(s, obj.Any, caller, asBag, depth)
+		bx.content = modifyValue(s, bx.content, caller, asBag, depth)
 	} else {
-		obj.Any = x.MustModify(obj.Any, func(element any) (altered any, changed bool) {
+		obj.Any = x.MustModify(bx.content, func(element any) (altered any, changed bool) {
 			return modifyValue(s, element, caller, asBag, depth), true
 		})
 	}
