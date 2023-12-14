@@ -106,7 +106,7 @@ func updateConverter() {
 								}
 							}
 						case int64:
-							return time.Unix(0, tv), true
+							return time.Unix(0, tv).UTC(), true
 						}
 					}
 					return val, false
@@ -126,7 +126,7 @@ func updateConverter() {
 						if 946684800.0 <= val && val <= 2524608000.0 { // 2000-01-01 <= val <= 2050-01-01
 							sec := int64(val)
 							nano := int64((val - float64(sec)) * 1_000_000_000.0)
-							return time.Unix(sec, nano), true
+							return time.Unix(sec, nano).UTC(), true
 						}
 						return val, false
 					},

@@ -63,3 +63,11 @@ func TestBoxSetBadPath(t *testing.T) {
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
+
+func TestBoxSetBadArgCount(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((box (make-flow-box :parse "{x:3}")))
+                  (send box :set))`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+}
