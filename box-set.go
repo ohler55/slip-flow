@@ -58,9 +58,7 @@ type BoxSet struct {
 
 // Call the function with the arguments provided.
 func (f *BoxSet) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 2 || 3 < len(args) {
-		slip.PanicArgCount(f, 2, 3)
-	}
+	slip.ArgCountCheck(f, args, 2, 3)
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Flavor != boxFlavor {
 		slip.PanicType("box", args[0], "flow-box")

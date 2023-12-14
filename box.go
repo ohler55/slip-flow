@@ -100,7 +100,7 @@ func (caller boxInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 				if inst.Flavor != bag.Flavor() {
 					slip.PanicType("box :init :set", args[i+1], "bag-flavor instance")
 				}
-				bx.track = *inst.Any.(*track)
+				bx.content = inst.Any
 			} else {
 				bx.content = bag.ObjectToBag(args[i+1])
 			}
@@ -858,14 +858,15 @@ func writeBox(obj *flavors.Instance, args slip.List) (result slip.Object) {
 			}
 		}
 	}
+	bx := obj.Any.(*box)
 	var b []byte
 	switch {
 	case prty && 1 < pw.MaxDepth:
-		b = pw.Encode(obj.Any)
+		b = pw.Encode(bx.content)
 	case pw.SEN:
-		b = sen.Bytes(obj.Any, &pw.Options)
+		b = sen.Bytes(bx.content, &pw.Options)
 	default:
-		b = []byte(oj.JSON(obj.Any, &pw.Options))
+		b = []byte(oj.JSON(bx.content, &pw.Options))
 	}
 	if out == nil {
 		return slip.String(b)
