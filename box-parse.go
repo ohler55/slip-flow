@@ -5,6 +5,7 @@ package main
 import (
 	"github.com/ohler55/ojg/alt"
 	"github.com/ohler55/ojg/jp"
+	"github.com/ohler55/ojg/sen"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/bag"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -13,61 +14,58 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := BoxSet{Function: slip.Function{Name: "flow-box-set", Args: args}}
+			f := BoxParse{Function: slip.Function{Name: "flow-box-parse", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "flow-box-set",
+			Name: "flow-box-parse",
 			Args: []*slip.DocArg{
 				{
 					Name: "box",
 					Type: "flow-box",
-					Text: "The _box_ to set a value in.",
+					Text: "The _box_ to parse a value in.",
 				},
 				{
-					Name: "value",
-					Type: "object",
-					Text: "The _value_ to set in _box_ according to the path.",
+					Name: "string",
+					Type: "string",
+					Text: "The string to parse and set in the instance according to the _path_.",
 				},
 				{Name: "&optional"},
 				{
 					Name: "path",
 					Type: "string|bag-path",
-					Text: `The path to the location in the box to set the _value_.
+					Text: `The path to the location in the box to set the parsed value.
 The path must follow the JSONPath format.`,
 				},
 			},
 			Return: "box",
-			Text: `__flow-box-set__ sets a _value_ at the location described by _path_.
-If no _path_ is provided the entire contents of the box is replaced.
-
-This is the same as the _:set_ method of the _flow-box-flavor_ except none of the method's
-daemons are invoked hence it has a slight performance advantage.`,
+			Text: `__flow-box-parse__ parses the _string_ and sets the result at the location
+described by _path_. If no _path_ is provided the entire contents of the box is replaced.`,
 			Examples: []string{
 				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}"))`,
-				`(flow-box-set box 3 "a") => #<flow-box-flavor 12345> ;; content is now {a:3}`,
+				`(flow-box-parse box 3 "[a]") => #<flow-box-flavor 12345> ;; content is now {a:[3]}`,
 			},
 		}, &Pkg)
 }
 
-// BoxSet represents the flow-box-set function.
-type BoxSet struct {
+// BoxParse represents the flow-box-parse function.
+type BoxParse struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *BoxSet) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *BoxParse) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
 		slip.PanicType("box", args[0], "box")
 	}
-	_ = self.Receive(s, ":set", args[1:], depth)
+	_ = self.Receive(s, ":parse", args[1:], depth)
 
 	return self
 }
 
-func setBox(obj *flavors.Instance, value, path slip.Object) {
+func parseBox(obj *flavors.Instance, value, path slip.Object) {
 	var x jp.Expr
 	switch p := path.(type) {
 	case nil:
@@ -78,12 +76,19 @@ func setBox(obj *flavors.Instance, value, path slip.Object) {
 	default:
 		slip.PanicType("path", p, "string")
 	}
+	ss, ok := value.(slip.String)
+	if !ok {
+		slip.PanicType("string", value, "string")
+	}
+	v := sen.MustParse([]byte(ss))
+	if options.Converter != nil {
+		v = options.Converter.Convert(v)
+	}
 	bx := obj.Any.(*box)
 	if bx.frozen {
 		bx.content = alt.Dup(bx.content)
 		bx.frozen = false
 	}
-	v := bag.ObjectToBag(value)
 	if x == nil {
 		bx.content = v
 	} else {

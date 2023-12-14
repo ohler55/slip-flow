@@ -576,37 +576,6 @@ func MakeBox(id slip.Object) (self *flavors.Instance, bx *box) {
 
 // TBD move the following functions to individual function files (flow-box-set ...)
 
-func parseBox(obj *flavors.Instance, value, path slip.Object) {
-	var x jp.Expr
-	switch p := path.(type) {
-	case nil:
-	case slip.String:
-		x = jp.MustParseString(string(p))
-	case bag.Path:
-		x = jp.Expr(p)
-	default:
-		slip.PanicType("path", p, "string")
-	}
-	ss, ok := value.(slip.String)
-	if !ok {
-		slip.PanicType("string", value, "string")
-	}
-	v := sen.MustParse([]byte(ss))
-	if options.Converter != nil {
-		v = options.Converter.Convert(v)
-	}
-	bx := obj.Any.(*box)
-	if bx.frozen {
-		bx.content = alt.Dup(bx.content)
-		bx.frozen = false
-	}
-	if x == nil {
-		bx.content = v
-	} else {
-		x.MustSet(bx.content, v)
-	}
-}
-
 func readBox(obj *flavors.Instance, value, path slip.Object) {
 	var x jp.Expr
 	switch p := path.(type) {

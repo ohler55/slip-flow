@@ -5,7 +5,7 @@
   - clos functions
    + make-flow-box (&key tracking-id track set parse read)
    + flow-box-set (value &optional path)
-   - flow-box-parse (string &optional path)
+   + flow-box-parse (string &optional path)
    - flow-box-read (stream &optional path)
    - flow-box-get (&optional path as-bag)
    - flow-box-has (path)
