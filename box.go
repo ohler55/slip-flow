@@ -146,59 +146,6 @@ Sets the initial value when _make-instance_ is called.
 `
 }
 
-type boxSetCaller struct{}
-
-func (caller boxSetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	obj := s.Get("self").(*flavors.Instance)
-	switch len(args) {
-	case 1:
-		setBox(obj, args[0], nil)
-	case 2:
-		setBox(obj, args[0], args[1])
-	default:
-		flavors.PanicMethodArgChoice(obj, ":set", len(args), "1 or 2")
-	}
-	return obj
-}
-
-func (caller boxSetCaller) Docs() string {
-	return `__:set__ _value_ &optional _path_ => _self_
-  _value_ The value to set in the instance according to the path.
-  _path_ The path to the location in the box to set the _value_.
-The path must follow the JSONPath format.
-
-Sets a _value_ at the location described by _path_.
-If no _path_ is provided the entire contents of the box is replaced.
-`
-}
-
-type boxParseCaller struct{}
-
-func (caller boxParseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	obj := s.Get("self").(*flavors.Instance)
-	switch len(args) {
-	case 1:
-		parseBox(obj, args[0], nil)
-	case 2:
-		parseBox(obj, args[0], args[1])
-	default:
-		flavors.PanicMethodArgChoice(obj, ":parse", len(args), "1 or 2")
-	}
-	return obj
-}
-
-func (caller boxParseCaller) Docs() string {
-	return `__:parse__ _string_ &optional _path_ => _self_
-  _string_ The string to parse and set in the instance according to the _path_.
-  _path_ The path to the location in the box to set the parsed value.
-The path must follow the JSONPath format.
-
-
-Parses _string_ and sets the parsed value at the location described by _path_.
-If no _path_ is provided the entire contents of the box is replaced.
-`
-}
-
 type boxReadCaller struct{}
 
 func (caller boxReadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {

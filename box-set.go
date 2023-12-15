@@ -23,27 +23,24 @@ func init() {
 				{
 					Name: "box",
 					Type: "flow-box",
-					Text: "The _box_ to set a value in.",
+					Text: "to set a value in.",
 				},
 				{
 					Name: "value",
 					Type: "object",
-					Text: "The _value_ to set in _box_ according to the path.",
+					Text: "to set in _box_ according to the path.",
 				},
 				{Name: "&optional"},
 				{
 					Name: "path",
 					Type: "string|bag-path",
-					Text: `The path to the location in the box to set the _value_.
+					Text: `to the location in the box to set the _value_.
 The path must follow the JSONPath format.`,
 				},
 			},
 			Return: "box",
 			Text: `__flow-box-set__ sets a _value_ at the location described by _path_.
-If no _path_ is provided the entire contents of the box is replaced.
-
-This is the same as the _:set_ method of the _flow-box-flavor_ except none of the method's
-daemons are invoked hence it has a slight performance advantage.`,
+If no _path_ is provided the entire contents of the box is replaced.`,
 			Examples: []string{
 				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}"))`,
 				`(flow-box-set box 3 "a") => #<flow-box-flavor 12345> ;; content is now {a:3}`,
@@ -89,4 +86,23 @@ func setBox(obj *flavors.Instance, value, path slip.Object) {
 	} else {
 		x.MustSet(bx.content, v)
 	}
+}
+
+type boxSetCaller struct{}
+
+func (caller boxSetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	switch len(args) {
+	case 1:
+		setBox(obj, args[0], nil)
+	case 2:
+		setBox(obj, args[0], args[1])
+	default:
+		flavors.PanicMethodArgChoice(obj, ":set", len(args), "1 or 2")
+	}
+	return obj
+}
+
+func (caller boxSetCaller) Docs() string {
+	return methodDocFromFunc(":set", "flow-box-set", "flow-box-flavor")
 }

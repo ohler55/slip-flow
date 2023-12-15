@@ -24,18 +24,18 @@ func init() {
 				{
 					Name: "box",
 					Type: "flow-box",
-					Text: "The _box_ to parse a value in.",
+					Text: "to parse a value in.",
 				},
 				{
 					Name: "string",
 					Type: "string",
-					Text: "The string to parse and set in the instance according to the _path_.",
+					Text: "to parse and set in the instance according to the _path_.",
 				},
 				{Name: "&optional"},
 				{
 					Name: "path",
 					Type: "string|bag-path",
-					Text: `The path to the location in the box to set the parsed value.
+					Text: `to the location in the box to set the parsed value.
 The path must follow the JSONPath format.`,
 				},
 			},
@@ -94,4 +94,23 @@ func parseBox(obj *flavors.Instance, value, path slip.Object) {
 	} else {
 		x.MustSet(bx.content, v)
 	}
+}
+
+type boxParseCaller struct{}
+
+func (caller boxParseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	switch len(args) {
+	case 1:
+		parseBox(obj, args[0], nil)
+	case 2:
+		parseBox(obj, args[0], args[1])
+	default:
+		flavors.PanicMethodArgChoice(obj, ":parse", len(args), "1 or 2")
+	}
+	return obj
+}
+
+func (caller boxParseCaller) Docs() string {
+	return methodDocFromFunc(":parse", "flow-box-parse", "flow-box-flavor")
 }

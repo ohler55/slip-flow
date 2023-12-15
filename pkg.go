@@ -3,6 +3,8 @@
 package main
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ohler55/ojg"
@@ -147,4 +149,33 @@ func updateConverter() {
 			}
 		}
 	}
+}
+
+func methodDocFromFunc(method, funcName, flavor string) string {
+	var b []byte
+	fd := slip.DescribeFunction(slip.Symbol(funcName))
+	if fd != nil {
+		b = fmt.Appendf(b, "__%s__ ", method)
+		for _, da := range fd.Args {
+			if da.Name[0] == '&' {
+				b = fmt.Appendf(b, "%s ", da.Name)
+			} else {
+				b = fmt.Appendf(b, "_%s_ ", da.Name)
+			}
+		}
+		if 0 < len(fd.Return) {
+			b = fmt.Appendf(b, "=> _%s_\n", fd.Return)
+		} else {
+			b = append(b, '\n')
+		}
+		for _, da := range fd.Args {
+			if da.Name[0] != '&' {
+				b = fmt.Appendf(b, "   _%s_ [%s] %s\n", da.Name, da.Type, da.Text)
+			}
+		}
+		b = fmt.Appendf(b, "\n\nThe __%s__ method", method)
+		b = append(b, fd.Text[strings.IndexByte(fd.Text, ' '):]...)
+		b = fmt.Appendf(b, "\n\n\nSee also: __%s__ (with examples)\n", funcName)
+	}
+	return string(b)
 }
