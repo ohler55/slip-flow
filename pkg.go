@@ -151,12 +151,12 @@ func updateConverter() {
 	}
 }
 
-func methodDocFromFunc(method, funcName, flavor string) string {
+func methodDocFromFunc(method, funcName, flavor, obj string) string {
 	var b []byte
 	fd := slip.DescribeFunction(slip.Symbol(funcName))
 	if fd != nil {
 		b = fmt.Appendf(b, "__%s__ ", method)
-		for _, da := range fd.Args {
+		for _, da := range fd.Args[1:] { // first arg is always the instance
 			if da.Name[0] == '&' {
 				b = fmt.Appendf(b, "%s ", da.Name)
 			} else {
@@ -168,14 +168,24 @@ func methodDocFromFunc(method, funcName, flavor string) string {
 		} else {
 			b = append(b, '\n')
 		}
-		for _, da := range fd.Args {
+		for _, da := range fd.Args[1:] {
 			if da.Name[0] != '&' {
 				b = fmt.Appendf(b, "   _%s_ [%s] %s\n", da.Name, da.Type, da.Text)
 			}
 		}
 		b = fmt.Appendf(b, "\n\nThe __%s__ method", method)
 		b = append(b, fd.Text[strings.IndexByte(fd.Text, ' '):]...)
-		b = fmt.Appendf(b, "\n\n\nSee also: __%s__ (with examples)\n", funcName)
+		if 0 < len(fd.Examples) {
+			b = append(b, "\n\n\nExamples:\n"...)
+			pat := fmt.Sprintf("(%s %s", funcName, obj)
+			rep := fmt.Sprintf("(send %s %s", obj, method)
+			for _, ex := range fd.Examples {
+				b = append(b, ' ', ' ')
+				b = append(b, strings.Replace(ex, pat, rep, 1)...)
+				b = append(b, '\n')
+			}
+		}
+		b = fmt.Appendf(b, "\n\nSee also: __%s__\n", funcName)
 	}
 	return string(b)
 }

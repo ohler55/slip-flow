@@ -9,7 +9,13 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	flow "github.com/ohler55/slip-flow"
 )
+
+func TestMakeBox(t *testing.T) {
+	box, _ := flow.MakeBox(slip.Fixnum(123))
+	tt.Equal(t, "/#<flow-box-flavor [0-9a-f]+>/", box.String())
+}
 
 func TestBoxDocs(t *testing.T) {
 	scope := slip.NewScope()
@@ -44,15 +50,10 @@ func TestBoxDocs(t *testing.T) {
 	}
 }
 
-func TestBoxSetDoc(t *testing.T) {
-	scope := slip.NewScope()
-	var out strings.Builder
-	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	scope.Set("*print-right-margin*", slip.Fixnum(80))
-	_ = slip.ReadString(`(describe-method flow-box-flavor :set out)`).Eval(scope, nil)
-	fmt.Printf("***\n%s\n", out.String())
-
-	out.Reset()
-	_ = slip.ReadString(`(describe-method flow-box-flavor :parse out)`).Eval(scope, nil)
-	fmt.Printf("***\n%s\n", out.String())
-}
+// func TestBoxInitDoc(t *testing.T) {
+// 	scope := slip.NewScope()
+// 	var out strings.Builder
+// 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+// 	_ = slip.ReadString(`(describe-method flow-box-flavor :write out)`).Eval(scope, nil)
+// 	fmt.Printf("***\n%s\n", out.String())
+// }

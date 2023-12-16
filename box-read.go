@@ -3,6 +3,8 @@
 package main
 
 import (
+	"io"
+
 	"github.com/ohler55/ojg/alt"
 	"github.com/ohler55/ojg/jp"
 	"github.com/ohler55/ojg/sen"
@@ -14,77 +16,78 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := BoxParse{Function: slip.Function{Name: "flow-box-parse", Args: args}}
+			f := BoxRead{Function: slip.Function{Name: "flow-box-read", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "flow-box-parse",
+			Name: "flow-box-read",
 			Args: []*slip.DocArg{
 				{
 					Name: "box",
 					Type: "flow-box",
-					Text: "to parse a value in.",
+					Text: "to read a value in.",
 				},
 				{
-					Name: "string",
-					Type: "string",
-					Text: "to parse and set in the instance according to the _path_.",
+					Name: "stream",
+					Type: "input-stream",
+					Text: "to read from and set in the instance according to the _path_.",
 				},
 				{Name: "&optional"},
 				{
 					Name: "path",
 					Type: "string|bag-path",
-					Text: `to the location in the box to set the parsed value.
+					Text: `to the location in the box to set the readd value.
 The path must follow the JSONPath format.`,
 				},
 			},
 			Return: "box",
-			Text: `__flow-box-parse__ parses the _string_ and sets the result at the location
+			Text: `__flow-box-read__ reads from the _stream_ and sets the result at the location
 described by _path_. If no _path_ is provided the entire contents of the box is replaced.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}")) => #<flow-box-flavor 12345>`,
-				`(flow-box-parse box 3 "[a]") => #<flow-box-flavor 12345> ;; content is now {a:[3]}`,
+				`(setq box (make-instance 'flow-box-flavor :read "{a:7}"))`,
+				`(flow-box-read box (make-string-input-steam "[3]") "a") => #<flow-box-flavor 12345>`,
+				` ;; content is now {a:[3]}`,
 			},
 		}, &Pkg)
 }
 
-// BoxParse represents the flow-box-parse function.
-type BoxParse struct {
+// BoxRead represents the flow-box-read function.
+type BoxRead struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *BoxParse) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *BoxRead) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
 		slip.PanicType("box", args[0], "box")
 	}
-	_ = self.Receive(s, ":parse", args[1:], depth)
+	_ = self.Receive(s, ":read", args[1:], depth)
 
 	return self
 }
 
-type boxParseCaller struct{}
+type boxReadCaller struct{}
 
-func (caller boxParseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller boxReadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	switch len(args) {
 	case 1:
-		parseBox(obj, args[0], nil)
+		readBox(obj, args[0], nil)
 	case 2:
-		parseBox(obj, args[0], args[1])
+		readBox(obj, args[0], args[1])
 	default:
-		flavors.PanicMethodArgChoice(obj, ":parse", len(args), "1 or 2")
+		flavors.PanicMethodArgChoice(obj, ":read", len(args), "1 or 2")
 	}
 	return obj
 }
 
-func (caller boxParseCaller) Docs() string {
+func (caller boxReadCaller) Docs() string {
 	return methodDocFromFunc(":parse", "flow-box-parse", "flow-box-flavor", "box")
 }
 
-func parseBox(obj *flavors.Instance, value, path slip.Object) {
+func readBox(obj *flavors.Instance, value, path slip.Object) {
 	var x jp.Expr
 	switch p := path.(type) {
 	case nil:
@@ -95,11 +98,11 @@ func parseBox(obj *flavors.Instance, value, path slip.Object) {
 	default:
 		slip.PanicType("path", p, "string")
 	}
-	ss, ok := value.(slip.String)
+	r, ok := value.(io.Reader)
 	if !ok {
-		slip.PanicType("string", value, "string")
+		slip.PanicType("stream", value, "input-stream")
 	}
-	v := sen.MustParse([]byte(ss))
+	v := sen.MustParseReader(r)
 	if options.Converter != nil {
 		v = options.Converter.Convert(v)
 	}

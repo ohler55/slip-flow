@@ -42,7 +42,7 @@ The path must follow the JSONPath format.`,
 			Text: `__flow-box-set__ sets a _value_ at the location described by _path_.
 If no _path_ is provided the entire contents of the box is replaced.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}"))`,
+				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}")) => #<flow-box-flavor 12345>`,
 				`(flow-box-set box 3 "a") => #<flow-box-flavor 12345> ;; content is now {a:3}`,
 			},
 		}, &Pkg)
@@ -62,6 +62,25 @@ func (f *BoxSet) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	_ = self.Receive(s, ":set", args[1:], depth)
 
 	return self
+}
+
+type boxSetCaller struct{}
+
+func (caller boxSetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	switch len(args) {
+	case 1:
+		setBox(obj, args[0], nil)
+	case 2:
+		setBox(obj, args[0], args[1])
+	default:
+		flavors.PanicMethodArgChoice(obj, ":set", len(args), "1 or 2")
+	}
+	return obj
+}
+
+func (caller boxSetCaller) Docs() string {
+	return methodDocFromFunc(":set", "flow-box-set", "flow-box-flavor", "box")
 }
 
 func setBox(obj *flavors.Instance, value, path slip.Object) {
@@ -86,23 +105,4 @@ func setBox(obj *flavors.Instance, value, path slip.Object) {
 	} else {
 		x.MustSet(bx.content, v)
 	}
-}
-
-type boxSetCaller struct{}
-
-func (caller boxSetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	obj := s.Get("self").(*flavors.Instance)
-	switch len(args) {
-	case 1:
-		setBox(obj, args[0], nil)
-	case 2:
-		setBox(obj, args[0], args[1])
-	default:
-		flavors.PanicMethodArgChoice(obj, ":set", len(args), "1 or 2")
-	}
-	return obj
-}
-
-func (caller boxSetCaller) Docs() string {
-	return methodDocFromFunc(":set", "flow-box-set", "flow-box-flavor")
 }
