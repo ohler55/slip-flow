@@ -126,7 +126,7 @@ func modifyBox(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) 
 	if x == nil {
 		bx.content = modifyValue(s, bx.content, caller, asBag, depth)
 	} else {
-		obj.Any = x.MustModify(bx.content, func(element any) (altered any, changed bool) {
+		bx.content = x.MustModify(bx.content, func(element any) (altered any, changed bool) {
 			return modifyValue(s, element, caller, asBag, depth), true
 		})
 	}

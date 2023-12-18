@@ -86,15 +86,12 @@ func removeBox(obj *flavors.Instance, path slip.Object) {
 	}
 	bx := obj.Any.(*box)
 	if x == nil {
-		if bx.frozen {
-			bx.frozen = false
-		}
 		bx.content = nil
 	} else {
 		if bx.frozen {
 			bx.content = alt.Dup(bx.content)
-			bx.frozen = false
 		}
 		bx.content = x.MustRemove(bx.content)
 	}
+	bx.frozen = false
 }

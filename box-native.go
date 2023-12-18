@@ -54,6 +54,8 @@ func (caller boxNativeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 	if 0 < len(args) {
 		flavors.PanicMethodArgChoice(obj, ":native", len(args), "0")
 	}
+	// fmt.Printf("*** any: %T\n", obj.Any)
+	// fmt.Printf("*** content: %T\n", obj.Any.(*box).content)
 	return slip.SimpleObject(obj.Any.(*box).content)
 }
 

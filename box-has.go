@@ -80,7 +80,7 @@ func hasBox(obj *flavors.Instance, path slip.Object) slip.Object {
 	case bag.Path:
 		x = jp.Expr(p)
 	default:
-		slip.PanicType("path", p, "string")
+		slip.PanicType("path", p, "string", "bag-path")
 	}
 	if x == nil || x.Has(obj.Any.(*box).content) {
 		return slip.True
