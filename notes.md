@@ -3,26 +3,26 @@
 - next
  - flow-box-flavor
   - clos functions
-   + make-flow-box (&key tracking-id track set parse read)
-   + flow-box-set (value &optional path)
-   + flow-box-parse (string &optional path)
-   + flow-box-read (stream &optional path)
+   + flow-box-bag ()
+   + flow-box-copy ()
+   + flow-box-freeze ()
+   + flow-box-frozen ()
    + flow-box-get (&optional path as-bag)
    + flow-box-has (path)
-   + flow-box-remove (path)
-   - flow-box-modify (function &optional path &key :as-bag
-   - flow-box-native ()
-   - flow-box-write (&optional stream &key pretty depth right-margin time-format time-wrap json color)
-   - flow-box-walk (function &optional path as-lisp)
-   - flow-box-bag ()
-   + flow-box-freeze ()
-   + flow-box-thaw ()
-   + flow-box-frozen ()
-   + flow-box-tracking-id ()
-   + flow-box-track ()
    + flow-box-history ()
+   + flow-box-native ()
+   + flow-box-parse (string &optional path)
+   + flow-box-read (stream &optional path)
+   + flow-box-remove (path)
    + flow-box-scan (flow-name task-name)
-   - flow-box-copy ()
+   + flow-box-set (value &optional path)
+   + flow-box-thaw ()
+   + flow-box-track ()
+   + flow-box-tracking-id ()
+   + make-flow-box (&key tracking-id track set parse read)
+   - flow-box-modify (function &optional path &key :as-bag
+   - flow-box-walk (function &optional path as-lisp)
+   - flow-box-write (&optional stream &key pretty depth right-margin time-format time-wrap json color)
   - tests
    + pkg
 

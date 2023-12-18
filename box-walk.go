@@ -101,26 +101,26 @@ CallFunc:
 	switch tf := fn.(type) {
 	case *slip.Lambda:
 		if asBag {
-			for _, v := range path.Get(obj.Any) {
+			for _, v := range path.Get(obj.Any.(*box).content) {
 				arg := bag.Flavor().MakeInstance().(*flavors.Instance)
 				arg.Any = v
 				_ = tf.Call(s, slip.List{arg}, d2)
 			}
 		} else {
-			for _, v := range path.Get(obj.Any) {
+			for _, v := range path.Get(obj.Any.(*box).content) {
 				arg := slip.SimpleObject(v)
 				_ = tf.Call(s, slip.List{arg}, d2)
 			}
 		}
 	case *slip.FuncInfo:
 		if asBag {
-			for _, v := range path.Get(obj.Any) {
+			for _, v := range path.Get(obj.Any.(*box).content) {
 				arg := bag.Flavor().MakeInstance().(*flavors.Instance)
 				arg.Any = v
 				_ = tf.Apply(s, slip.List{arg}, d2)
 			}
 		} else {
-			for _, v := range path.Get(obj.Any) {
+			for _, v := range path.Get(obj.Any.(*box).content) {
 				arg := slip.SimpleObject(v)
 				tf.Apply(s, slip.List{arg}, d2)
 			}

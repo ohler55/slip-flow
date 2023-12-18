@@ -53,7 +53,7 @@ func (caller boxCopyCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 	obj := s.Get("self").(*flavors.Instance)
 	orig := obj.Any.(*box)
 	inst := boxFlavor.MakeInstance().(*flavors.Instance)
-	bx := &box{track: track{id: orig.track.id}, frozen: true}
+	bx := &box{track: track{id: orig.track.id}, frozen: true, content: orig.content}
 	orig.frozen = true
 	bx.track.history = make([]*event, len(orig.track.history))
 	for i, ev := range orig.track.history {
