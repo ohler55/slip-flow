@@ -1,8 +1,27 @@
 # SLIP-Flow Notes
 
 - next
- - flow-box-flavor
- - has-logger-flavor (abstract flavor)
+
+ - has-logger-flavor or can-log-flavor (abstract flavor)
+  - logger [read only and set by container or on create] [gi/logger instance as the default]
+  - :log-level
+  - :set-log-level
+  - :error
+  - :warn
+  - :info
+  - :debug
+  - with level and methods for debug, error, info, warn that check local level
+   - set-level from parent changes local level
+    - un-set is okay and means logger level only is used
+
+ - flow-task-flavor (has-logger)
+  - :transition (box &optional wait)
+  - task struct
+   - flow [containing flow]
+   - name
+   - actor
+   - function
+
 
 - design
  - flow package in separate repo
@@ -35,26 +54,6 @@
   - link
    - name
    - target
-  - box
-   - error [var]
-	flavor.DefMethod(":init", "", initCaller{}) [provide tracking id or track from other box]
-	flavor.DefMethod(":set", "", setCaller{})
-	flavor.DefMethod(":parse", "", parseCaller{})
-	flavor.DefMethod(":read", "", readCaller{})
-	flavor.DefMethod(":get", "", getCaller{})
-	flavor.DefMethod(":has", "", hasCaller{})
-	flavor.DefMethod(":remove", "", removeCaller{})
-	flavor.DefMethod(":modify", "", modifyCaller{})
-	flavor.DefMethod(":native", "", nativeCaller{})
-	flavor.DefMethod(":write", "", writeCaller{})
-	flavor.DefMethod(":walk", "", walkCaller{})
-	flavor.DefMethod(":bag", "", bagCaller{})
-	flavor.DefMethod(":native", "", nativeCaller{})
-	flavor.DefMethod(":tracking-id", "", trackingIDCaller{})
-	flavor.DefMethod(":freeze", "", freezeCaller{})
-	flavor.DefMethod(":track", "", trackCaller{}) [instance]
-	flavor.DefMethod(":events", "", eventsCaller{})
-	flavor.DefMethod(":scan", "", scanCaller{}) [adds and entry to the track]
 
   - config format (lisp or json)
    - flow
@@ -72,6 +71,12 @@
      - worker-count
 
    - json format in a bag with option for lisp
+
+- actors
+ - queue input actor for trigger tasks
+ - splitter and merger
+ - sub-flow
+ - ...
 
  - classes/flavors
   - flow-manager-flavor
@@ -110,11 +115,6 @@
 
   - flow-link-flavor or flow-transition-flavor
 
-  - flow-task-flavor (has-logger)
-   - :transition (box &optional wait)
-   - :flow [containing flow]
-   - actor [var]
-   - function [var]
    -
   - flow-box-flavor
    - model after bag but add tracking-id

@@ -32,12 +32,12 @@ func TestTrackScan(t *testing.T) {
 	track.Scan("flo", "task-2")
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(send track :events)`,
+		Source: `(send track :history)`,
 		Validate: func(t *testing.T, v slip.Object) {
-			events, ok := v.(slip.List)
+			history, ok := v.(slip.List)
 			tt.Equal(t, true, ok)
-			tt.Equal(t, 2, len(events))
-			for i, e := range events {
+			tt.Equal(t, 2, len(history))
+			for i, e := range history {
 				ev, ok2 := e.(slip.List)
 				tt.Equal(t, true, ok2)
 				tt.Equal(t, 3, len(ev))
@@ -56,7 +56,7 @@ func TestTrackDocs(t *testing.T) {
 
 	for _, method := range []string{
 		":id",
-		":events",
+		":history",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-track-flavor %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))

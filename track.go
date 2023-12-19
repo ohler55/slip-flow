@@ -28,7 +28,7 @@ _flow-box-flavor_ is traverses a flow.`),
 	trackFlavor.Final = true
 	trackFlavor.GoMakeOnly = true
 	trackFlavor.DefMethod(":id", "", trackIDCaller{})
-	trackFlavor.DefMethod(":events", "", trackEventsCaller{})
+	trackFlavor.DefMethod(":history", "", trackHistoryCaller{})
 }
 
 type event struct {
@@ -38,8 +38,8 @@ type event struct {
 }
 
 type track struct {
-	id     slip.Object
-	events []*event
+	id      slip.Object
+	history []*event
 }
 
 type trackIDCaller struct{}
@@ -57,32 +57,32 @@ Returns the id of the track.
 `
 }
 
-type trackEventsCaller struct{}
+type trackHistoryCaller struct{}
 
-func (caller trackEventsCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller trackHistoryCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
-	return self.Any.(*track).eventsList()
+	return self.Any.(*track).historyList()
 }
 
-func (caller trackEventsCaller) Docs() string {
-	return `__:events__ => _list_
+func (caller trackHistoryCaller) Docs() string {
+	return `__:history__ => _list_
 
 
-Returns the events of the track as a list of triples where each triple is a list of
+Returns the history of the track as a list of triples where each triple is a list of
 the time, the task name, and the flow name.
 `
 }
 
 // Scan adds an event to the track.
 func (t *track) Scan(flow, task string) {
-	t.events = append(t.events, &event{flow: flow, task: task, when: time.Now().UTC()})
+	t.history = append(t.history, &event{flow: flow, task: task, when: time.Now().UTC()})
 }
 
-func (t *track) eventsList() (events slip.List) {
-	if 0 < len(t.events) {
-		events = make(slip.List, len(t.events))
-		for i, ev := range t.events {
-			events[i] = slip.List{slip.Time(ev.when), slip.String(ev.task), slip.String(ev.flow)}
+func (t *track) historyList() (history slip.List) {
+	if 0 < len(t.history) {
+		history = make(slip.List, len(t.history))
+		for i, ev := range t.history {
+			history[i] = slip.List{slip.Time(ev.when), slip.String(ev.task), slip.String(ev.flow)}
 		}
 	}
 	return
