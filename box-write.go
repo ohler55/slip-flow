@@ -52,6 +52,11 @@ A value of zero outputs a tight single line output. Default: 4.`,
 					Text: "value to use in place of the _*print-right-margin*_ value.",
 				},
 				{
+					Name: "indent",
+					Type: "fixnum",
+					Text: "is the number of spaces to indent JSON or SEN output if :pretty is not non-nil.",
+				},
+				{
 					Name: "time-format",
 					Type: "string",
 					Text: "value to use in place of the _*flow-box-time-format*_ value.",
@@ -70,6 +75,11 @@ A value of zero outputs a tight single line output. Default: 4.`,
 					Name: "color",
 					Type: "boolean",
 					Text: "if true the output is colorized.",
+				},
+				{
+					Name: "full",
+					Type: "boolean",
+					Text: "if true the output includes the box track and the content is nested on level down.",
 				},
 			},
 			Return: "box",
@@ -96,23 +106,21 @@ func (f *BoxWrite) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 	if !ok {
 		slip.PanicType("box", args[0], "box")
 	}
-	_ = self.Receive(s, ":write", args[1:], depth)
-
-	return self
+	return self.Receive(s, ":write", args[1:], depth)
 }
 
 type boxWriteCaller struct{}
 
 func (caller boxWriteCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	return writeBox(obj, args)
+	return writeBox(s, obj, args)
 }
 
 func (caller boxWriteCaller) Docs() string {
 	return methodDocFromFunc(":write", "flow-box-write", "flow-box-flavor", "box")
 }
 
-func writeBox(obj *flavors.Instance, args slip.List) (result slip.Object) {
+func writeBox(s *slip.Scope, obj *flavors.Instance, args slip.List) (result slip.Object) {
 	var out io.Writer
 	dp := slip.DefaultPrinter()
 	pw := pretty.Writer{
@@ -121,6 +129,7 @@ func writeBox(obj *flavors.Instance, args slip.List) (result slip.Object) {
 		MaxDepth: 4,
 		SEN:      true,
 	}
+	var full bool
 	pw.Indent = 2
 	prty := dp.Pretty
 	if 0 < len(args) {
@@ -135,7 +144,7 @@ func writeBox(obj *flavors.Instance, args slip.List) (result slip.Object) {
 			// probably a key or an error
 		default:
 			if ta == slip.True {
-				out = slip.StandardOutput.(io.Writer)
+				out = s.Get("*standard-output*").(io.Writer)
 			} else {
 				slip.PanicType("stream", ta, "nil", "t", "output-stream")
 			}
@@ -161,6 +170,12 @@ func writeBox(obj *flavors.Instance, args slip.List) (result slip.Object) {
 					slip.PanicType(":right-margin", args[pos+1], "fixnum")
 				}
 				pw.Width = int(num)
+			case ":indent":
+				num, ok := args[pos+1].(slip.Fixnum)
+				if !ok {
+					slip.PanicType(":indent", args[pos+1], "fixnum")
+				}
+				pw.Indent = int(num)
 			case ":time-format":
 				switch ta := args[pos+1].(type) {
 				case nil:
@@ -183,22 +198,42 @@ func writeBox(obj *flavors.Instance, args slip.List) (result slip.Object) {
 				pw.SEN = args[pos+1] == nil
 			case ":color":
 				pw.Color = args[pos+1] != nil
+			case ":full":
+				full = args[pos+1] != nil
 
 			default:
-				slip.PanicType("keyword", sym, ":pretty", ":depth", ":right-margin",
-					":time-format", ":time-wrap", ":json", ":color")
+				slip.PanicType("keyword", sym, ":pretty", ":depth", ":right-margin", "indent",
+					":time-format", ":time-wrap", ":json", ":color", "full")
 			}
 		}
 	}
 	bx := obj.Any.(*box)
+	content := bx.content
+	if full {
+		history := make([]any, len(bx.track.history))
+		for i, ev := range bx.track.history {
+			history[i] = map[string]any{
+				"when": ev.when,
+				"flow": ev.flow,
+				"task": ev.task,
+			}
+		}
+		content = map[string]any{
+			"track": map[string]any{
+				"id":      slip.Simplify(bx.track.id),
+				"history": history,
+			},
+			"content": content,
+		}
+	}
 	var b []byte
 	switch {
 	case prty && 1 < pw.MaxDepth:
-		b = pw.Encode(bx.content)
+		b = pw.Encode(content)
 	case pw.SEN:
-		b = sen.Bytes(bx.content, &pw.Options)
+		b = sen.Bytes(content, &pw.Options)
 	default:
-		b = []byte(oj.JSON(bx.content, &pw.Options))
+		b = []byte(oj.JSON(content, &pw.Options))
 	}
 	if out == nil {
 		return slip.String(b)

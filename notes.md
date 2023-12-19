@@ -1,33 +1,27 @@
 # SLIP-Flow Notes
 
 - next
- - flow-box-flavor
-  - clos functions
-   + flow-box-bag ()
-   + flow-box-copy ()
-   + flow-box-freeze ()
-   + flow-box-frozen ()
-   + flow-box-get (&optional path as-bag)
-   + flow-box-has (path)
-   + flow-box-history ()
-   + flow-box-native ()
-   + flow-box-parse (string &optional path)
-   + flow-box-read (stream &optional path)
-   + flow-box-remove (path)
-   + flow-box-scan (flow-name task-name)
-   + flow-box-set (value &optional path)
-   + flow-box-thaw ()
-   + flow-box-track ()
-   + flow-box-tracking-id ()
-   + make-flow-box (&key tracking-id track set parse read)
-   - flow-box-modify (function &optional path &key :as-bag
-   - flow-box-walk (function &optional path as-lisp)
-   - flow-box-write (&optional stream &key pretty depth right-margin time-format time-wrap json color)
-  - tests
-   + pkg
 
+ - has-logger-flavor or can-log-flavor (abstract flavor)
+  - logger [read only and set by container or on create] [gi/logger instance as the default]
+  - :log-level
+  - :set-log-level
+  - :error
+  - :warn
+  - :info
+  - :debug
+  - with level and methods for debug, error, info, warn that check local level
+   - set-level from parent changes local level
+    - un-set is okay and means logger level only is used
 
- - has-logger-flavor (abstract flavor)
+ - flow-task-flavor (has-logger)
+  - :transition (box &optional wait)
+  - task struct
+   - flow [containing flow]
+   - name
+   - actor
+   - function
+
 
 - design
  - flow package in separate repo
@@ -121,11 +115,6 @@
 
   - flow-link-flavor or flow-transition-flavor
 
-  - flow-task-flavor (has-logger)
-   - :transition (box &optional wait)
-   - :flow [containing flow]
-   - actor [var]
-   - function [var]
    -
   - flow-box-flavor
    - model after bag but add tracking-id
