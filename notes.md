@@ -1,18 +1,12 @@
 # SLIP-Flow Notes
 
 - next
+ - add Receive() to instance interface
 
  - has-logger-flavor or can-log-flavor (abstract flavor)
-  - logger [read only and set by container or on create] [gi/logger instance as the default]
-  - :log-level
-  - :set-log-level
-  - :error
-  - :warn
-  - :info
-  - :debug
-  - with level and methods for debug, error, info, warn that check local level
-   - set-level from parent changes local level
-    - un-set is okay and means logger level only is used
+  - test
+   - create a concrete flavor that inherits can-log-flavor then call methods
+    - maybe defflavor if flavor not defined
 
  - flow-task-flavor (has-logger)
   - :transition (box &optional wait)
