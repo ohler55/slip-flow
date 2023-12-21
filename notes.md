@@ -1,70 +1,35 @@
 # SLIP-Flow Notes
 
 - next
- - add Receive() to instance interface
+ - create flow-task-flavor and :init
 
- - has-logger-flavor or can-log-flavor (abstract flavor)
-  - test
-   - create a concrete flavor that inherits can-log-flavor then call methods
-    - maybe defflavor if flavor not defined
-
- - flow-task-flavor (has-logger)
-  - :transition (box &optional wait)
-  - task struct
-   - flow [containing flow]
-   - name
-   - actor
-   - function
-
-
-- design
- - flow package in separate repo
-  - design/model
-   - immutable bag or similar
-   - separate routine for each node/task
-    - or option for separate thread
-     - **maybe option for number of workers**
-      - 0 means inline, > 0 means work-queue (channel) and workers
-  - flow-manager
-   - logger
-   - map of flows by name
-  - flow
-   - name
-   - log level
-   - entry
-   - tasks
-  - task or node
-   - name
-   - links map[string]*Link
-   - actors []*flavors.Instance
+  - flow-task-flavor
+   - initializers
+    - :name
+    - :actor - one or a list
+     - function, instance, or list of instances
+    - :worker (count)
+     - if 0 then sync
+     - should match actors but round-robin for assignment to loops if not
+    - :logger (from can-log-flavor)
+    - :log-level (from can-log-flavor)
+   - methods
     - :receive
-     - calls :transition on parent task to move to linked task
-   - function (if using a function or lambda)
-   - queue chan *Box
-   - worker-count
-   - workers (if actor is an instance)
-    - instances in the worker loops if instances
-    - else just use the function
-  - link
-   - name
-   - target
+    - :transition
+    - :start
+    - :shutdown (&optional wait)
+    - all from can-log-flavor
 
-  - config format (lisp or json)
-   - flow
+   - task struct
     - name
-    - log-level
-    - entry (string)
-    - tasks
-     - name
-     - log-level
-     - links (names and targets)
-     - function (optional)
-     - actor
-      - flavor
-      - init key/values
-     - worker-count
+    - self points back to task instance
+    - links map[string]*Link
+    - actors []*flavors.Instance
+    - function (if using a function or lambda)
+    - queue chan box instance
+    - workers (used to put nil on chan to stop)
 
-   - json format in a bag with option for lisp
+
 
 - actors
  - queue input actor for trigger tasks
@@ -81,14 +46,6 @@
    - :flows [all flows, maybe with pattern to match]
    - :remove
    - :logger [return gi:logger of the manager]
-  - has-logger-flavor
-   - logger [read only and set by container or on create]
-   - :log-level
-   - :set-log-level
-   - :error
-   - :warn
-   - :info
-   - :debug
   - flow-flavor (has-logger-flavor)
    - :init [should take a config but allow for changes later]
    - :start [starts all tasks]
@@ -107,28 +64,6 @@
    - :unlink (source link-name)
    - :set-entry (task-name)
 
-  - flow-link-flavor or flow-transition-flavor
-
-   -
-  - flow-box-flavor
-   - model after bag but add tracking-id
-   - keep flag to indicate if it is immutable
-    - set flag on call to transition or receive
-     - only need to set the flag if async (0 < workers or has a queue)
-
-   - task-flavor
-    - methods
-     - start
-      - starts processing loop
-     - stop
-     - submit box/data/bag
-      - drops data on to processing channel
-      - initially copy but later wrap with box that dups on set
-       - or maybe enhance bag to have option for copy on set (immuttable flag)
-     - handle-error
-     - flow return flow task is in
-     - links - returns link names with task as assoc list
-    - subclass for specific behavior
   - flow-flavor
    - init should take a config but allow for changes later
    - can subclass for specific flows
