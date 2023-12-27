@@ -2,6 +2,7 @@
 
 - next
  - create flow-task-flavor and :init
+  - test with other methods
 
   - flow-task-flavor
    - initializers
