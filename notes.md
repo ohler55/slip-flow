@@ -1,8 +1,12 @@
 # SLIP-Flow Notes
 
 - next
+
  - create flow-task-flavor and :init
   - test with other methods
+  - how to verify started
+   - might need mutex to check queue and a running
+   - or need an actor and wait for action
 
   - flow-task-flavor
    - initializers

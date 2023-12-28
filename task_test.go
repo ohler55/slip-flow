@@ -24,6 +24,12 @@ func TestTaskDocs(t *testing.T) {
 
 	for _, method := range []string{
 		":init",
+		":name",
+		":workers",
+		":start",
+		":shutdown",
+		":running",
+		":metrics",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-task-flavor %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
@@ -31,10 +37,10 @@ func TestTaskDocs(t *testing.T) {
 	}
 }
 
-func TestTaskInitDoc(t *testing.T) {
-	scope := slip.NewScope()
-	var out strings.Builder
-	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString(`(describe-method flow-task-flavor :init out)`).Eval(scope, nil)
-	fmt.Printf("***\n%s\n", out.String())
-}
+// func TestTaskInitDoc(t *testing.T) {
+// 	scope := slip.NewScope()
+// 	var out strings.Builder
+// 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+// 	_ = slip.ReadString(`(describe-method flow-task-flavor :init out)`).Eval(scope, nil)
+// 	fmt.Printf("*** docs: \n%s\n", out.String())
+// }
