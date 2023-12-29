@@ -2,18 +2,13 @@
 
 package main
 
-import (
-	"github.com/ohler55/slip"
-)
-
 // TBD flow-flavor
 
 type flow struct {
 	name string
 	// self *flavors.Instance
-	// TBD tasks
-	errorHandler slip.Caller
-	errorTask    *task
+	// tasks     map[string]*task
+	errorTask *task
 
 	// received  atomic.Uint64
 	// errors    atomic.Uint64

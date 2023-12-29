@@ -2,11 +2,13 @@
 
 - next
 
- - create flow-task-flavor and :init
-  - test with other methods
-  - how to verify started
-   - might need mutex to check queue and a running
-   - or need an actor and wait for action
+ - flow-task-flavor
+  - test :receive
+   - workers = 0
+    - function
+    - instance
+     - defflavor with start, shutdown, and perform
+
 
   - flow-task-flavor
    - initializers

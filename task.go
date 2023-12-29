@@ -223,13 +223,8 @@ func (t *task) handlePanic(s *slip.Scope, bi *flavors.Instance) {
 			}
 			return
 		}
-		if t.flow != nil {
-			if t.flow.errorTask != nil {
-				t.flow.errorTask.receive(s, nb)
-			}
-			if t.flow.errorHandler != nil {
-				t.flow.errorHandler.Call(s, slip.List{bi}, 0)
-			}
+		if t.flow != nil && t.flow.errorTask != nil {
+			t.flow.errorTask.receive(s, nb)
 		}
 	}
 }
