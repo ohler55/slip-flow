@@ -34,6 +34,7 @@ queued and processed by workers in separate threads.`),
 				slip.Symbol(":name"),
 				slip.Symbol(":actor"),
 				slip.Symbol(":workers"),
+				slip.Symbol(":depth"),
 			},
 		},
 	)
@@ -190,6 +191,10 @@ func (t *task) handleResult(s *slip.Scope, result slip.Object) {
 			to = t.links[string(tr)]
 		}
 		if bi, has := list[1].(*flavors.Instance); has && bi != nil && boxFlavor == bi.Flavor {
+			t.processed.Add(1)
+			tr := bi.Any.(*box).track
+			ev := tr.history[len(tr.history)-1]
+			t.duration.Add(uint64(time.Since(ev.when)))
 			if to != nil {
 				to.receive(s, bi)
 			}
@@ -324,8 +329,6 @@ func (caller taskInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 			} else {
 				slip.PanicType("task :init :depth", args[i+1], "fixnum greater than 0")
 			}
-		default:
-			slip.PanicType("task :init", args[i], ":name", ":actor", ":workers")
 		}
 	}
 	obj.Any = &tsk

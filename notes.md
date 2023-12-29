@@ -4,6 +4,8 @@
 
  - flow-task-flavor
   - test :receive
+   - test panics in actor
+   - test function actor
    - workers = 0
     - function
     - instance

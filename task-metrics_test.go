@@ -11,14 +11,16 @@ import (
 
 func TestTaskMetricsOk(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk)))
+		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk :actor (lambda (b) (list 'ok b)))))
+                  (flow-task-receive task (make-flow-box :set '(1 2 3)))
                   (flow-task-metrics task))`,
-		Expect: "((received . 0) (processed . 0) (errors . 0))",
+		Expect: `/\(\(received . 1\) \(processed . 1\) \(errors . 0\) \(average . .+\)\)/`,
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk)))
+		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk :actor (lambda (b) (list 'ok b)))))
+                  (send task :receive (make-flow-box :set '(1 2 3)))
                   (send task :metrics))`,
-		Expect: "((received . 0) (processed . 0) (errors . 0))",
+		Expect: `/\(\(received . 1\) \(processed . 1\) \(errors . 0\) \(average . .+\)\)/`,
 	}).Test(t)
 }
 
