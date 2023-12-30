@@ -5,7 +5,10 @@
  - flow-task-flavor
   - test :receive
    - test panics in actor
-   - test function actor
+    - make sure string and Stringer both work as well as error
+     - for string and error need go actor
+   - better to test with a flow
+
    - workers = 0
     - function
     - instance
