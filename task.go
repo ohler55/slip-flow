@@ -306,7 +306,6 @@ func (caller taskInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 						slip.PanicType("task :init :actor", val, "instance with :perform method", "function", "list")
 					}
 				}
-				// TBD could be lambda?
 			case *slip.Lambda:
 				tsk.caller = tv
 			case *slip.FuncInfo:

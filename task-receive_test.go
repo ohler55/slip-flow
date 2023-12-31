@@ -114,6 +114,35 @@ func TestTaskReceiveFunction(t *testing.T) {
 	}).Test(t)
 }
 
+func TestTaskReceiveInstanceSync(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString(
+		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
+	_ = slip.ReadString(`(defflavor task-receiver-test-actor (task)
+                                                             ()
+                                                             :gettable-instance-variables
+                                                             :settable-instance-variables)`).Eval(scope, nil)
+	_ = slip.ReadString(`(defmethod (task-receiver-test-actor :start) (tsk) (setq task tsk))`).Eval(scope, nil)
+	_ = slip.ReadString(`(defmethod (task-receiver-test-actor :shutdown) ()
+                          (unless (string= "flow-task-flavor" (send (send task :flavor) :name))
+                                  (panic "task not set")))`).Eval(scope, nil)
+	_ = slip.ReadString(`(defmethod (task-receiver-test-actor :perform) (b)
+                                     (flow-box-set b 3 "c")
+                                     (setq task-receive-test-box b)
+                                     (list 'ok b))`).Eval(scope, nil)
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(let ((task (make-instance 'flow-task-flavor
+                                            :name "tisk"
+                                            :actor (make-instance 'task-receiver-test-actor))))
+                  (send task :start)
+                  (flow-task-receive task task-receive-test-box)
+                  (send task :shutdown)
+                  (flow-box-native task-receive-test-box))`,
+		Expect: `/\("c" \. 3\)/`,
+	}).Test(t)
+}
+
 func TestTaskReceiveNotTask(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(flow-task-receive t (make-flow-box))`,

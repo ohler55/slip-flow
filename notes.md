@@ -4,15 +4,14 @@
 
  - flow-task-flavor
   - test :receive
-   - test panics in actor
-    - make sure string and Stringer both work as well as error
-     - for string and error need go actor
-   - better to test with a flow
+   - test with instance actors
 
-   - workers = 0
-    - function
-    - instance
-     - defflavor with start, shutdown, and perform
+ - new flow-flavor branch
+  -
+  - test task :receive panics in actor
+   - make sure string and Stringer both work as well as error
+    - for string and error need go actor
+
 
 
   - flow-task-flavor
