@@ -2,10 +2,6 @@
 
 - next
 
- - flow-task-flavor
-  - test :receive
-   - test with instance actors
-
  - new flow-flavor branch
   -
   - test task :receive panics in actor

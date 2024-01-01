@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -118,18 +119,7 @@ func TestTaskReceiveInstanceSync(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(
 		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
-	_ = slip.ReadString(`(defflavor task-receiver-test-actor (task)
-                                                             ()
-                                                             :gettable-instance-variables
-                                                             :settable-instance-variables)`).Eval(scope, nil)
-	_ = slip.ReadString(`(defmethod (task-receiver-test-actor :start) (tsk) (setq task tsk))`).Eval(scope, nil)
-	_ = slip.ReadString(`(defmethod (task-receiver-test-actor :shutdown) ()
-                          (unless (string= "flow-task-flavor" (send (send task :flavor) :name))
-                                  (panic "task not set")))`).Eval(scope, nil)
-	_ = slip.ReadString(`(defmethod (task-receiver-test-actor :perform) (b)
-                                     (flow-box-set b 3 "c")
-                                     (setq task-receive-test-box b)
-                                     (list 'ok b))`).Eval(scope, nil)
+	assureTaskRecieveTestActor(scope)
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((task (make-instance 'flow-task-flavor
@@ -141,6 +131,46 @@ func TestTaskReceiveInstanceSync(t *testing.T) {
                   (flow-box-native task-receive-test-box))`,
 		Expect: `/\("c" \. 3\)/`,
 	}).Test(t)
+}
+
+func TestTaskReceiveInstanceAsync(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString(
+		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
+	assureTaskRecieveTestActor(scope)
+
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(let ((task (make-instance 'flow-task-flavor
+                                            :name "tisk"
+                                            :workers 3
+                                            :actor (list
+                                                    (make-instance 'task-receiver-test-actor)
+                                                    (make-instance 'task-receiver-test-actor)
+                                                    (make-instance 'task-receiver-test-actor)))))
+                  (send task :start)
+                  (flow-task-receive task task-receive-test-box)
+                  (send task :shutdown)
+                  (flow-box-native task-receive-test-box))`,
+		Expect: `/\("c" \. 3\)/`,
+	}).Test(t)
+}
+
+func assureTaskRecieveTestActor(scope *slip.Scope) {
+	if flavors.Find("task-receiver-test-actor") == nil {
+		_ = slip.ReadString(`(defflavor task-receiver-test-actor (task)
+                                                             ()
+                                                             :gettable-instance-variables
+                                                             :settable-instance-variables)`).Eval(scope, nil)
+		_ = slip.ReadString(`(defmethod (task-receiver-test-actor :start) (tsk) (setq task tsk))`).Eval(scope, nil)
+		_ = slip.ReadString(`(defmethod (task-receiver-test-actor :shutdown) ()
+                          (unless (string= "flow-task-flavor" (send (send task :flavor) :name))
+                                  (panic "task not set")))`).Eval(scope, nil)
+		_ = slip.ReadString(`(defmethod (task-receiver-test-actor :perform) (b)
+                                     (flow-box-set b 3 "c")
+                                     (setq task-receive-test-box b)
+                                     (list 'ok b))`).Eval(scope, nil)
+	}
 }
 
 func TestTaskReceiveNotTask(t *testing.T) {
@@ -171,4 +201,24 @@ func TestTaskReceiveNotBox(t *testing.T) {
 	}).Test(t)
 }
 
-// TBD
+func TestTaskReceiveInstanceNoPerform(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString(
+		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(make-instance 'flow-task-flavor
+                                            :name "tisk"
+                                            :actor (make-instance 'vanilla-flavor))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(make-instance 'flow-task-flavor
+                                            :name "tisk"
+                                            :actor (list
+                                                    (make-instance 'vanilla-flavor)
+                                                    (make-instance 'vanilla-flavor)))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}
