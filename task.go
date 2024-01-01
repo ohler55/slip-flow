@@ -47,8 +47,8 @@ queued and processed by workers in separate threads.`),
 	taskFlavor.DefMethod(":receive", "", taskReceiveCaller{})
 	taskFlavor.DefMethod(":metrics", "", taskMetricsCaller{})
 
-	// :transition
-	//  reset/zero metrics
+	// :links
+	// :reset-metrics
 	// TBD
 }
 

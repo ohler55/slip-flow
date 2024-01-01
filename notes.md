@@ -3,29 +3,35 @@
 - next
 
  - new flow-flavor branch
-  -
+  - add flavor to flow.go
+   - docs
+    - describe as channel where submit or trigger starts and exit results on channel
+    - describe error task name is special
+    - will need an exit actor that puts box on exit-channel
+
+  - methods
+   - :init
+    - option to set manager which pulls in logger
+    - option to set logger directly
+    - option for a completed-channel or exit-channel or finished-channel or result-channel
+   - :add-task (task keywords and values or just task?)
+    - if args then no worries about adding the same task twice
+    - use taskInitCaller?
+   - :link (name from to) [all args are strings)
+   - :unlink (task-name link-name)
+   - :remove-task (task-name)
+   - :start
+   - :shutdown
+   - :tasks
+   - :find-task (task-name)
+   - :entry
+   - :set-entry (task-name)
+   - :submit (box)
+
   - test task :receive panics in actor
    - make sure string and Stringer both work as well as error
     - for string and error need go actor
 
-
-
-  - flow-task-flavor
-   - initializers
-    - :name
-    - :actor - one or a list
-     - function, instance, or list of instances
-    - :worker (count)
-     - if 0 then sync
-     - should match actors but round-robin for assignment to loops if not
-    - :logger (from can-log-flavor)
-    - :log-level (from can-log-flavor)
-   - methods
-    - :receive
-    - :transition
-    - :start
-    - :shutdown (&optional wait)
-    - all from can-log-flavor
 
    - task struct
     - name
@@ -53,39 +59,3 @@
    - :flows [all flows, maybe with pattern to match]
    - :remove
    - :logger [return gi:logger of the manager]
-  - flow-flavor (has-logger-flavor)
-   - :init [should take a config but allow for changes later]
-   - :start [starts all tasks]
-   - :stop &optional wait [all tasks]
-   - :submit (box &optional wait) [or call it receive to match tasks]
-   - :handle-error [called by tasks]
-   - :manager
-   - :tasks
-   - :add-task
-   - :remove-task
-   - :find-task
-   - :entry
-   - :link (source link-name target) [source and target can be name or task itself or another flow]
-    - maybe both target and source must be names to avoid cross linking
-    - still allow target to be a flow though
-   - :unlink (source link-name)
-   - :set-entry (task-name)
-
-  - flow-flavor
-   - init should take a config but allow for changes later
-   - can subclass for specific flows
-   - methods
-     - start (starts all tasks)
-     - stop &optional wait (all tasks)
-    - submit data &optional wait
-    - handle-error
-    - logger field points to gi/logger
-    - tasks
-    - add-task
-    - set-entry
-    - link name task (or task-name)
-     - optional flow for external links
-   - vars
-    - entry
-    - tasks
-  - syntax for describing, json or lisp
