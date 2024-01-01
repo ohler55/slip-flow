@@ -151,3 +151,20 @@ func MakeBox(id slip.Object) (self *flavors.Instance, bx *box) {
 
 	return
 }
+
+func boxDup(bi *flavors.Instance) (self *flavors.Instance, bx *box) {
+	b := bi.Any.(*box)
+	self = boxFlavor.MakeInstance().(*flavors.Instance)
+
+	bx = &box{
+		track:   track{id: b.track.id, history: make([]*event, len(b.track.history))},
+		content: b.content,
+		frozen:  true,
+	}
+	for i, ev := range b.track.history {
+		bx.track.history[i] = &event{when: ev.when, flow: ev.flow, task: ev.task}
+	}
+	self.Any = bx
+
+	return
+}

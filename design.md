@@ -32,10 +32,9 @@ addition to the Flavors methods.
 
 An instance of the **flow-manager-flavor** is used to load or create
 instances of the **flow-flavor** . The flows (**flow-flavor**
-instances) are typically initialized with a configuration what is
-loaded from either a JSON or LISP file although a flow can be build
-fully using LISP code by creating tasks explicitly. After loading
-flows managed by the flow manager can be accessed by flow name.
+instances) are typically initialized with a configuration that is
+composed of LISP code to build the flow. After loading flows managed
+by the flow manager can be accessed by flow name.
 
 The flow manager includes a logger that is shared with all flows and
 tasks to make monitoring more consistent. Another shared resource in
@@ -94,12 +93,12 @@ A actor can be a function or an instance of a Flavor.
 If a function then it must expect exactly one argument and return a
 list of transition name and a box.
 
-If an instance then it is expected to have at least the following methods:
+If an instance then the instance is expected to have at least the
+_:perform_ method and optionally a _:set-task_ and _:shutdown_
 
  - _:perform_ (box) that return a transition name and new box.
- - _:init_ with a keyword of _:configuration_.
- - _:set-task_ to let the instance know what task it is contained in.
- - _:shutdown_ to cleanup any open resources and to stop processing.
+ - _:set-task_ (task) to let the instance know what task it is contained in.
+ - _:shutdown_ () to cleanup any open resources and to stop processing.
 
 Actors should use the task for logging but generally don't need to
 access the task.
@@ -236,3 +235,27 @@ calling the logging methods of the Task that contains them.
 Logging is hierarchical in that each log entry includes the flow and
 task name and can be controlled by the logging level in the flow
 manager, flow, and task. Log levels are error, warn, info, and debug.
+
+### UI and Graphics
+
+The flow flavors and functions do not support a UI for building nor a
+means of generating a graphical representation of a flow. Instead
+graphical overlays are expected to hold information for a graphical
+representation. Together with the flows themselves an SVG file can be
+generated or a UI can be used to build and configure a flow.
+
+The overlays are expected to be a tree of flow, tasks, and
+links. Tasks overlays may include:
+
+ - *name* to match up with the task in a flow.
+ - *color* which could be derived from the task'c actor type.
+ - *shape* which could be derived from the task'c actor type.
+ - *x* horizontal location.
+ - *y* vertical location.
+
+A link attached to a task has some additional attributes used for
+display purposes.
+
+ - *name* to match against the actual links on a task.
+ - *mid-points* are the locations of any mid points in drawing a line
+   between two tasks.
