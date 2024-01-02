@@ -25,9 +25,19 @@ func init() {
 		slip.List{
 			slip.List{
 				slip.Symbol(":documentation"),
-				slip.String(`Tasks are objects that implement the processing nodes withing a flow. Each task
-has an actor that performs the processing of the task. Processing can be completed in the current thread or
-queued and processed by workers in separate threads.`),
+				slip.String(`Tasks are the shell around an actor that performs specific actions on a _box_
+that is passed from one _task_ to another in a _flow_.
+
+
+Each _task_ is named and can process a _box_ either synchronously by setting
+the _:workers_ to zero or asynchronous if _:workers_ is set to one or
+more. After processing the _box_ is sent through a link to the destination
+_task_ at the end of the link.
+
+
+See also: flow-flavor
+
+`),
 			},
 			slip.List{
 				slip.Symbol(":init-keywords"),
@@ -336,10 +346,11 @@ func (caller taskInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 }
 
 func (caller taskInitCaller) Docs() string {
-	return `__:init__ &key _name_ _workers_ _actor_
+	return `__:init__ &key _name_ _workers_ _actor_ _logger_
    _:name_ [string] sets the name of the task.
    _:workers_ [fixnum] the number of workers for concurrent processing. Zero indicates no concurrent processing.
    _:depth_ [fixnum] of the work queue.
+   _:logger_ [instance] an instance that has the _:log_ method.
    _:actor_ [instance|function|list] if an instance that instance is used for processing and must have the
 _perform_ method that expectes an instance of the _flow-box-flavor_. If the instance has a _start_ or _shutdown_
 those will be called when starting or stoping a flow. If the value of _:actor_ is a function is must expect one

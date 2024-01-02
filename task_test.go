@@ -42,6 +42,13 @@ func TestTaskDocs(t *testing.T) {
 	}
 }
 
+func TestTaskInitLogger(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(make-instance 'flow-task-flavor :name "tisk" :logger (make-instance 'logger-flavor))`,
+		Expect: "/#<flow-task-flavor [0-9a-f]+>/",
+	}).Test(t)
+}
+
 func TestTaskInitBadName(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(make-instance 'flow-task-flavor :name 123)`,
@@ -81,6 +88,7 @@ func TestTaskInitBadKeyword(t *testing.T) {
 // 	scope := slip.NewScope()
 // 	var out strings.Builder
 // 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-// 	_ = slip.ReadString(`(describe-method flow-task-flavor :init out)`).Eval(scope, nil)
-// 	fmt.Printf("*** docs: \n%s\n", out.String())
+// 	// _ = slip.ReadString(`(describe-method flow-task-flavor :init out)`).Eval(scope, nil)
+// 	// fmt.Printf("*** docs: \n%s\n", out.String())
+// 	_ = slip.ReadString(`(describe-flavor flow-task-flavor)`).Eval(scope, nil)
 // }

@@ -1,19 +1,16 @@
 # SLIP-Flow Notes
 
 - next
+ - docs
 
- - new flow-flavor branch
-  - add flavor to flow.go
-   - docs
-    - describe as channel where submit or trigger starts and exit results on channel
-    - describe error task name is special
-    - will need an exit actor that puts box on exit-channel
+ - should task-flavor be set to only be created from go code?
+  - MakeTask should then take args like :init
 
   - methods
    - :init
     - option to set manager which pulls in logger
     - option to set logger directly
-    - option for a completed-channel or exit-channel or finished-channel or result-channel
+    - option for an exit-channel
    - :add-task (task keywords and values or just task?)
     - if args then no worries about adding the same task twice
     - use taskInitCaller?

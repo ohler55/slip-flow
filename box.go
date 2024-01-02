@@ -23,12 +23,28 @@ func init() {
 		slip.List{
 			slip.List{
 				slip.Symbol(":documentation"),
-				slip.String(`A container for data passed between instances of the
-_flow-task-flavor_ in a flow. The content of the box can be frozen which forces a
-if an attempt is made to modify the content. Typically when transitioning from one
-task to another a shallow copy of the box is made and the new box as well as the
+				slip.String(`A container for data passed between instances of the _flow-task-flavor_ in a
+flow. The content of the box can be frozen which forces a if an attempt is
+made to modify the content. Typically when transitioning from one task to
+another a shallow copy of the box is made and the new box as well as the
 original is frozen so that the original box content will not be modified by
 modifications to the new box.
+
+
+Like the _gi:bag-flavor_ the data in a _box_ is a tree composed of primitives,
+_lists_, and _hash-tables_ like collections. The primitives type are:
+  - _t_
+  - _nil_
+  - _:false_ which maps to a boolean false for a JSON mapping.
+  - _integer_
+  - _double-float_
+  - _string_
+  - _time_
+
+
+Data in a _box_ can be accessed and modified using methods that use a JSONPath
+to identify one or more values.
+
 `),
 			},
 			slip.List{

@@ -9,7 +9,7 @@ At the highest level, a Flow is a collection of Tasks that for a
 processing unit. Data enters a Flow and transitions from one Task to
 another until processing is complete.
 
-SLIP-Flow is implemented primarlify in golang with an API that is
+SLIP-Flow is implemented primarily in golang with an API that is
 primarily Flavors based but with corresponding functions to to also be
 a CLOS API.
 
