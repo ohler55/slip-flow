@@ -1,17 +1,12 @@
 # SLIP-Flow Notes
 
 - next
- - docs
-
- - should task-flavor be set to only be created from go code?
-  - MakeTask should then take args like :init
+ - change examples to use flow to create flow, add task
+ - change tests to use MakeTask() or flow then add-task
 
   - methods
    - :init
-    - option to set manager which pulls in logger
-    - option to set logger directly
-    - option for an exit-channel
-   - :add-task (task keywords and values or just task?)
+   - :add-task => task
     - if args then no worries about adding the same task twice
     - use taskInitCaller?
    - :link (name from to) [all args are strings)

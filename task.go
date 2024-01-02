@@ -262,30 +262,14 @@ func (t *task) metrics() (alist slip.List) {
 }
 
 // MakeTask is only public for testing purposes.
-func MakeTask(name slip.Object) (self *flavors.Instance, t *task) {
+func MakeTask(args ...slip.Object) (self *flavors.Instance, t *task) {
 	self = taskFlavor.MakeInstance().(*flavors.Instance)
-	t = &task{links: map[string]*task{}}
-	switch tn := name.(type) {
-	case slip.Symbol:
-		t.name = string(tn)
-	case slip.String:
-		t.name = string(tn)
-	}
-	self.Any = t
-
+	t = makeTaskStruct(self, args)
 	return
 }
 
-// task-flavor :init //////////////////////////////////////////////////////////
-
-type taskInitCaller struct{}
-
-func (caller taskInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	obj := s.Get("self").(*flavors.Instance)
-	if 0 < len(args) {
-		args = args[0].(slip.List)
-	}
-	tsk := task{self: obj, links: map[string]*task{}}
+func makeTaskStruct(self *flavors.Instance, args slip.List) (tsk *task) {
+	tsk = &task{self: self, links: map[string]*task{}}
 	for i := 0; i < len(args)-1; i += 2 {
 		switch args[i] {
 		case slip.Symbol(":name"):
@@ -340,7 +324,19 @@ func (caller taskInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 			}
 		}
 	}
-	obj.Any = &tsk
+	self.Any = tsk
+
+	return
+}
+
+type taskInitCaller struct{}
+
+func (caller taskInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	if 0 < len(args) {
+		args = args[0].(slip.List)
+	}
+	_ = makeTaskStruct(self, args)
 
 	return nil
 }

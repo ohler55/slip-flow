@@ -40,10 +40,10 @@ together. Designating an entry task if needed as well. The "error" task name
 is reserved for handling errors and panics.
 
 
-Once built data is submitted as an instance of the _box-flavor_ which collects
-tracking information as it traverses the graph of linked tasks. If provided
-the final tasks in a flow will place the _box_ with tracking information on an
-exit channel.
+Once a flow has been built data is submitted as an instance of the
+_box-flavor_ which collects tracking information as it traverses the graph of
+linked tasks. If provided the final tasks in a flow will place the _box_ with
+tracking information on an exit channel.
 
 
 See also: flow-task-flavor
@@ -68,7 +68,7 @@ See also: flow-task-flavor
 	// flowFlavor.DefMethod(":unlink", "", flowUnlinkCaller{})
 	// flowFlavor.DefMethod(":remove-task", "", flowRemoveTaskCaller{})
 	// flowFlavor.DefMethod(":tasks", "", flowTasksCaller{})
-	// flowFlavor.DefMethod(":FindTask", "", flowFindTaskCaller{})
+	// flowFlavor.DefMethod(":find-task", "", flowFindTaskCaller{})
 	// flowFlavor.DefMethod(":entry", "", flowEntryCaller{})
 	// flowFlavor.DefMethod(":set-entry", "", flowSetEntryCaller{})
 	// flowFlavor.DefMethod(":submit", "", flowSubmitCaller{})
