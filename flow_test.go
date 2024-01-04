@@ -18,10 +18,10 @@ func TestFlowDocs(t *testing.T) {
 
 	for _, method := range []string{
 		":init",
-		// ":name",
-		// ":start",
-		// ":shutdown",
-		// ":running",
+		":name",
+		":start",
+		":shutdown",
+		":running",
 		// ":add-task",
 		// ":link",
 		// ":unlink",
@@ -31,6 +31,7 @@ func TestFlowDocs(t *testing.T) {
 		// ":entry",
 		// ":set-entry",
 		// ":submit",
+		":exit-channel",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-flavor %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))

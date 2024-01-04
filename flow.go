@@ -58,10 +58,10 @@ See also: flow-task-flavor
 		},
 	)
 	flowFlavor.DefMethod(":init", "", flowInitCaller{})
-	// flowFlavor.DefMethod(":name", "", flowNameCaller{})
-	// flowFlavor.DefMethod(":start", "", flowStartCaller{})
-	// flowFlavor.DefMethod(":shutdown", "", flowShutdownCaller{})
-	// flowFlavor.DefMethod(":running", "", flowRunningCaller{})
+	flowFlavor.DefMethod(":name", "", flowNameCaller{})
+	flowFlavor.DefMethod(":start", "", flowStartCaller{})
+	flowFlavor.DefMethod(":shutdown", "", flowShutdownCaller{})
+	flowFlavor.DefMethod(":running", "", flowRunningCaller{})
 	// flowFlavor.DefMethod(":metrics", "", flowMetricsCaller{})
 	// flowFlavor.DefMethod(":add-task", "", flowAddTaskCaller{})
 	// flowFlavor.DefMethod(":link", "", flowLinkCaller{})
@@ -72,20 +72,41 @@ See also: flow-task-flavor
 	// flowFlavor.DefMethod(":entry", "", flowEntryCaller{})
 	// flowFlavor.DefMethod(":set-entry", "", flowSetEntryCaller{})
 	// flowFlavor.DefMethod(":submit", "", flowSubmitCaller{})
+	flowFlavor.DefMethod(":exit-channel", "", flowExitChannelCaller{})
 	// TBD
 }
 
 type flow struct {
-	name      string
-	self      *flavors.Instance
-	tasks     map[string]*task
-	errorTask *task
-	exitChan  gi.Channel
+	name     string
+	self     *flavors.Instance
+	tasks    map[string]*task
+	exitChan gi.Channel
 
 	// received  atomic.Uint64
 	// errors    atomic.Uint64
 	// processed atomic.Uint64
 	// duration  atomic.Uint64 // sum of processing times from entry to completed from box tracks
+}
+
+func (f *flow) start(s *slip.Scope) {
+	for _, t := range f.tasks {
+		t.start(s)
+	}
+}
+
+func (f *flow) shutdown(s *slip.Scope) {
+	for _, t := range f.tasks {
+		t.shutdown(s)
+	}
+}
+
+func (f *flow) running() bool {
+	for _, t := range f.tasks {
+		if t.running() {
+			return true
+		}
+	}
+	return false
 }
 
 type flowInitCaller struct{}

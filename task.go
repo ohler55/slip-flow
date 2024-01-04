@@ -238,8 +238,10 @@ func (t *task) handlePanic(s *slip.Scope, bi *flavors.Instance) {
 			}
 			return
 		}
-		if t.flow != nil && t.flow.errorTask != nil {
-			t.flow.errorTask.receive(s, nb)
+		if t.flow != nil {
+			if et := t.flow.tasks["error"]; et != nil {
+				et.receive(s, nb)
+			}
 		}
 	}
 }

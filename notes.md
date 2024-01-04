@@ -5,7 +5,9 @@
  - change tests to use MakeTask() or flow then add-task
 
   - methods
-   - :init
+   + :init
+   + :name
+   + :exit-channel
    - :add-task => task
     - if args then no worries about adding the same task twice
     - use taskInitCaller?
