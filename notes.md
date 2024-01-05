@@ -9,8 +9,6 @@
    + :name
    + :exit-channel
    - :add-task => task
-    - if args then no worries about adding the same task twice
-    - use taskInitCaller?
    - :link (name from to) [all args are strings)
    - :unlink (task-name link-name)
    - :remove-task (task-name)
@@ -27,16 +25,23 @@
     - for string and error need go actor
 
 
-   - task struct
-    - name
-    - self points back to task instance
-    - links map[string]*Link
-    - actors []*flavors.Instance
-    - function (if using a function or lambda)
-    - queue chan box instance
-    - workers (used to put nil on chan to stop)
-
-
+- UI
+ - should be part of task and flow
+  - keeping separate will be hard to keep in sync
+  - task
+   - svg [string]
+   - x [fixnum]
+   - y
+  - flow
+   - width
+   - height
+   - icon-width
+   - icon-height
+   - background [string]
+ - update design.md
+ - optional method for actors to allow creation
+  - init-key-values => (:foo 2 :bar "xyz")
+   - what keywords and values are needed to create the same actor instance
 
 - actors
  - queue input actor for trigger tasks

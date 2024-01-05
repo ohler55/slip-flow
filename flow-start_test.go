@@ -9,18 +9,18 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-// func TestFlowStartOk(t *testing.T) {
-// 	(&sliptest.Function{
-// 		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo))
-//                        running)
-//                   (flow-add-task flow :name "tisk" :actor (lambda (b) (list 'ok b)))
-//                   (flow-start flow)
-//                   (setq running (flow-running flow))
-//                   (flow-shutdown flow)
-//                   running)`,
-// 		Expect: "t",
-// 	}).Test(t)
-// }
+func TestFlowStartOk(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo))
+                       running)
+                  (flow-add-task flow :name "tisk" :workers 1 :actor (lambda (b) (list 'ok b)))
+                  (flow-start flow)
+                  (setq running (flow-running flow))
+                  (flow-shutdown flow)
+                  running)`,
+		Expect: "t",
+	}).Test(t)
+}
 
 func TestFlowStartNotFlow(t *testing.T) {
 	(&sliptest.Function{

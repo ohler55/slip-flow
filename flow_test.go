@@ -22,7 +22,7 @@ func TestFlowDocs(t *testing.T) {
 		":start",
 		":shutdown",
 		":running",
-		// ":add-task",
+		":add-task",
 		// ":link",
 		// ":unlink",
 		// ":remove-task",

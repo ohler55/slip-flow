@@ -62,8 +62,7 @@ See also: flow-task-flavor
 	flowFlavor.DefMethod(":start", "", flowStartCaller{})
 	flowFlavor.DefMethod(":shutdown", "", flowShutdownCaller{})
 	flowFlavor.DefMethod(":running", "", flowRunningCaller{})
-	// flowFlavor.DefMethod(":metrics", "", flowMetricsCaller{})
-	// flowFlavor.DefMethod(":add-task", "", flowAddTaskCaller{})
+	flowFlavor.DefMethod(":add-task", "", flowAddTaskCaller{})
 	// flowFlavor.DefMethod(":link", "", flowLinkCaller{})
 	// flowFlavor.DefMethod(":unlink", "", flowUnlinkCaller{})
 	// flowFlavor.DefMethod(":remove-task", "", flowRemoveTaskCaller{})
@@ -73,6 +72,7 @@ See also: flow-task-flavor
 	// flowFlavor.DefMethod(":set-entry", "", flowSetEntryCaller{})
 	// flowFlavor.DefMethod(":submit", "", flowSubmitCaller{})
 	flowFlavor.DefMethod(":exit-channel", "", flowExitChannelCaller{})
+	// flowFlavor.DefMethod(":metrics", "", flowMetricsCaller{})
 	// TBD
 }
 
@@ -107,6 +107,16 @@ func (f *flow) running() bool {
 		}
 	}
 	return false
+}
+
+func (f *flow) addTask(args slip.List) *flavors.Instance {
+	inst, tsk := MakeTask(args...)
+	if _, has := f.tasks[tsk.name]; has {
+		slip.NewPanic("Task %s already exists in flow %s.", tsk.name, f.name)
+	}
+	f.tasks[tsk.name] = tsk
+
+	return inst
 }
 
 type flowInitCaller struct{}
