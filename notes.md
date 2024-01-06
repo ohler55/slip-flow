@@ -24,6 +24,18 @@
    - make sure string and Stringer both work as well as error
     - for string and error need go actor
 
+ - flow-manager
+
+ - examples
+  - multiple task flows
+
+ - actors
+  - exit actor (places box on exit-channel)
+  - error-logger (logs error or what ever is in box if not an error)
+  - queue input actor for trigger tasks
+  - splitter and merger
+  - sub-flow
+  - ...
 
 - UI
  - should be part of task and flow
@@ -43,11 +55,6 @@
   - init-key-values => (:foo 2 :bar "xyz")
    - what keywords and values are needed to create the same actor instance
 
-- actors
- - queue input actor for trigger tasks
- - splitter and merger
- - sub-flow
- - ...
 
  - classes/flavors
   - flow-manager-flavor
