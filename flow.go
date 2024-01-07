@@ -3,6 +3,8 @@
 package main
 
 import (
+	"sort"
+
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/pkg/gi"
@@ -63,13 +65,13 @@ See also: flow-task-flavor
 	flowFlavor.DefMethod(":shutdown", "", flowShutdownCaller{})
 	flowFlavor.DefMethod(":running", "", flowRunningCaller{})
 	flowFlavor.DefMethod(":add-task", "", flowAddTaskCaller{})
-	// flowFlavor.DefMethod(":link", "", flowLinkCaller{})
-	// flowFlavor.DefMethod(":unlink", "", flowUnlinkCaller{})
+	flowFlavor.DefMethod(":tasks", "", flowTasksCaller{})
 	// flowFlavor.DefMethod(":remove-task", "", flowRemoveTaskCaller{})
-	// flowFlavor.DefMethod(":tasks", "", flowTasksCaller{})
 	// flowFlavor.DefMethod(":find-task", "", flowFindTaskCaller{})
 	// flowFlavor.DefMethod(":entry", "", flowEntryCaller{})
 	// flowFlavor.DefMethod(":set-entry", "", flowSetEntryCaller{})
+	// flowFlavor.DefMethod(":link", "", flowLinkCaller{})
+	// flowFlavor.DefMethod(":unlink", "", flowUnlinkCaller{})
 	// flowFlavor.DefMethod(":submit", "", flowSubmitCaller{})
 	flowFlavor.DefMethod(":exit-channel", "", flowExitChannelCaller{})
 	// flowFlavor.DefMethod(":metrics", "", flowMetricsCaller{})
@@ -117,6 +119,17 @@ func (f *flow) addTask(args slip.List) *flavors.Instance {
 	f.tasks[tsk.name] = tsk
 
 	return inst
+}
+
+func (f *flow) taskList() slip.List {
+	tasks := make(slip.List, 0, len(f.tasks))
+	for _, t := range f.tasks {
+		tasks = append(tasks, t.self)
+	}
+	sort.Slice(tasks, func(i, j int) bool {
+		return tasks[i].(*flavors.Instance).Any.(*task).name < tasks[j].(*flavors.Instance).Any.(*task).name
+	})
+	return tasks
 }
 
 type flowInitCaller struct{}

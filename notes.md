@@ -8,16 +8,17 @@
    + :init
    + :name
    + :exit-channel
-   - :add-task => task
-   - :link (name from to) [all args are strings)
-   - :unlink (task-name link-name)
+   + :start
+   + :shutdown
+   + :running
+   + :add-task
+   + :tasks
    - :remove-task (task-name)
-   - :start
-   - :shutdown
-   - :tasks
    - :find-task (task-name)
    - :entry
    - :set-entry (task-name)
+   - :link (name from to) [all args are strings)
+   - :unlink (task-name link-name)
    - :submit (box)
 
   - test task :receive panics in actor
