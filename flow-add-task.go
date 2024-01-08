@@ -22,6 +22,31 @@ func init() {
 					Type: "flow",
 					Text: "to add-task.",
 				},
+				{Name: "&key"},
+				{
+					Name: "name",
+					Type: "string",
+					Text: "of task to add.",
+				},
+				{
+					Name: "actor",
+					Type: "instance|function|list",
+					Text: `if an instance that instance is used for processing and must have the
+_perform_ method that expectes an instance of the _flow-box-flavor_. If the instance has a _start_ or _shutdown_
+those will be called when starting or stoping a flow. If the value of _:actor_ is a function is must expect one
+box argument just as the _:perform_ method does. If the actor is a list of instances those will be used as
+workers.`,
+				},
+				{
+					Name: "workers",
+					Type: "fixnum",
+					Text: "the number of workers for concurrent processing. Zero indicates no concurrent processing.",
+				},
+				{
+					Name: "depth",
+					Type: "fixnum",
+					Text: "of the work queue.",
+				},
 			},
 			Return: "nil",
 			Text:   `__flow-add-task__ add-tasks all the _tasks_ in the _flow_.`,
@@ -33,7 +58,7 @@ func init() {
 		}, &Pkg)
 }
 
-// FlowAddTask represents the flow-flow-add-task function.
+// FlowAddTask represents the flow-add-task function.
 type FlowAddTask struct {
 	slip.Function
 }

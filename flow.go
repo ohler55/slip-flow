@@ -66,9 +66,9 @@ See also: flow-task-flavor
 	flowFlavor.DefMethod(":running", "", flowRunningCaller{})
 	flowFlavor.DefMethod(":add-task", "", flowAddTaskCaller{})
 	flowFlavor.DefMethod(":tasks", "", flowTasksCaller{})
-	// flowFlavor.DefMethod(":remove-task", "", flowRemoveTaskCaller{})
-	// flowFlavor.DefMethod(":find-task", "", flowFindTaskCaller{})
-	// flowFlavor.DefMethod(":entry", "", flowEntryCaller{})
+	flowFlavor.DefMethod(":remove-task", "", flowRemoveTaskCaller{})
+	flowFlavor.DefMethod(":find-task", "", flowFindTaskCaller{})
+	flowFlavor.DefMethod(":entry", "", flowEntryCaller{})
 	// flowFlavor.DefMethod(":set-entry", "", flowSetEntryCaller{})
 	// flowFlavor.DefMethod(":link", "", flowLinkCaller{})
 	// flowFlavor.DefMethod(":unlink", "", flowUnlinkCaller{})
@@ -82,6 +82,7 @@ type flow struct {
 	name     string
 	self     *flavors.Instance
 	tasks    map[string]*task
+	entry    *task
 	exitChan gi.Channel
 
 	// received  atomic.Uint64
@@ -119,6 +120,35 @@ func (f *flow) addTask(args slip.List) *flavors.Instance {
 	f.tasks[tsk.name] = tsk
 
 	return inst
+}
+
+func (f *flow) removeTask(name slip.Object) {
+	var key string
+	switch tn := name.(type) {
+	case slip.String:
+		key = string(tn)
+	case slip.Symbol:
+		key = string(tn)
+	default:
+		slip.PanicType("flow :remove-task :task", tn, "string", "symbol")
+	}
+	delete(f.tasks, key)
+}
+
+func (f *flow) findTask(name slip.Object) (found slip.Object) {
+	var key string
+	switch tn := name.(type) {
+	case slip.String:
+		key = string(tn)
+	case slip.Symbol:
+		key = string(tn)
+	default:
+		slip.PanicType("flow :find-task :task", tn, "string", "symbol")
+	}
+	if t := f.tasks[key]; t != nil {
+		found = t.self
+	}
+	return
 }
 
 func (f *flow) taskList() slip.List {

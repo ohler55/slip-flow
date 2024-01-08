@@ -13,13 +13,15 @@
    + :running
    + :add-task
    + :tasks
-   - :remove-task (task-name)
-   - :find-task (task-name)
+   + :remove-task (task-name)
+   + :find-task (task-name)
    - :entry
    - :set-entry (task-name)
    - :link (name from to) [all args are strings)
    - :unlink (task-name link-name)
    - :submit (box)
+  - task :links
+   - return assoc with link name and destination task
 
   - test task :receive panics in actor
    - make sure string and Stringer both work as well as error
