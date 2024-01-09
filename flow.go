@@ -117,6 +117,7 @@ func (f *flow) addTask(args slip.List) *flavors.Instance {
 	if _, has := f.tasks[tsk.name]; has {
 		slip.NewPanic("Task %s already exists in flow %s.", tsk.name, f.name)
 	}
+	tsk.flow = f
 	f.tasks[tsk.name] = tsk
 
 	return inst

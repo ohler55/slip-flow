@@ -1,6 +1,13 @@
 # SLIP-Flow Notes
 
 - next
+
+ - flow-exit-actor
+  - .Any *task set on :start for task name and flow.exitChan
+  - put box on exit-channel
+  - return nil nil
+ - flow :submit and test with flow-exit-actor
+
  - change examples to use flow to create flow, add task
  - change tests to use MakeTask() or flow then add-task
 
@@ -17,23 +24,24 @@
    + :find-task (task-name)
    + :entry
    + :set-entry (task-name)
-   - :link (name from to) [all args are strings)
-   - :unlink (task-name link-name)
+   + :link (name from to) [all args are strings)
    - :submit (box)
+    - test with exit-channel
+     - need special actor for last to allow dead ends on parallel branches that don't join
    - :metrics
     - task entry with empty track increments flow received
     - any termination task (ExitTask or flag on task to indicate it is last?) marks as processed and updates duration
      - maybe just any task with no outgoing links
       - actor returns box and link so box and nil link-name with no links
 
-  - task :links
-   - return assoc with link name and destination task
+ - task
+  - :unlink (link-name)
 
   - test task :receive panics in actor
    - make sure string and Stringer both work as well as error
     - for string and error need go actor
 
- - flow-manager
+ - flow-manager - needed for sub-flow-actor
 
  - examples
   - multiple task flows

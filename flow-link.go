@@ -41,7 +41,7 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-link__ creates a named link between the _from_ task to the _to_ task in a flow.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :link "flo"))`,
+				`(setq flow (make-instance 'flow-flavor :name "flo"))`,
 				`(flow-add-task flow :name 'tick :actor (lambda (b) (list 'ok b)))`,
 				`(flow-add-task flow :name 'tock :actor (lambda (b) (list 'ok b)))`,
 				`(flow-link flow "ok" 'tick 'tock) => nil`,

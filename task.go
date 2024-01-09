@@ -195,6 +195,11 @@ func (t *task) handleResult(s *slip.Scope, result slip.Object) {
 		var to *task
 		switch tr := list[0].(type) {
 		case nil:
+			if len(t.links) == 0 && list[1] == nil {
+				// No links and both the transition and box are nil for this
+				// is the end of the line.
+				return
+			}
 			to = t.links[""]
 		case slip.String:
 			to = t.links[string(tr)]
