@@ -69,8 +69,8 @@ See also: flow-task-flavor
 	flowFlavor.DefMethod(":remove-task", "", flowRemoveTaskCaller{})
 	flowFlavor.DefMethod(":find-task", "", flowFindTaskCaller{})
 	flowFlavor.DefMethod(":entry", "", flowEntryCaller{})
-	// flowFlavor.DefMethod(":set-entry", "", flowSetEntryCaller{})
-	// flowFlavor.DefMethod(":link", "", flowLinkCaller{})
+	flowFlavor.DefMethod(":set-entry", "", flowSetEntryCaller{})
+	flowFlavor.DefMethod(":link", "", flowLinkCaller{})
 	// flowFlavor.DefMethod(":unlink", "", flowUnlinkCaller{})
 	// flowFlavor.DefMethod(":submit", "", flowSubmitCaller{})
 	flowFlavor.DefMethod(":exit-channel", "", flowExitChannelCaller{})
@@ -143,7 +143,7 @@ func (f *flow) findTask(name slip.Object) (found slip.Object) {
 	case slip.Symbol:
 		key = string(tn)
 	default:
-		slip.PanicType("flow :find-task :task", tn, "string", "symbol")
+		slip.PanicType("flow :find-task :task-name", tn, "string", "symbol")
 	}
 	if t := f.tasks[key]; t != nil {
 		found = t.self
@@ -160,6 +160,58 @@ func (f *flow) taskList() slip.List {
 		return tasks[i].(*flavors.Instance).Any.(*task).name < tasks[j].(*flavors.Instance).Any.(*task).name
 	})
 	return tasks
+}
+
+func (f *flow) setEntry(name slip.Object) (found slip.Object) {
+	var key string
+	switch tn := name.(type) {
+	case nil:
+		f.entry = nil
+		return
+	case slip.String:
+		key = string(tn)
+	case slip.Symbol:
+		key = string(tn)
+	default:
+		slip.PanicType("flow :set-entry :task-name", tn, "string", "symbol")
+	}
+	if t := f.tasks[key]; t != nil {
+		found = t.self
+		f.entry = t
+	} else {
+		slip.NewPanic("task %s not found", key)
+	}
+	return
+}
+
+func (f *flow) link(args slip.List) {
+	// Argument count already checked.
+	var (
+		from *task
+		to   *task
+	)
+	name := strFromArg(args[0], "flow :link :link-name")
+	if from = f.tasks[strFromArg(args[1], "flow :link :from")]; from == nil {
+		slip.NewPanic("task %s not found", args[1])
+	}
+	if to = f.tasks[strFromArg(args[2], "flow :link :to")]; to == nil {
+		slip.NewPanic("task %s not found", args[2])
+	}
+	from.links[name] = to
+}
+
+func strFromArg(arg slip.Object, argName string) (str string) {
+	switch ta := arg.(type) {
+	case nil:
+		str = ""
+	case slip.String:
+		str = string(ta)
+	case slip.Symbol:
+		str = string(ta)
+	default:
+		slip.PanicType(argName, ta, "string", "symbol")
+	}
+	return
 }
 
 type flowInitCaller struct{}

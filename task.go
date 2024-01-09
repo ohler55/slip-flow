@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -56,8 +57,8 @@ See also: flow-flavor
 	taskFlavor.DefMethod(":running", "", taskRunningCaller{})
 	taskFlavor.DefMethod(":receive", "", taskReceiveCaller{})
 	taskFlavor.DefMethod(":metrics", "", taskMetricsCaller{})
+	taskFlavor.DefMethod(":links", "", taskLinksCaller{})
 
-	// :links
 	// :reset-metrics
 	// TBD
 }
@@ -259,6 +260,25 @@ func (t *task) metrics() (alist slip.List) {
 				slip.Symbol("average"),
 				slip.Tail{Value: slip.DoubleFloat(float64(dur) / float64(time.Second) / float64(ecnt+pcnt))},
 			})
+	}
+	return
+}
+
+func (t *task) linkList() (la slip.List) {
+	if 0 < len(t.links) {
+		keys := make([]string, 0, len(t.links))
+		for k := range t.links {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		la = make(slip.List, len(keys))
+		for i, k := range keys {
+			var ti *flavors.Instance
+			if to := t.links[k]; to != nil {
+				ti = to.self
+			}
+			la[i] = slip.List{slip.String(k), slip.Tail{Value: ti}}
+		}
 	}
 	return
 }

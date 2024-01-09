@@ -70,9 +70,7 @@ func (f *FlowAddTask) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	if !ok || self.Flavor != flowFlavor {
 		slip.PanicType("flow", args[0], "flow")
 	}
-	self.Any.(*flow).addTask(args[1:])
-
-	return nil
+	return self.Any.(*flow).addTask(args[1:])
 }
 
 type flowAddTaskCaller struct{}
@@ -80,9 +78,7 @@ type flowAddTaskCaller struct{}
 func (caller flowAddTaskCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 
-	obj.Any.(*flow).addTask(args)
-
-	return nil
+	return obj.Any.(*flow).addTask(args)
 }
 
 func (caller flowAddTaskCaller) Docs() string {

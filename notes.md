@@ -15,11 +15,17 @@
    + :tasks
    + :remove-task (task-name)
    + :find-task (task-name)
-   - :entry
-   - :set-entry (task-name)
+   + :entry
+   + :set-entry (task-name)
    - :link (name from to) [all args are strings)
    - :unlink (task-name link-name)
    - :submit (box)
+   - :metrics
+    - task entry with empty track increments flow received
+    - any termination task (ExitTask or flag on task to indicate it is last?) marks as processed and updates duration
+     - maybe just any task with no outgoing links
+      - actor returns box and link so box and nil link-name with no links
+
   - task :links
    - return assoc with link name and destination task
 
