@@ -71,7 +71,6 @@ See also: flow-task-flavor
 	flowFlavor.DefMethod(":entry", "", flowEntryCaller{})
 	flowFlavor.DefMethod(":set-entry", "", flowSetEntryCaller{})
 	flowFlavor.DefMethod(":link", "", flowLinkCaller{})
-	// flowFlavor.DefMethod(":unlink", "", flowUnlinkCaller{})
 	// flowFlavor.DefMethod(":submit", "", flowSubmitCaller{})
 	flowFlavor.DefMethod(":exit-channel", "", flowExitChannelCaller{})
 	// flowFlavor.DefMethod(":metrics", "", flowMetricsCaller{})
@@ -199,6 +198,14 @@ func (f *flow) link(args slip.List) {
 		slip.NewPanic("task %s not found", args[2])
 	}
 	from.links[name] = to
+}
+
+func (f *flow) exit(bi slip.Object) {
+	// TBD update metrics for processed or errors depending on last entry in track
+
+	if f.exitChan != nil {
+		f.exitChan <- bi
+	}
 }
 
 func strFromArg(arg slip.Object, argName string) (str string) {

@@ -3,10 +3,13 @@
 - next
 
  - flow-exit-actor
-  - .Any *task set on :start for task name and flow.exitChan
-  - put box on exit-channel
-  - return nil nil
+
  - flow :submit and test with flow-exit-actor
+  - box as number
+  - multiply by 3
+  - odd or even check then to one of two exit tasks
+  - later add log-error-actor
+   - calls flow.exit and logs error
 
  - change examples to use flow to create flow, add task
  - change tests to use MakeTask() or flow then add-task
