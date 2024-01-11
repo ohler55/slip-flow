@@ -34,7 +34,6 @@ type exitActorStartCaller struct{}
 func (caller exitActorStartCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	obj.Any = args[0].(*flavors.Instance).Any.(*task).flow
-
 	return nil
 }
 
@@ -51,9 +50,10 @@ type exitActorPerformCaller struct{}
 
 func (caller exitActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
+
 	obj.Any.(*flow).exit(args[0])
 
-	return nil
+	return slip.List{nil, nil}
 }
 
 func (caller exitActorPerformCaller) Docs() string {

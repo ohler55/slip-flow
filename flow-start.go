@@ -33,7 +33,7 @@ func init() {
 		}, &Pkg)
 }
 
-// FlowStart represents the flow-flow-start function.
+// FlowStart represents the flow-start function.
 type FlowStart struct {
 	slip.Function
 }

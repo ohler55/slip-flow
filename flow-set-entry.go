@@ -39,7 +39,7 @@ func init() {
 		}, &Pkg)
 }
 
-// FlowSetEntry represents the flow-flow-set-entry function.
+// FlowSetEntry represents the flow-set-entry function.
 type FlowSetEntry struct {
 	slip.Function
 }

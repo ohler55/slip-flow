@@ -34,7 +34,7 @@ func init() {
 		}, &Pkg)
 }
 
-// FlowShutdown represents the flow-flow-shutdown function.
+// FlowShutdown represents the flow-shutdown function.
 type FlowShutdown struct {
 	slip.Function
 }

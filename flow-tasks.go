@@ -33,7 +33,7 @@ func init() {
 		}, &Pkg)
 }
 
-// FlowTasks represents the flow-flow-tasks function.
+// FlowTasks represents the flow-tasks function.
 type FlowTasks struct {
 	slip.Function
 }

@@ -34,7 +34,7 @@ func init() {
 		}, &Pkg)
 }
 
-// FlowEntry represents the flow-flow-entry function.
+// FlowEntry represents the flow-entry function.
 type FlowEntry struct {
 	slip.Function
 }

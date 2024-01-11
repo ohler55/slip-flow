@@ -2,14 +2,7 @@
 
 - next
 
- - flow-exit-actor
-
  - flow :submit and test with flow-exit-actor
-  - box as number
-  - multiply by 3
-  - odd or even check then to one of two exit tasks
-  - later add log-error-actor
-   - calls flow.exit and logs error
 
  - change examples to use flow to create flow, add task
  - change tests to use MakeTask() or flow then add-task
@@ -29,8 +22,6 @@
    + :set-entry (task-name)
    + :link (name from to) [all args are strings)
    - :submit (box)
-    - test with exit-channel
-     - need special actor for last to allow dead ends on parallel branches that don't join
    - :metrics
     - task entry with empty track increments flow received
     - any termination task (ExitTask or flag on task to indicate it is last?) marks as processed and updates duration

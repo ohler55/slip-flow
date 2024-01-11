@@ -34,7 +34,7 @@ func init() {
 		}, &Pkg)
 }
 
-// FlowRunning represents the flow-flow-running function.
+// FlowRunning represents the flow-running function.
 type FlowRunning struct {
 	slip.Function
 }

@@ -164,11 +164,15 @@ func (t *task) receive(s *slip.Scope, bi *flavors.Instance) {
 		bx       *box
 		flowName string
 	)
-	t.received.Add(1)
-	bi, bx = boxDup(bi)
 	if t.flow != nil {
 		flowName = t.flow.name
 	}
+	if levelInfo <= int(t.self.Get("log-level").(slip.Fixnum)) {
+		msg := fmt.Sprintf("%s:%s received box %s", flowName, t.name, bi.Any.(*box).track.id)
+		t.self.Receive(s, ":info", slip.List{slip.String(msg)}, 0)
+	}
+	t.received.Add(1)
+	bi, bx = boxDup(bi)
 	bx.track.Scan(flowName, t.name)
 	switch {
 	case t.queue != nil:
@@ -192,7 +196,10 @@ func (t *task) call(s *slip.Scope, bi *flavors.Instance) {
 
 func (t *task) handleResult(s *slip.Scope, result slip.Object) {
 	if list, _ := result.(slip.List); len(list) == 2 {
-		var to *task
+		var (
+			to       *task
+			linkName string
+		)
 		switch tr := list[0].(type) {
 		case nil:
 			if len(t.links) == 0 && list[1] == nil {
@@ -203,21 +210,32 @@ func (t *task) handleResult(s *slip.Scope, result slip.Object) {
 			to = t.links[""]
 		case slip.String:
 			to = t.links[string(tr)]
+			linkName = string(tr)
 		case slip.Symbol:
 			to = t.links[string(tr)]
+			linkName = string(tr)
 		}
 		if bi, has := list[1].(*flavors.Instance); has && bi != nil && boxFlavor == bi.Flavor {
 			t.processed.Add(1)
 			tr := bi.Any.(*box).track
 			ev := tr.history[len(tr.history)-1]
 			t.duration.Add(uint64(time.Since(ev.when)))
+			if levelInfo <= int(t.self.Get("log-level").(slip.Fixnum)) {
+				var flowName string
+				if t.flow != nil {
+					flowName = t.flow.name
+				}
+				msg := fmt.Sprintf("%s:%s following %s with box %s",
+					flowName, t.name, linkName, bi.Any.(*box).track.id)
+				t.self.Receive(s, ":info", slip.List{slip.String(msg)}, 0)
+			}
 			if to != nil {
 				to.receive(s, bi)
 			}
 			return
 		}
 	}
-	slip.NewPanic("Actor in task %s did not return a list of transition name and box instance.", t.name)
+	slip.NewPanic("Actor did not return a list of link name and box instance.")
 }
 
 func (t *task) handlePanic(s *slip.Scope, bi *flavors.Instance) {
@@ -227,27 +245,35 @@ func (t *task) handlePanic(s *slip.Scope, bi *flavors.Instance) {
 		ev := tr.history[len(tr.history)-1]
 		t.duration.Add(uint64(time.Since(ev.when)))
 		nb, bx := boxDup(bi)
-		if rs, ok := rec.(fmt.Stringer); ok {
+		switch tr := rec.(type) {
+		case slip.Error:
 			bx.content = map[string]any{
 				"content": bx.content,
-				"error":   rs.String(),
+				"error":   tr.Error(),
 			}
-		} else {
+		case fmt.Stringer:
 			bx.content = map[string]any{
 				"content": bx.content,
-				"error":   fmt.Sprintf("%v", rs),
+				"error":   tr.String(),
+			}
+		default:
+			bx.content = map[string]any{
+				"content": bx.content,
+				"error":   fmt.Sprintf("%v", tr),
 			}
 		}
-		if to, has := t.links["error"]; has {
-			if to != nil {
-				to.receive(s, nb)
-			}
+		if to := t.links["error"]; to != nil {
+			to.receive(s, nb)
 			return
 		}
 		if t.flow != nil {
 			if et := t.flow.tasks["error"]; et != nil {
 				et.receive(s, nb)
+				return
 			}
+			msg := fmt.Sprintf("%s:%s box %s: %s",
+				t.flow.name, t.name, bi.Any.(*box).track.id, bx.content.(map[string]any)["error"])
+			t.self.Receive(s, ":error", slip.List{slip.String(msg)}, 0)
 		}
 	}
 }

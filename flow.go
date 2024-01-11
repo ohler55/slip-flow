@@ -71,10 +71,11 @@ See also: flow-task-flavor
 	flowFlavor.DefMethod(":entry", "", flowEntryCaller{})
 	flowFlavor.DefMethod(":set-entry", "", flowSetEntryCaller{})
 	flowFlavor.DefMethod(":link", "", flowLinkCaller{})
-	// flowFlavor.DefMethod(":submit", "", flowSubmitCaller{})
+	flowFlavor.DefMethod(":submit", "", flowSubmitCaller{})
 	flowFlavor.DefMethod(":exit-channel", "", flowExitChannelCaller{})
 	// flowFlavor.DefMethod(":metrics", "", flowMetricsCaller{})
 	// TBD
+	flowFlavor.DefMethod(":set-level", ":after", flowSetLevelCaller{})
 }
 
 type flow struct {
@@ -91,7 +92,13 @@ type flow struct {
 }
 
 func (f *flow) start(s *slip.Scope) {
+	logger := f.self.Get("logger")
+	if logger == nil {
+		logger = slip.ReadString("(make-instance 'logger-flavor)").Eval(s, nil)
+		f.self.Set("logger", logger)
+	}
 	for _, t := range f.tasks {
+		t.self.Set("logger", logger)
 		t.start(s)
 	}
 }
@@ -208,6 +215,15 @@ func (f *flow) exit(bi slip.Object) {
 	}
 }
 
+func (f *flow) submit(s *slip.Scope, bi slip.Object) {
+	if f.entry == nil {
+		slip.NewPanic("no entry task has been set for the %s flow", f.name)
+	}
+	f.entry.receive(s, bi.(*flavors.Instance))
+
+	// TBD
+}
+
 func strFromArg(arg slip.Object, argName string) (str string) {
 	switch ta := arg.(type) {
 	case nil:
@@ -262,5 +278,25 @@ func (caller flowInitCaller) Docs() string {
 
 
 Sets the initial value when _make-instance_ is called.
+`
+}
+
+type flowSetLevelCaller struct{}
+
+func (caller flowSetLevelCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	f := obj.Any.(*flow)
+	level := f.self.Get("log-level")
+	for _, t := range f.tasks {
+		_ = t.self.Receive(s, ":set-level", slip.List{level}, 0)
+	}
+	return nil
+}
+
+func (caller flowSetLevelCaller) Docs() string {
+	return `__:after :setLevel__
+
+
+Sets the _log-level_ of all the tasks in the flow.
 `
 }

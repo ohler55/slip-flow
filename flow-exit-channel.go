@@ -33,7 +33,7 @@ func init() {
 		}, &Pkg)
 }
 
-// FlowExitChannel represents the flow-flow-exit-channel function.
+// FlowExitChannel represents the flow-exit-channel function.
 type FlowExitChannel struct {
 	slip.Function
 }

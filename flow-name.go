@@ -32,7 +32,7 @@ func init() {
 		}, &Pkg)
 }
 
-// FlowName represents the flow-flow-name function.
+// FlowName represents the flow-name function.
 type FlowName struct {
 	slip.Function
 }
