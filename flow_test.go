@@ -1,4 +1,4 @@
-// Copyright (c) 2023, Peter Ohler, All rights reserved.
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
 
 package main_test
 
@@ -31,6 +31,7 @@ func TestFlowDocs(t *testing.T) {
 		":link",
 		":submit",
 		":exit-channel",
+		":set-level",
 		// ":metrics",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-flavor %s out)`, method)).Eval(scope, nil)

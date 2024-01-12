@@ -2,40 +2,21 @@
 
 - next
 
- - flow :submit and test with flow-exit-actor
-
  - change examples to use flow to create flow, add task
  - change tests to use MakeTask() or flow then add-task
 
-  - methods
-   + :init
-   + :name
-   + :exit-channel
-   + :start
-   + :shutdown
-   + :running
-   + :add-task
-   + :tasks
-   + :remove-task (task-name)
-   + :find-task (task-name)
-   + :entry
-   + :set-entry (task-name)
-   + :link (name from to) [all args are strings)
-   - :submit (box)
-   - :metrics
-    - task entry with empty track increments flow received
-    - any termination task (ExitTask or flag on task to indicate it is last?) marks as processed and updates duration
-     - maybe just any task with no outgoing links
-      - actor returns box and link so box and nil link-name with no links
+ - flow
+  - :metrics
+   - task entry with empty track increments flow received
+   - any termination task (ExitTask or flag on task to indicate it is last?) marks as processed and updates duration
+    - maybe just any task with no outgoing links
+     - actor returns box and link so box and nil link-name with no links
 
  - task
   - :unlink (link-name)
 
-  - test task :receive panics in actor
-   - make sure string and Stringer both work as well as error
-    - for string and error need go actor
 
- - flow-manager - needed for sub-flow-actor
+ - flow-group - needed for sub-flow-actor
 
  - examples
   - multiple task flows
@@ -48,7 +29,7 @@
   - sub-flow
   - ...
 
-- UI
+- flow-editor
  - should be part of task and flow
   - keeping separate will be hard to keep in sync
   - task
@@ -68,7 +49,7 @@
 
 
  - classes/flavors
-  - flow-manager-flavor
+  - flow-group-flavor
    - :init [directory of flows or config file or config args]
    - :load [read/load a config file then add]
    - :add [from a bag or lisp config]

@@ -1,4 +1,4 @@
-// Copyright (c) 2023, Peter Ohler, All rights reserved.
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
 
 package main
 
@@ -245,22 +245,13 @@ func (t *task) handlePanic(s *slip.Scope, bi *flavors.Instance) {
 		ev := tr.history[len(tr.history)-1]
 		t.duration.Add(uint64(time.Since(ev.when)))
 		nb, bx := boxDup(bi)
-		switch tr := rec.(type) {
-		case slip.Error:
-			bx.content = map[string]any{
-				"content": bx.content,
-				"error":   tr.Error(),
-			}
-		case fmt.Stringer:
-			bx.content = map[string]any{
-				"content": bx.content,
-				"error":   tr.String(),
-			}
-		default:
-			bx.content = map[string]any{
-				"content": bx.content,
-				"error":   fmt.Sprintf("%v", tr),
-			}
+		msg := fmt.Sprintf("%v", rec)
+		if se, _ := rec.(slip.Error); se != nil {
+			msg = se.Error()
+		}
+		bx.content = map[string]any{
+			"content": bx.content,
+			"error":   msg,
 		}
 		if to := t.links["error"]; to != nil {
 			to.receive(s, nb)

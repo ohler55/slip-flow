@@ -1,4 +1,4 @@
-// Copyright (c) 2023, Peter Ohler, All rights reserved.
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
 
 package main_test
 
@@ -40,7 +40,6 @@ func TestFlowSubmitFunction(t *testing.T) {
   (flow-link flow 'odd "odd-or-even" 'odd)
   (flow-link flow 'even "odd-or-even" 'even)
   (flow-set-entry flow 'start)
-  (flow-start flow)
   (send flow :set-level 'warn)
   (flow-submit flow (make-flow-box :set '(1))))`,
 		Expect: "nil",
@@ -107,5 +106,19 @@ func TestFlowSubmitNotFlow(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(flow-submit t (make-flow-box))`,
 		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}
+
+func TestFlowSubmitNoEntry(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((flow (make-instance 'flow-flavor :name 'flo)))
+  (flow-add-task flow
+                 :name "start"
+                 :actor (lambda (b)
+                          (flow-box-set b (* 3 (flow-box-get b "[0]")) "[0]")
+                          (list 'ok b)))
+  (flow-submit flow (make-flow-box :set '(1))))`,
+		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }

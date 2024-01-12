@@ -1,4 +1,4 @@
-// Copyright (c) 2023, Peter Ohler, All rights reserved.
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
 
 package main
 
@@ -84,6 +84,7 @@ type flow struct {
 	tasks    map[string]*task
 	entry    *task
 	exitChan gi.Channel
+	started  bool
 
 	// received  atomic.Uint64
 	// errors    atomic.Uint64
@@ -101,21 +102,18 @@ func (f *flow) start(s *slip.Scope) {
 		t.self.Set("logger", logger)
 		t.start(s)
 	}
+	f.started = true
 }
 
 func (f *flow) shutdown(s *slip.Scope) {
 	for _, t := range f.tasks {
 		t.shutdown(s)
 	}
+	f.started = false
 }
 
 func (f *flow) running() bool {
-	for _, t := range f.tasks {
-		if t.running() {
-			return true
-		}
-	}
-	return false
+	return f.started
 }
 
 func (f *flow) addTask(args slip.List) *flavors.Instance {
@@ -218,6 +216,9 @@ func (f *flow) exit(bi slip.Object) {
 func (f *flow) submit(s *slip.Scope, bi slip.Object) {
 	if f.entry == nil {
 		slip.NewPanic("no entry task has been set for the %s flow", f.name)
+	}
+	if !f.started {
+		f.start(s)
 	}
 	f.entry.receive(s, bi.(*flavors.Instance))
 
