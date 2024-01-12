@@ -2,9 +2,6 @@
 
 - next
 
- - change examples to use flow to create flow, add task
- - change tests to use MakeTask() or flow then add-task
-
  - flow
   - :metrics
    - task entry with empty track increments flow received
