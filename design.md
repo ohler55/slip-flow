@@ -5,22 +5,22 @@ Processing for golang, a mostly Common LISP implementation.
 
 ## Concepts
 
-At the highest level, a Flow is a collection of Tasks that for a
+At the highest level, a Flow is a collection of Tasks that form a
 processing unit. Data enters a Flow and transitions from one Task to
 another until processing is complete.
 
-SLIP-Flow is implemented primarlify in golang with an API that is
-primarily Flavors based but with corresponding functions to to also be
-a CLOS API.
+SLIP-Flow is implemented in golang with an API that is primarily
+Flavors based but with corresponding functions to also be a CLOS API.
 
 The classes or flavors in the package are:
 
- * flow-manager
+ * flow-group
  * flow
  * task
  * actor
  * box
  * track
+ * flow-editor
 
 ## Classes (Flavors)
 
@@ -28,26 +28,26 @@ Elements of the packages are implemented as classes or more
 specifically as Flavors with additional CLOS style method functions in
 addition to the Flavors methods.
 
-### flow-manager
+### flow-group
 
-An instance of the **flow-manager-flavor** is used to load or create
+An instance of the **flow-group-flavor** is used to form a set of
 instances of the **flow-flavor** . The flows (**flow-flavor**
 instances) are typically initialized with a configuration that is
 composed of LISP code to build the flow. After loading flows managed
-by the flow manager can be accessed by flow name.
+by the flow group can be accessed by flow name.
 
-The flow manager includes a logger that is shared with all flows and
+The flow group includes a logger that is shared with all flows and
 tasks to make monitoring more consistent. Another shared resource in
-the flow manager is an error handler that acts as the backstop for
+the flow group is an error handler that acts as the backstop for
 errors not handled by the flows themselves.
 
 ### flow
 
-Every flow must have a unique name in the flow manager. Flows are
+Every flow must have a unique name in the flow group. Flows are
 primarily a container for tasks although there are some elements of
 the flow that are shared across tasks. One shared element is the log
-level and an error handler if different than flow manager. If set the
-flow error handle overrides the flow manager error handler for that
+level and an error handler if different than flow group. If set the
+flow error handle overrides the flow group error handler for that
 specific flow.
 
 A flow also has an option entry task. If data can be submitted
@@ -55,29 +55,29 @@ directly to a flow then the entry task must be set. If the entry task
 is not set a trigger task such as an HTTP server task or periodic time
 task is needed.
 
-Flows are typically build from a configuration JSON that adheres to a
-specific format. A flow can also be created directly from code by
-adding tasks to a flow and then linking up the tasks.
+Flows are build directly from LISP code by adding tasks to a flow and
+then linking up the tasks.
 
 ### task
 
 Tasks represent steps in a process. They are a container for an actor
 which does the actuall processing for the task. Tasks can be either
 synchronous or make use of one or more workers that pull data from a
-work queue. The task is handles transitions through links to other
-tasks based on the response from an actor when the actor is asked to
+work queue. The task handles transitions through links to other tasks
+based on the response from an actor when the actor is asked to
 perform.
 
-The configuration for a task includes what kind of actor to create. An
-actor can be either a single LISP function or lambda or else a flavor
-name. If a function then on receipt of a box of data it is either
-passed to the function or placed on a queue and a worker routine calls
-the function. If the actor is a flavor name then an instance of that
-flavor is created with a configuration from the task configuration and
-the `:perform` method is called on the actor when a box is received or
-popped off a work queue. The response from the actor must include the
-transition (link name) to follow and a new box of data. The task then
-sends the new box on the link identifed by the transition specified.
+Defining a task includes actors that perform the action for the
+task. An actor can be either a single LISP function or lambda or else
+a flavor name. If a function then on receipt of a box of data it is
+either passed to the function or placed on a queue and a worker
+routine calls the function. If the actor is a flavor name then an
+instance of that flavor is created with a configuration from the task
+configuration and the `:perform` method is called on the actor when a
+box is received or popped off a work queue. The response from the
+actor must include the transition (link name) to follow and a new box
+of data. The task then sends the new box on the link identifed by the
+transition specified.
 
 All calls to the actor are wrapped in a recover so any panic is
 captured and sent on an "error" link if it exists or to the error
@@ -94,10 +94,10 @@ If a function then it must expect exactly one argument and return a
 list of transition name and a box.
 
 If an instance then the instance is expected to have at least the
-_:perform_ method and optionally a _:set-task_ and _:shutdown_
+_:perform_ method and optionally a _:start_ and _:shutdown_
 
  - _:perform_ (box) that return a transition name and new box.
- - _:set-task_ (task) to let the instance know what task it is contained in.
+ - _:start_ (task) to let the instance know what task it is contained in.
  - _:shutdown_ () to cleanup any open resources and to stop processing.
 
 Actors should use the task for logging but generally don't need to
@@ -121,7 +121,7 @@ the data first.
 
 ### track
 
-The tracking information in a box is also a copy on set attribute of
+The tracking information in a box is also a "copy on set" attribute of
 the box. It contains a tracking identifier and a history of the tasks
 and times the box has transitioned through.
 
@@ -132,14 +132,14 @@ without thinking through the various scenarios and use cases that
 could be encountered. This section covers of a few of the less obvious
 use cases and how they influenced the design.
 
-### Flow Manager
+### Flow Group
 
-By using a top level manager for all flows a shared logging and error
+By using a top level group for all flows a shared logging and error
 handler can be employed. It also allows for flows to call transitions
 to other flows by using a link than includes not only a task name but
 also a flow name.
 
-A flow manager also allows flow validation that across all flows if
+A flow group also allows flow validation that across all flows if
 nested flows are used.
 
 ### Triggers
@@ -196,7 +196,7 @@ becomes important the history can be overlaid on the flows.
 As a processing flow gets more complicated it is advantageous to be
 able to break the flow into sub-flows or nested flows. This allows for
 more understandable flows and for reuse of common flows. Nested flows
-are supported by the use of a flow manager and a sub-flow actor.
+are supported by the use of a flow group and a sub-flow actor.
 
 ### Parallel Paths
 
@@ -234,28 +234,14 @@ calling the logging methods of the Task that contains them.
 
 Logging is hierarchical in that each log entry includes the flow and
 task name and can be controlled by the logging level in the flow
-manager, flow, and task. Log levels are error, warn, info, and debug.
+group, flow, and task. Log levels are error, warn, info, and debug.
 
-### UI and Graphics
+### Editor
 
-The flow flavors and functions do not support a UI for building nor a
-means of generating a graphical representation of a flow. Instead
-graphical overlays are expected to hold information for a graphical
-representation. Together with the flows themselves an SVG file can be
-generated or a UI can be used to build and configure a flow.
-
-The overlays are expected to be a tree of flow, tasks, and
-links. Tasks overlays may include:
-
- - *name* to match up with the task in a flow.
- - *color* which could be derived from the task'c actor type.
- - *shape* which could be derived from the task'c actor type.
- - *x* horizontal location.
- - *y* vertical location.
-
-A link attached to a task has some additional attributes used for
-display purposes.
-
- - *name* to match against the actual links on a task.
- - *mid-points* are the locations of any mid points in drawing a line
-   between two tasks.
+An editor is used to build a flow. Flows are stored as LISP code. As
+long as the structure is not changed the editor will be able to read
+and edit the flow file. Graphical information is stored in the flow
+and task objects. The flow object includes the overall dimensions of
+the flow and the default size of each task. Tasks include a X and Y
+location along with an SVG for the task. Links can be created with mid
+points.

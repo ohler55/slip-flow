@@ -1,4 +1,4 @@
-// Copyright (c) 2023, Peter Ohler, All rights reserved.
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
 
 package main_test
 
@@ -56,4 +56,5 @@ func TestBoxDocs(t *testing.T) {
 // 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 // 	_ = slip.ReadString(`(describe-method flow-box-flavor :write out)`).Eval(scope, nil)
 // 	fmt.Printf("***\n%s\n", out.String())
+// 	_ = slip.ReadString(`(describe-flavor flow-box-flavor)`).Eval(scope, nil)
 // }

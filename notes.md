@@ -2,50 +2,51 @@
 
 - next
 
- - new flow-flavor branch
-  -
-  - test task :receive panics in actor
-   - make sure string and Stringer both work as well as error
-    - for string and error need go actor
+ - flow
+  - :metrics
+   - task entry with empty track increments flow received
+   - any termination task (ExitTask or flag on task to indicate it is last?) marks as processed and updates duration
+    - maybe just any task with no outgoing links
+     - actor returns box and link so box and nil link-name with no links
+
+ - task
+  - :unlink (link-name)
 
 
+ - flow-group - needed for sub-flow-actor
 
-  - flow-task-flavor
-   - initializers
-    - :name
-    - :actor - one or a list
-     - function, instance, or list of instances
-    - :worker (count)
-     - if 0 then sync
-     - should match actors but round-robin for assignment to loops if not
-    - :logger (from can-log-flavor)
-    - :log-level (from can-log-flavor)
-   - methods
-    - :receive
-    - :transition
-    - :start
-    - :shutdown (&optional wait)
-    - all from can-log-flavor
+ - examples
+  - multiple task flows
 
-   - task struct
-    - name
-    - self points back to task instance
-    - links map[string]*Link
-    - actors []*flavors.Instance
-    - function (if using a function or lambda)
-    - queue chan box instance
-    - workers (used to put nil on chan to stop)
+ - actors
+  - exit actor (places box on exit-channel)
+  - error-logger (logs error or what ever is in box if not an error)
+  - queue input actor for trigger tasks
+  - splitter and merger
+  - sub-flow
+  - ...
 
+- flow-editor
+ - should be part of task and flow
+  - keeping separate will be hard to keep in sync
+  - task
+   - svg [string]
+   - x [fixnum]
+   - y
+  - flow
+   - width
+   - height
+   - icon-width
+   - icon-height
+   - background [string]
+ - update design.md
+ - optional method for actors to allow creation
+  - init-key-values => (:foo 2 :bar "xyz")
+   - what keywords and values are needed to create the same actor instance
 
-
-- actors
- - queue input actor for trigger tasks
- - splitter and merger
- - sub-flow
- - ...
 
  - classes/flavors
-  - flow-manager-flavor
+  - flow-group-flavor
    - :init [directory of flows or config file or config args]
    - :load [read/load a config file then add]
    - :add [from a bag or lisp config]
@@ -53,39 +54,3 @@
    - :flows [all flows, maybe with pattern to match]
    - :remove
    - :logger [return gi:logger of the manager]
-  - flow-flavor (has-logger-flavor)
-   - :init [should take a config but allow for changes later]
-   - :start [starts all tasks]
-   - :stop &optional wait [all tasks]
-   - :submit (box &optional wait) [or call it receive to match tasks]
-   - :handle-error [called by tasks]
-   - :manager
-   - :tasks
-   - :add-task
-   - :remove-task
-   - :find-task
-   - :entry
-   - :link (source link-name target) [source and target can be name or task itself or another flow]
-    - maybe both target and source must be names to avoid cross linking
-    - still allow target to be a flow though
-   - :unlink (source link-name)
-   - :set-entry (task-name)
-
-  - flow-flavor
-   - init should take a config but allow for changes later
-   - can subclass for specific flows
-   - methods
-     - start (starts all tasks)
-     - stop &optional wait (all tasks)
-    - submit data &optional wait
-    - handle-error
-    - logger field points to gi/logger
-    - tasks
-    - add-task
-    - set-entry
-    - link name task (or task-name)
-     - optional flow for external links
-   - vars
-    - entry
-    - tasks
-  - syntax for describing, json or lisp

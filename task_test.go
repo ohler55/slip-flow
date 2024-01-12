@@ -1,4 +1,4 @@
-// Copyright (c) 2023, Peter Ohler, All rights reserved.
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
 
 package main_test
 
@@ -14,10 +14,10 @@ import (
 )
 
 func TestMakeTask(t *testing.T) {
-	task, _ := flow.MakeTask(slip.String("tisk"))
+	task, _ := flow.MakeTask(slip.Symbol(":name"), slip.String("tisk"))
 	tt.Equal(t, "/#<flow-task-flavor [0-9a-f]+>/", task.String())
 
-	task, _ = flow.MakeTask(slip.Symbol("tisk"))
+	task, _ = flow.MakeTask(slip.Symbol(":name"), slip.Symbol("tisk"))
 	tt.Equal(t, "/#<flow-task-flavor [0-9a-f]+>/", task.String())
 }
 
@@ -35,11 +35,19 @@ func TestTaskDocs(t *testing.T) {
 		":running",
 		":receive",
 		":metrics",
+		":links",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-task-flavor %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}
+}
+
+func TestTaskInitLogger(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(make-instance 'flow-task-flavor :name "tisk" :logger (make-instance 'logger-flavor))`,
+		Expect: "/#<flow-task-flavor [0-9a-f]+>/",
+	}).Test(t)
 }
 
 func TestTaskInitBadName(t *testing.T) {
@@ -81,6 +89,7 @@ func TestTaskInitBadKeyword(t *testing.T) {
 // 	scope := slip.NewScope()
 // 	var out strings.Builder
 // 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-// 	_ = slip.ReadString(`(describe-method flow-task-flavor :init out)`).Eval(scope, nil)
-// 	fmt.Printf("*** docs: \n%s\n", out.String())
+// 	// _ = slip.ReadString(`(describe-method flow-task-flavor :init out)`).Eval(scope, nil)
+// 	// fmt.Printf("*** docs: \n%s\n", out.String())
+// 	_ = slip.ReadString(`(describe-flavor flow-task-flavor)`).Eval(scope, nil)
 // }

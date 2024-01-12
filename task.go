@@ -1,9 +1,10 @@
-// Copyright (c) 2023, Peter Ohler, All rights reserved.
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
 
 package main
 
 import (
 	"fmt"
+	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -25,9 +26,19 @@ func init() {
 		slip.List{
 			slip.List{
 				slip.Symbol(":documentation"),
-				slip.String(`Tasks are objects that implement the processing nodes withing a flow. Each task
-has an actor that performs the processing of the task. Processing can be completed in the current thread or
-queued and processed by workers in separate threads.`),
+				slip.String(`Tasks are the shell around an actor that performs specific actions on a _box_
+that is passed from one _task_ to another in a _flow_.
+
+
+Each _task_ is named and can process a _box_ either synchronously by setting
+the _:workers_ to zero or asynchronous if _:workers_ is set to one or
+more. After processing the _box_ is sent through a link to the destination
+_task_ at the end of the link.
+
+
+See also: flow-flavor
+
+`),
 			},
 			slip.List{
 				slip.Symbol(":init-keywords"),
@@ -46,9 +57,9 @@ queued and processed by workers in separate threads.`),
 	taskFlavor.DefMethod(":running", "", taskRunningCaller{})
 	taskFlavor.DefMethod(":receive", "", taskReceiveCaller{})
 	taskFlavor.DefMethod(":metrics", "", taskMetricsCaller{})
+	taskFlavor.DefMethod(":links", "", taskLinksCaller{})
 
-	// :transition
-	//  reset/zero metrics
+	// :reset-metrics
 	// TBD
 }
 
@@ -153,11 +164,15 @@ func (t *task) receive(s *slip.Scope, bi *flavors.Instance) {
 		bx       *box
 		flowName string
 	)
-	t.received.Add(1)
-	bi, bx = boxDup(bi)
 	if t.flow != nil {
 		flowName = t.flow.name
 	}
+	if levelInfo <= int(t.self.Get("log-level").(slip.Fixnum)) {
+		msg := fmt.Sprintf("%s:%s received box %s", flowName, t.name, bi.Any.(*box).track.id)
+		t.self.Receive(s, ":info", slip.List{slip.String(msg)}, 0)
+	}
+	t.received.Add(1)
+	bi, bx = boxDup(bi)
 	bx.track.Scan(flowName, t.name)
 	switch {
 	case t.queue != nil:
@@ -181,27 +196,46 @@ func (t *task) call(s *slip.Scope, bi *flavors.Instance) {
 
 func (t *task) handleResult(s *slip.Scope, result slip.Object) {
 	if list, _ := result.(slip.List); len(list) == 2 {
-		var to *task
+		var (
+			to       *task
+			linkName string
+		)
 		switch tr := list[0].(type) {
 		case nil:
+			if len(t.links) == 0 && list[1] == nil {
+				// No links and both the transition and box are nil for this
+				// is the end of the line.
+				return
+			}
 			to = t.links[""]
 		case slip.String:
 			to = t.links[string(tr)]
+			linkName = string(tr)
 		case slip.Symbol:
 			to = t.links[string(tr)]
+			linkName = string(tr)
 		}
 		if bi, has := list[1].(*flavors.Instance); has && bi != nil && boxFlavor == bi.Flavor {
 			t.processed.Add(1)
 			tr := bi.Any.(*box).track
 			ev := tr.history[len(tr.history)-1]
 			t.duration.Add(uint64(time.Since(ev.when)))
+			if levelInfo <= int(t.self.Get("log-level").(slip.Fixnum)) {
+				var flowName string
+				if t.flow != nil {
+					flowName = t.flow.name
+				}
+				msg := fmt.Sprintf("%s:%s following %s with box %s",
+					flowName, t.name, linkName, bi.Any.(*box).track.id)
+				t.self.Receive(s, ":info", slip.List{slip.String(msg)}, 0)
+			}
 			if to != nil {
 				to.receive(s, bi)
 			}
 			return
 		}
 	}
-	slip.NewPanic("Actor in task %s did not return a list of transition name and box instance.", t.name)
+	slip.NewPanic("Actor did not return a list of link name and box instance.")
 }
 
 func (t *task) handlePanic(s *slip.Scope, bi *flavors.Instance) {
@@ -211,25 +245,26 @@ func (t *task) handlePanic(s *slip.Scope, bi *flavors.Instance) {
 		ev := tr.history[len(tr.history)-1]
 		t.duration.Add(uint64(time.Since(ev.when)))
 		nb, bx := boxDup(bi)
-		if rs, ok := rec.(fmt.Stringer); ok {
-			bx.content = map[string]any{
-				"content": bx.content,
-				"error":   rs.String(),
-			}
-		} else {
-			bx.content = map[string]any{
-				"content": bx.content,
-				"error":   fmt.Sprintf("%v", rs),
-			}
+		msg := fmt.Sprintf("%v", rec)
+		if se, _ := rec.(slip.Error); se != nil {
+			msg = se.Error()
 		}
-		if to, has := t.links["error"]; has {
-			if to != nil {
-				to.receive(s, nb)
-			}
+		bx.content = map[string]any{
+			"content": bx.content,
+			"error":   msg,
+		}
+		if to := t.links["error"]; to != nil {
+			to.receive(s, nb)
 			return
 		}
-		if t.flow != nil && t.flow.errorTask != nil {
-			t.flow.errorTask.receive(s, nb)
+		if t.flow != nil {
+			if et := t.flow.tasks["error"]; et != nil {
+				et.receive(s, nb)
+				return
+			}
+			msg := fmt.Sprintf("%s:%s box %s: %s",
+				t.flow.name, t.name, bi.Any.(*box).track.id, bx.content.(map[string]any)["error"])
+			t.self.Receive(s, ":error", slip.List{slip.String(msg)}, 0)
 		}
 	}
 }
@@ -251,31 +286,34 @@ func (t *task) metrics() (alist slip.List) {
 	return
 }
 
-// MakeTask is only public for testing purposes.
-func MakeTask(name slip.Object) (self *flavors.Instance, t *task) {
-	self = taskFlavor.MakeInstance().(*flavors.Instance)
-	t = &task{links: map[string]*task{}}
-	switch tn := name.(type) {
-	case slip.Symbol:
-		t.name = string(tn)
-	case slip.String:
-		t.name = string(tn)
+func (t *task) linkList() (la slip.List) {
+	if 0 < len(t.links) {
+		keys := make([]string, 0, len(t.links))
+		for k := range t.links {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		la = make(slip.List, len(keys))
+		for i, k := range keys {
+			var ti *flavors.Instance
+			if to := t.links[k]; to != nil {
+				ti = to.self
+			}
+			la[i] = slip.List{slip.String(k), slip.Tail{Value: ti}}
+		}
 	}
-	self.Any = t
-
 	return
 }
 
-// task-flavor :init //////////////////////////////////////////////////////////
+// MakeTask is only public for testing purposes.
+func MakeTask(args ...slip.Object) (self *flavors.Instance, t *task) {
+	self = taskFlavor.MakeInstance().(*flavors.Instance)
+	t = makeTaskStruct(self, args)
+	return
+}
 
-type taskInitCaller struct{}
-
-func (caller taskInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	obj := s.Get("self").(*flavors.Instance)
-	if 0 < len(args) {
-		args = args[0].(slip.List)
-	}
-	tsk := task{self: obj, links: map[string]*task{}}
+func makeTaskStruct(self *flavors.Instance, args slip.List) (tsk *task) {
+	tsk = &task{self: self, links: map[string]*task{}}
 	for i := 0; i < len(args)-1; i += 2 {
 		switch args[i] {
 		case slip.Symbol(":name"):
@@ -330,16 +368,29 @@ func (caller taskInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 			}
 		}
 	}
-	obj.Any = &tsk
+	self.Any = tsk
+
+	return
+}
+
+type taskInitCaller struct{}
+
+func (caller taskInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	if 0 < len(args) {
+		args = args[0].(slip.List)
+	}
+	_ = makeTaskStruct(self, args)
 
 	return nil
 }
 
 func (caller taskInitCaller) Docs() string {
-	return `__:init__ &key _name_ _workers_ _actor_
+	return `__:init__ &key _name_ _workers_ _actor_ _logger_
    _:name_ [string] sets the name of the task.
    _:workers_ [fixnum] the number of workers for concurrent processing. Zero indicates no concurrent processing.
    _:depth_ [fixnum] of the work queue.
+   _:logger_ [instance] an instance that has the _:log_ method.
    _:actor_ [instance|function|list] if an instance that instance is used for processing and must have the
 _perform_ method that expectes an instance of the _flow-box-flavor_. If the instance has a _start_ or _shutdown_
 those will be called when starting or stoping a flow. If the value of _:actor_ is a function is must expect one

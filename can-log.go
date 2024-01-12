@@ -1,10 +1,17 @@
-// Copyright (c) 2023, Peter Ohler, All rights reserved.
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
 
 package main
 
 import (
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
+)
+
+const (
+	levelError int = iota
+	levelWarn
+	levelInfo
+	levelDebug
 )
 
 var (
@@ -119,21 +126,21 @@ func (caller canLogSetLogLevelCaller) Call(s *slip.Scope, args slip.List, depth 
 	switch ta := args[0].(type) {
 	case slip.Fixnum:
 		level = int(ta)
-		if level < 0 {
-			level = 0
-		} else if 3 < level {
-			level = 3
+		if level < levelError {
+			level = levelError
+		} else if levelDebug < level {
+			level = levelDebug
 		}
 	case slip.Symbol:
 		switch ta {
 		case slip.Symbol("error"), slip.Symbol(":error"):
-			level = 0
+			level = levelError
 		case slip.Symbol("warn"), slip.Symbol(":warn"):
-			level = 1
+			level = levelWarn
 		case slip.Symbol("info"), slip.Symbol(":info"):
-			level = 2
+			level = levelInfo
 		case slip.Symbol("debug"), slip.Symbol(":debug"):
-			level = 3
+			level = levelDebug
 		}
 	}
 	if level < 0 {

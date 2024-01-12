@@ -1,10 +1,12 @@
-// Copyright (c) 2023, Peter Ohler, All rights reserved.
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
 
 package main_test
 
 import (
+	"bytes"
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/sliptest"
@@ -221,4 +223,101 @@ func TestTaskReceiveInstanceNoPerform(t *testing.T) {
                                                     (make-instance 'vanilla-flavor)))`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
+}
+
+func TestTaskReceiveNoErrorTask(t *testing.T) {
+	testTaskReceive(t, `
+(let* ((lg (make-instance 'logger-flavor))
+       (flow (make-instance 'flow-flavor :name 'flo :logger lg)))
+  (flow-add-task flow
+                 :name "start"
+                 :actor (lambda (b) (list 'ok)))
+  (flow-set-entry flow 'start)
+  (flow-submit flow (make-flow-box :set '(1)))
+  (send lg :shutdown))`,
+		"/^E flo:start box .+: /")
+}
+
+func TestTaskReceiveErrorTask(t *testing.T) {
+	testTaskReceive(t, `
+(let* ((lg (make-instance 'logger-flavor))
+       (flow (make-instance 'flow-flavor :name 'flo :logger lg)))
+  (flow-add-task flow
+                 :name "start"
+                 :actor (lambda (b) (list 'ok)))
+  (flow-add-task flow
+                 :name "error"
+                 :actor (lambda (b) (format t "~A~%" (send b :get "error")) (list nil nil)))
+  (flow-set-entry flow 'start)
+  (flow-submit flow (make-flow-box :set '(1)))
+  (send lg :shutdown))`,
+		"Actor did not return a list of link name and box instance.\n")
+}
+
+func TestTaskReceiveErrorLink(t *testing.T) {
+	testTaskReceive(t, `
+(let* ((lg (make-instance 'logger-flavor))
+       (flow (make-instance 'flow-flavor :name 'flo :logger lg)))
+  (flow-add-task flow
+                 :name "start"
+                 :actor (lambda (b) (list 'ok)))
+  (flow-add-task flow
+                 :name "bad"
+                 :actor (lambda (b) (format t "~A~%" (send b :get "error")) (list nil nil)))
+  (flow-link flow 'error 'start "bad")
+  (flow-set-entry flow 'start)
+  (flow-submit flow (make-flow-box :set '(1)))
+  (send lg :shutdown))`,
+		"Actor did not return a list of link name and box instance.\n")
+}
+
+func TestTaskReceiveLogInfo(t *testing.T) {
+	testTaskReceive(t, `
+(let* ((lg (make-instance 'logger-flavor))
+       (flow (make-instance 'flow-flavor :name 'flo :logger lg)))
+  (flow-add-task flow
+                 :name "start"
+                 :actor (lambda (b) (list "ok" b)))
+  (flow-add-task flow
+                 :name "done"
+                 :actor (make-instance 'flow-exit-actor))
+  (flow-link flow 'ok 'start 'done)
+  (flow-set-entry flow 'start)
+  (send flow :set-level 'info)
+  (flow-submit flow (make-flow-box :set '(1)))
+  (send lg :shutdown))`,
+		"/^I flo:start received box /")
+}
+
+func TestTaskReceiveEmptyLinkName(t *testing.T) {
+	testTaskReceive(t, `
+(let* ((lg (make-instance 'logger-flavor))
+       (flow (make-instance 'flow-flavor :name 'flo :logger lg)))
+  (flow-add-task flow
+                 :name "start"
+                 :actor (lambda (b) (list nil b)))
+  (flow-add-task flow
+                 :name "done"
+                 :actor (make-instance 'flow-exit-actor))
+  (flow-link flow "" 'start 'done)
+  (flow-set-entry flow 'start)
+  (send flow :set-level 'info)
+  (flow-submit flow (make-flow-box :set '(1)))
+  (send lg :shutdown))`,
+		"/^I flo:start received box /")
+}
+
+func testTaskReceive(t *testing.T, code, expect string) {
+	var b bytes.Buffer
+	scope := slip.NewScope()
+	orig := scope.Get("*standard-output*")
+	defer scope.Set("*standard-output*", orig)
+	scope.Set("*standard-output*", &slip.OutputStream{Writer: &b})
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: code,
+		Expect: "nil",
+	}).Test(t)
+	tt.Equal(t, expect, b.String())
 }

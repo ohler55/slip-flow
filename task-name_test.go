@@ -1,4 +1,4 @@
-// Copyright (c) 2023, Peter Ohler, All rights reserved.
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
 
 package main_test
 
@@ -12,7 +12,7 @@ import (
 
 func TestTaskNameOk(t *testing.T) {
 	scope := slip.NewScope()
-	task, _ := flow.MakeTask(slip.String("tisk"))
+	task, _ := flow.MakeTask(slip.Symbol(":name"), slip.String("tisk"))
 	scope.Let("task", task)
 	(&sliptest.Function{
 		Scope:  scope,
@@ -35,7 +35,7 @@ func TestTaskNameNotTask(t *testing.T) {
 
 func TestTaskNameArgCount(t *testing.T) {
 	scope := slip.NewScope()
-	task, _ := flow.MakeTask(slip.String("tisk"))
+	task, _ := flow.MakeTask(slip.Symbol(":name"), slip.String("tisk"))
 	scope.Let("task", task)
 	(&sliptest.Function{
 		Scope:     scope,
