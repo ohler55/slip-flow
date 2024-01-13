@@ -57,10 +57,9 @@ See also: flow-flavor
 	taskFlavor.DefMethod(":running", "", taskRunningCaller{})
 	taskFlavor.DefMethod(":receive", "", taskReceiveCaller{})
 	taskFlavor.DefMethod(":metrics", "", taskMetricsCaller{})
+	taskFlavor.DefMethod(":reset-metrics", "", taskResetMetricsCaller{})
 	taskFlavor.DefMethod(":links", "", taskLinksCaller{})
-
-	// :reset-metrics
-	// TBD
+	taskFlavor.DefMethod(":unlink", "", taskUnlinkCaller{})
 }
 
 type task struct {
@@ -171,8 +170,11 @@ func (t *task) receive(s *slip.Scope, bi *flavors.Instance) {
 		msg := fmt.Sprintf("%s:%s received box %s", flowName, t.name, bi.Any.(*box).track.id)
 		t.self.Receive(s, ":info", slip.List{slip.String(msg)}, 0)
 	}
-	t.received.Add(1)
 	bi, bx = boxDup(bi)
+	if len(bx.track.history) == 0 && t.flow != nil {
+		t.flow.received.Add(1)
+	}
+	t.received.Add(1)
 	bx.track.Scan(flowName, t.name)
 	switch {
 	case t.queue != nil:
@@ -286,6 +288,13 @@ func (t *task) metrics() (alist slip.List) {
 	return
 }
 
+func (t *task) resetMetrics() {
+	t.received.Store(0)
+	t.errors.Store(0)
+	t.processed.Store(0)
+	t.duration.Store(0)
+}
+
 func (t *task) linkList() (la slip.List) {
 	if 0 < len(t.links) {
 		keys := make([]string, 0, len(t.links))
@@ -303,6 +312,23 @@ func (t *task) linkList() (la slip.List) {
 		}
 	}
 	return
+}
+
+func (t *task) unlink(args slip.List) {
+	var name string
+	switch ta := args[0].(type) {
+	case nil:
+		// leave name as ""
+	case slip.String:
+		name = string(ta)
+	case slip.Symbol:
+		name = string(ta)
+	default:
+		slip.PanicType("link", ta, "string", "symbol")
+	}
+	t.qmu.Lock()
+	delete(t.links, name)
+	t.qmu.Unlock()
 }
 
 // MakeTask is only public for testing purposes.

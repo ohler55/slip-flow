@@ -23,7 +23,7 @@ func init() {
 					Text: "to return the metrics for.",
 				},
 			},
-			Return: "nil",
+			Return: "list",
 			Text:   `__flow-task-metrics__ returns the metrics the _task_.`,
 			Examples: []string{
 				`(setq task (make-instance 'flow-task-flavor :name "tisk"))`,
