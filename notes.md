@@ -16,8 +16,6 @@
   - http-post-actor
   - schedule-actor
   - inspect-actor [prints out box, for debugging]
-  - file-monitor-actor [load and process file when it changes, or if dir when new file added]
-  - file-saver-actor [write or append to file, name generated from content]
 
 - flow-editor
  - should be part of task and flow
