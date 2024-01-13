@@ -32,7 +32,8 @@ func TestFlowDocs(t *testing.T) {
 		":submit",
 		":exit-channel",
 		":set-level",
-		// ":metrics",
+		":metrics",
+		":reset-metrics",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-flavor %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))

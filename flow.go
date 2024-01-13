@@ -4,8 +4,11 @@ package main
 
 import (
 	"sort"
+	"sync/atomic"
+	"time"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/bag"
 	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/pkg/gi"
 )
@@ -73,8 +76,8 @@ See also: flow-task-flavor
 	flowFlavor.DefMethod(":link", "", flowLinkCaller{})
 	flowFlavor.DefMethod(":submit", "", flowSubmitCaller{})
 	flowFlavor.DefMethod(":exit-channel", "", flowExitChannelCaller{})
-	// flowFlavor.DefMethod(":metrics", "", flowMetricsCaller{})
-	// TBD
+	flowFlavor.DefMethod(":metrics", "", flowMetricsCaller{})
+	flowFlavor.DefMethod(":reset-metrics", "", flowResetMetricsCaller{})
 	flowFlavor.DefMethod(":set-level", ":after", flowSetLevelCaller{})
 }
 
@@ -86,13 +89,17 @@ type flow struct {
 	exitChan gi.Channel
 	started  bool
 
-	// received  atomic.Uint64
-	// errors    atomic.Uint64
-	// processed atomic.Uint64
-	// duration  atomic.Uint64 // sum of processing times from entry to completed from box tracks
+	received  atomic.Uint64
+	errors    atomic.Uint64
+	processed atomic.Uint64
+	duration  atomic.Uint64 // sum of processing times from entry to completed from box tracks
 }
 
 func (f *flow) start(s *slip.Scope) {
+	f.received.Store(0)
+	f.errors.Store(0)
+	f.processed.Store(0)
+	f.duration.Store(0)
 	logger := f.self.Get("logger")
 	if logger == nil {
 		logger = slip.ReadString("(make-instance 'logger-flavor)").Eval(s, nil)
@@ -206,23 +213,75 @@ func (f *flow) link(args slip.List) {
 }
 
 func (f *flow) exit(bi slip.Object) {
-	// TBD update metrics for processed or errors depending on last entry in track
-
+	history := bi.(*flavors.Instance).Any.(*box).track.history
+	if 0 < len(history) {
+		first := history[0]
+		last := history[len(history)-1]
+		if last.task == "error" {
+			f.errors.Add(1)
+		} else {
+			f.processed.Add(1)
+			f.duration.Add(uint64(last.when.Sub(first.when)))
+		}
+	}
 	if f.exitChan != nil {
 		f.exitChan <- bi
 	}
 }
 
-func (f *flow) submit(s *slip.Scope, bi slip.Object) {
+func (f *flow) submit(s *slip.Scope, data slip.Object) {
 	if f.entry == nil {
 		slip.NewPanic("no entry task has been set for the %s flow", f.name)
 	}
 	if !f.started {
 		f.start(s)
 	}
-	f.entry.receive(s, bi.(*flavors.Instance))
+	var bi *flavors.Instance // box-flavor
+	if inst, _ := data.(*flavors.Instance); inst != nil {
+		switch {
+		case inst.Flavor == boxFlavor:
+			bi = inst
+		case inst.Flavor == bag.Flavor():
+			var bx *box
+			bi, bx = MakeBox(gi.NewUUID())
+			bx.content = inst.Any
+			bx.frozen = true
+		default:
+			slip.PanicType("box", data, "flow-box-flavor", "bag-flavor")
+		}
+	} else {
+		var bx *box
+		bi, bx = MakeBox(gi.NewUUID())
+		bx.content = bag.ObjectToBag(data)
+	}
+	f.entry.receive(s, bi)
+}
 
-	// TBD
+func (f *flow) metrics() (alist slip.List) {
+	alist = append(alist, slip.List{slip.Symbol("received"), slip.Tail{Value: slip.Fixnum(f.received.Load())}})
+	ecnt := f.errors.Load()
+	pcnt := f.processed.Load()
+	dur := f.duration.Load()
+	alist = append(alist, slip.List{slip.Symbol("processed"), slip.Tail{Value: slip.Fixnum(pcnt)}})
+	alist = append(alist, slip.List{slip.Symbol("errors"), slip.Tail{Value: slip.Fixnum(ecnt)}})
+	if 0 < pcnt {
+		alist = append(alist,
+			slip.List{
+				slip.Symbol("average"),
+				slip.Tail{Value: slip.DoubleFloat(float64(dur) / float64(time.Second) / float64(pcnt))},
+			})
+	}
+	return
+}
+
+func (f *flow) resetMetrics() {
+	f.received.Store(0)
+	f.errors.Store(0)
+	f.processed.Store(0)
+	f.duration.Store(0)
+	for _, t := range f.tasks {
+		t.resetMetrics()
+	}
 }
 
 func strFromArg(arg slip.Object, argName string) (str string) {
