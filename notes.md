@@ -2,17 +2,6 @@
 
 - next
 
- - flow-group-flavor inherits can-log-flavor
-  - :init
-  - :add [flow-group-add]
-  - :find [get a flow by name]
-  - :flows [all flows, maybe with pattern to match]
-  - :remove
-  - :set-level :after
-  - :start
-  - :shutdown
-  - add group to flow so sub-flow-actor can find sub-flow
-
  - actors
   + flow-exit-actor (places box on exit-channel)
   - log-error-actor (logs error or what ever is in box if not an error)

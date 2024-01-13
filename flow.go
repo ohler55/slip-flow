@@ -84,6 +84,7 @@ See also: flow-task-flavor
 type flow struct {
 	name     string
 	self     *flavors.Instance
+	group    *group
 	tasks    map[string]*task
 	entry    *task
 	exitChan gi.Channel
