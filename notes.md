@@ -4,9 +4,7 @@
 
  - actors
   + flow-exit-actor (places box on exit-channel)
-  - log-error-actor (logs error or what ever is in box if not an error)
-   - option to exit or continue flow
-    - maybe just look at links. if no links then exit else follow any link
+  + log-error-actor (logs error or what ever is in box if not an error)
   - queue-actor input actor for trigger tasks
   - split-actor [multiple transitions in parallel]
   - merge-actor [merge back multiple branch after a split]
