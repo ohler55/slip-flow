@@ -246,18 +246,9 @@ func parseBoxWriteOptions(args slip.List, hasOutput bool) (pw *pretty.Writer, fu
 			full = args[pos+1] != nil
 		case ":output":
 			output = args[pos+1]
-			if !hasOutput {
-				slip.PanicType("keyword", sym, ":pretty", ":depth", ":right-margin", "indent",
-					":time-format", ":time-wrap", ":json", ":color", "full")
-			}
 		default:
-			if hasOutput {
-				slip.PanicType("keyword", sym, ":pretty", ":depth", ":right-margin", "indent",
-					":time-format", ":time-wrap", ":json", ":color", "full", "output")
-			} else {
-				slip.PanicType("keyword", sym, ":pretty", ":depth", ":right-margin", "indent",
-					":time-format", ":time-wrap", ":json", ":color", "full")
-			}
+			slip.PanicType("keyword", sym, ":pretty", ":depth", ":right-margin", "indent",
+				":time-format", ":time-wrap", ":json", ":color", "full")
 		}
 	}
 	return

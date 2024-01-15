@@ -1,19 +1,17 @@
 # SLIP-Flow Notes
 
 - next
- - add options for write in log-error-actor
-
  - actors
   + flow-exit-actor (places box on exit-channel)
   + log-error-actor (logs error or what ever is in box if not an error)
-  - inspect-actor [prints out box, for debugging]
-  - queue-actor input actor for trigger tasks
+  + inspect-actor [prints out box, for debugging]
+  - sub-flow-actor
   - split-actor [multiple transitions in parallel]
   - merge-actor [merge back multiple branch after a split]
-  - sub-flow-actor
   - http-server-actor
   - http-get-actor
   - http-post-actor
+  - queue-actor input actor for trigger tasks
   - schedule-actor
 
 - flow-editor

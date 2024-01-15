@@ -123,6 +123,7 @@ func TestLogErrorActorDocs(t *testing.T) {
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
 	for _, method := range []string{
+		":init",
 		":start",
 		":perform",
 	} {
