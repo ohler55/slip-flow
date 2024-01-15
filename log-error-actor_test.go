@@ -114,7 +114,7 @@ func TestLogErrorActorLink(t *testing.T) {
 		`(mapcar (lambda (ev) (cadr ev))(send (send log-error-test-out :track) :history))`).Eval(scope, nil)
 	tt.Equal(t, `("start" "fail" "error" "error2")`, slip.ObjectString(history))
 
-	tt.Equal(t, `/E {.*}/`, b.String())
+	tt.Equal(t, "E [3]\n", b.String())
 }
 
 func TestLogErrorActorDocs(t *testing.T) {

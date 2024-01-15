@@ -122,16 +122,6 @@ func (caller boxWriteCaller) Docs() string {
 
 func writeBox(s *slip.Scope, obj *flavors.Instance, args slip.List) (result slip.Object) {
 	var out io.Writer
-	dp := slip.DefaultPrinter()
-	pw := pretty.Writer{
-		Options:  options,
-		Width:    int(dp.RightMargin),
-		MaxDepth: 4,
-		SEN:      true,
-	}
-	var full bool
-	pw.Indent = 2
-	prty := dp.Pretty
 	if 0 < len(args) {
 		pos := 0
 		switch ta := args[0].(type) {
@@ -150,64 +140,21 @@ func writeBox(s *slip.Scope, obj *flavors.Instance, args slip.List) (result slip
 			}
 			pos++
 		}
-		for ; pos < len(args)-1; pos += 2 {
-			sym := args[pos].(slip.Symbol)
-			switch string(sym) {
-			case ":pretty":
-				prty = args[pos+1] != nil
-			case ":depth":
-				num, ok := args[pos+1].(slip.Fixnum)
-				if !ok {
-					slip.PanicType(":depth", args[pos+1], "fixnum")
-				}
-				pw.MaxDepth = int(num)
-				if pw.MaxDepth <= 0 {
-					pw.Indent = 0
-				}
-			case ":right-margin":
-				num, ok := args[pos+1].(slip.Fixnum)
-				if !ok {
-					slip.PanicType(":right-margin", args[pos+1], "fixnum")
-				}
-				pw.Width = int(num)
-			case ":indent":
-				num, ok := args[pos+1].(slip.Fixnum)
-				if !ok {
-					slip.PanicType(":indent", args[pos+1], "fixnum")
-				}
-				pw.Indent = int(num)
-			case ":time-format":
-				switch ta := args[pos+1].(type) {
-				case nil:
-					pw.TimeFormat = ""
-				case slip.String:
-					pw.TimeFormat = string(ta)
-				default:
-					slip.PanicType(":time-format", args[pos+1], "string")
-				}
-			case ":time-wrap":
-				switch ta := args[pos+1].(type) {
-				case nil:
-					pw.TimeWrap = ""
-				case slip.String:
-					pw.TimeWrap = string(ta)
-				default:
-					slip.PanicType(":time-wrap", args[pos+1], "string")
-				}
-			case ":json":
-				pw.SEN = args[pos+1] == nil
-			case ":color":
-				pw.Color = args[pos+1] != nil
-			case ":full":
-				full = args[pos+1] != nil
-
-			default:
-				slip.PanicType("keyword", sym, ":pretty", ":depth", ":right-margin", "indent",
-					":time-format", ":time-wrap", ":json", ":color", "full")
-			}
-		}
+		args = args[pos:]
 	}
 	bx := obj.Any.(*box)
+	pw, full, prty, _ := parseBoxWriteOptions(args, false)
+	b := bx.toString(pw, full, prty)
+	if out == nil {
+		return slip.String(b)
+	}
+	if _, err := out.Write(b); err != nil {
+		panic(err)
+	}
+	return nil
+}
+
+func (bx *box) toString(pw *pretty.Writer, full, prty bool) (b []byte) {
 	content := bx.content
 	if full {
 		history := make([]any, len(bx.track.history))
@@ -226,7 +173,6 @@ func writeBox(s *slip.Scope, obj *flavors.Instance, args slip.List) (result slip
 			"content": content,
 		}
 	}
-	var b []byte
 	switch {
 	case prty && 1 < pw.MaxDepth:
 		b = pw.Encode(content)
@@ -235,11 +181,84 @@ func writeBox(s *slip.Scope, obj *flavors.Instance, args slip.List) (result slip
 	default:
 		b = []byte(oj.JSON(content, &pw.Options))
 	}
-	if out == nil {
-		return slip.String(b)
+	return
+}
+
+func parseBoxWriteOptions(args slip.List, hasOutput bool) (pw *pretty.Writer, full, prty bool, output slip.Object) {
+	dp := slip.DefaultPrinter()
+	pw = &pretty.Writer{
+		Options:  options,
+		Width:    int(dp.RightMargin),
+		MaxDepth: 4,
+		SEN:      true,
 	}
-	if _, err := out.Write(b); err != nil {
-		panic(err)
+	pw.Indent = 2
+	prty = dp.Pretty
+	for pos := 0; pos < len(args)-1; pos += 2 {
+		sym := args[pos].(slip.Symbol)
+		switch string(sym) {
+		case ":pretty":
+			prty = args[pos+1] != nil
+		case ":depth":
+			num, ok := args[pos+1].(slip.Fixnum)
+			if !ok {
+				slip.PanicType(":depth", args[pos+1], "fixnum")
+			}
+			pw.MaxDepth = int(num)
+			if pw.MaxDepth <= 0 {
+				pw.Indent = 0
+			}
+		case ":right-margin":
+			num, ok := args[pos+1].(slip.Fixnum)
+			if !ok {
+				slip.PanicType(":right-margin", args[pos+1], "fixnum")
+			}
+			pw.Width = int(num)
+		case ":indent":
+			num, ok := args[pos+1].(slip.Fixnum)
+			if !ok {
+				slip.PanicType(":indent", args[pos+1], "fixnum")
+			}
+			pw.Indent = int(num)
+		case ":time-format":
+			switch ta := args[pos+1].(type) {
+			case nil:
+				pw.TimeFormat = ""
+			case slip.String:
+				pw.TimeFormat = string(ta)
+			default:
+				slip.PanicType(":time-format", args[pos+1], "string")
+			}
+		case ":time-wrap":
+			switch ta := args[pos+1].(type) {
+			case nil:
+				pw.TimeWrap = ""
+			case slip.String:
+				pw.TimeWrap = string(ta)
+			default:
+				slip.PanicType(":time-wrap", args[pos+1], "string")
+			}
+		case ":json":
+			pw.SEN = args[pos+1] == nil
+		case ":color":
+			pw.Color = args[pos+1] != nil
+		case ":full":
+			full = args[pos+1] != nil
+		case ":output":
+			output = args[pos+1]
+			if !hasOutput {
+				slip.PanicType("keyword", sym, ":pretty", ":depth", ":right-margin", "indent",
+					":time-format", ":time-wrap", ":json", ":color", "full")
+			}
+		default:
+			if hasOutput {
+				slip.PanicType("keyword", sym, ":pretty", ":depth", ":right-margin", "indent",
+					":time-format", ":time-wrap", ":json", ":color", "full", "output")
+			} else {
+				slip.PanicType("keyword", sym, ":pretty", ":depth", ":right-margin", "indent",
+					":time-format", ":time-wrap", ":json", ":color", "full")
+			}
+		}
 	}
-	return nil
+	return
 }
