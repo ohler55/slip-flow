@@ -1,23 +1,18 @@
 # SLIP-Flow Notes
 
 - next
-
  - actors
   + flow-exit-actor (places box on exit-channel)
-  - log-error-actor (logs error or what ever is in box if not an error)
-   - option to exit or continue flow
-    - maybe just look at links. if no links then exit else follow any link
-  - queue-actor input actor for trigger tasks
+  + log-error-actor (logs error or what ever is in box if not an error)
+  + inspect-actor [prints out box, for debugging]
+  - sub-flow-actor
   - split-actor [multiple transitions in parallel]
   - merge-actor [merge back multiple branch after a split]
-  - sub-flow-actor
   - http-server-actor
   - http-get-actor
   - http-post-actor
+  - queue-actor input actor for trigger tasks
   - schedule-actor
-  - inspect-actor [prints out box, for debugging]
-  - file-monitor-actor [load and process file when it changes, or if dir when new file added]
-  - file-saver-actor [write or append to file, name generated from content]
 
 - flow-editor
  - should be part of task and flow
