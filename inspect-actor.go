@@ -67,18 +67,18 @@ func (caller inspectInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 
 func (caller inspectInitCaller) Docs() string {
 	return `__:init__ &key _pretty_ _depth_ _right-margin_ _indent_ _time-format_ _time-wrap_ _json_ _color_ _full_
-   _pretty_ [boolean] value to use in place of the _*print-pretty*_ value.
+   _:pretty_ [boolean] value to use in place of the _*print-pretty*_ value.
 If _t_ then the JSON or SEN output is indented according to the other keyword options.
-   _depth [fixnum] maximum number of nested elements on a line in the output.
+   _:depth [fixnum] maximum number of nested elements on a line in the output.
 A value of zero outputs a tight single line output. Default: 4.
-   _right-margin_ [fixnum] value to use in place of the _*print-right-margin*_ value.
-   _indent_ [fixnum] is the number of spaces to indent JSON or SEN output if :pretty is not non-nil.
-   _time-format_ [string] value to use in place of the _*flow-box-time-format*_ value.
-   _time-wrap_ [string] value to use in place of the _*flow-box-time-wrap*_ value.
-   _json_ [boolean] if true the output is JSON formatted otherwise output is SEN format.
-   _color_ [boolean] if true the output is colorized.
-   _full_ [boolean] if true the output includes the box track and the content is nested on level down.
-   _output_ [nil|symbol] if nil the box is written to _*standard-output*_ otherwise the _output_ must be
+   _:right-margin_ [fixnum] value to use in place of the _*print-right-margin*_ value.
+   _:indent_ [fixnum] is the number of spaces to indent JSON or SEN output if :pretty is not non-nil.
+   _:time-format_ [string] value to use in place of the _*flow-box-time-format*_ value.
+   _:time-wrap_ [string] value to use in place of the _*flow-box-time-wrap*_ value.
+   _:json_ [boolean] if true the output is JSON formatted otherwise output is SEN format.
+   _:color_ [boolean] if true the output is colorized.
+   _:full_ [boolean] if true the output includes the box track and the content is nested on level down.
+   _:output_ [nil|symbol] if nil the box is written to _*standard-output*_ otherwise the _output_ must be
 _:error_, _:warn_, _:info_, or _:debug_ matching the logger methods and filtered accordingly.
 
 

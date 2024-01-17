@@ -3,6 +3,8 @@
 package main
 
 import (
+	"sync"
+
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
 )
@@ -38,9 +40,12 @@ func init() {
 type group struct {
 	self  *flavors.Instance
 	flows map[string]*flow
+	mu    sync.Mutex
 }
 
 func (g *group) add(obj slip.Object) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
 	if fi, _ := obj.(*flavors.Instance); fi != nil && fi.Flavor == flowFlavor {
 		g.flows[fi.Any.(*flow).name] = fi.Any.(*flow)
 		fi.Any.(*flow).group = g
@@ -50,6 +55,8 @@ func (g *group) add(obj slip.Object) {
 }
 
 func (g *group) remove(obj slip.Object) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
 	var name string
 	switch tn := obj.(type) {
 	case slip.String:
@@ -66,6 +73,8 @@ func (g *group) remove(obj slip.Object) {
 }
 
 func (g *group) find(obj slip.Object) (fi slip.Object) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
 	var name string
 	switch tn := obj.(type) {
 	case slip.String:
@@ -82,6 +91,8 @@ func (g *group) find(obj slip.Object) (fi slip.Object) {
 }
 
 func (g *group) flowList() slip.List {
+	g.mu.Lock()
+	defer g.mu.Unlock()
 	all := make(slip.List, 0, len(g.flows))
 	for _, f := range g.flows {
 		all = append(all, f.self)
@@ -90,18 +101,23 @@ func (g *group) flowList() slip.List {
 }
 
 func (g *group) start(s *slip.Scope) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
 	logger := g.self.Get("logger")
 	if logger == nil {
 		logger = slip.ReadString("(make-instance 'logger-flavor)").Eval(s, nil)
-		g.self.Set("logger", logger)
+		g.self.Let("logger", logger)
 	}
 	for _, f := range g.flows {
-		f.self.Set("logger", logger)
+		// TBD if nil logger then set else don't
+		f.self.Let("logger", logger)
 		f.start(s)
 	}
 }
 
 func (g *group) shutdown(s *slip.Scope) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
 	for _, f := range g.flows {
 		f.shutdown(s)
 	}

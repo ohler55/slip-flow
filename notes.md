@@ -5,14 +5,27 @@
   + flow-exit-actor (places box on exit-channel)
   + log-error-actor (logs error or what ever is in box if not an error)
   + inspect-actor [prints out box, for debugging]
-  - sub-flow-actor
+  + jump-actor
   - split-actor [multiple transitions in parallel]
+   - list of links, follow all
+   - final is nil, nil
   - merge-actor [merge back multiple branch after a split]
-  - http-server-actor
-  - http-get-actor
-  - http-post-actor
-  - queue-actor input actor for trigger tasks
-  - schedule-actor
+   - number of boxes to receive for an id
+   - timeout if not all received in alloted time
+   - keep a mutex protected map
+   - need a timeout check loop (check every timeout/2 ?)
+   - merge box track and sort by time
+   - box content merged
+    - latest overrides if necessary
+    - jp.Walk non-primary, check values and add if missing, ignore if different
+  - http-client-actor (specify get, post, etc)
+  - http-get-actor - is this needed?
+  - http-post-actor - is this needed?
+  - trigger tasks
+   - are they needed or better to call from outside flow?
+   - http-server-actor
+   - queue-actor input actor for trigger tasks
+   - schedule-actor
 
 - flow-editor
  - should be part of task and flow

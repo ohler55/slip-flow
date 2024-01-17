@@ -50,7 +50,7 @@ type MakeFlow struct {
 // Call the function with the arguments provided.
 func (f *MakeFlow) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := flowFlavor.MakeInstance().(*flavors.Instance)
-	_ = self.Receive(s, ":init", slip.List{args}, depth)
+	self.Init(s, args, depth)
 
 	return self
 }
