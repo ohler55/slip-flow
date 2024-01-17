@@ -40,7 +40,7 @@ type MakeGroup struct {
 // Call the function with the arguments provided.
 func (f *MakeGroup) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := groupFlavor.MakeInstance().(*flavors.Instance)
-	_ = self.Receive(s, ":init", slip.List{args}, depth)
+	self.Init(s, args, depth)
 
 	return self
 }
