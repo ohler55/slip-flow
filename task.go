@@ -60,6 +60,7 @@ See also: flow-flavor
 	taskFlavor.DefMethod(":reset-metrics", "", taskResetMetricsCaller{})
 	taskFlavor.DefMethod(":links", "", taskLinksCaller{})
 	taskFlavor.DefMethod(":unlink", "", taskUnlinkCaller{})
+	taskFlavor.DefMethod(":transition", "", taskTransitionCaller{})
 }
 
 type task struct {
@@ -198,46 +199,45 @@ func (t *task) call(s *slip.Scope, bi *flavors.Instance) {
 
 func (t *task) handleResult(s *slip.Scope, result slip.Object) {
 	if list, _ := result.(slip.List); len(list) == 2 {
-		var (
-			to       *task
-			linkName string
-		)
+		var linkName string
 		switch tr := list[0].(type) {
 		case nil:
-			if len(t.links) == 0 && list[1] == nil {
+			if list[1] == nil && (list[0] == nil || len(t.links) == 0) {
 				// No links and both the transition and box are nil for this
 				// is the end of the line.
 				return
 			}
-			to = t.links[""]
 		case slip.String:
-			to = t.links[string(tr)]
 			linkName = string(tr)
 		case slip.Symbol:
-			to = t.links[string(tr)]
 			linkName = string(tr)
 		}
 		if bi, has := list[1].(*flavors.Instance); has && bi != nil && boxFlavor == bi.Flavor {
-			t.processed.Add(1)
-			tr := bi.Any.(*box).track
-			ev := tr.history[len(tr.history)-1]
-			t.duration.Add(uint64(time.Since(ev.when)))
-			if levelInfo <= int(t.self.Get("log-level").(slip.Fixnum)) {
-				var flowName string
-				if t.flow != nil {
-					flowName = t.flow.name
-				}
-				msg := fmt.Sprintf("%s:%s following %s with box %s",
-					flowName, t.name, linkName, bi.Any.(*box).track.id)
-				t.self.Receive(s, ":info", slip.List{slip.String(msg)}, 0)
-			}
-			if to != nil {
-				to.receive(s, bi)
-			}
+			t.transition(s, linkName, bi)
 			return
 		}
 	}
 	slip.NewPanic("Actor did not return a list of link name and box instance.")
+}
+
+func (t *task) transition(s *slip.Scope, linkName string, bi *flavors.Instance) {
+	to := t.links[linkName]
+	t.processed.Add(1)
+	tr := bi.Any.(*box).track
+	ev := tr.history[len(tr.history)-1]
+	t.duration.Add(uint64(time.Since(ev.when)))
+	if levelInfo <= int(t.self.Get("log-level").(slip.Fixnum)) {
+		var flowName string
+		if t.flow != nil {
+			flowName = t.flow.name
+		}
+		msg := fmt.Sprintf("%s:%s following %s with box %s",
+			flowName, t.name, linkName, bi.Any.(*box).track.id)
+		t.self.Receive(s, ":info", slip.List{slip.String(msg)}, 0)
+	}
+	if to != nil {
+		to.receive(s, bi)
+	}
 }
 
 func (t *task) handlePanic(s *slip.Scope, bi *flavors.Instance) {
