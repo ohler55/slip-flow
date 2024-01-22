@@ -6,9 +6,7 @@
   + log-error-actor (logs error or what ever is in box if not an error)
   + inspect-actor [prints out box, for debugging]
   + jump-actor
-  - split-actor [multiple transitions in parallel]
-   - list of links, follow all
-   - final is nil, nil
+  + split-actor
   - merge-actor [merge back multiple branch after a split]
    - number of boxes to receive for an id
    - timeout if not all received in alloted time
