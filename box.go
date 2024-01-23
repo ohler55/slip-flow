@@ -78,6 +78,7 @@ to identify one or more values.
 	boxFlavor.DefMethod(":history", "", boxHistoryCaller{})
 	boxFlavor.DefMethod(":scan", "", boxScanCaller{})
 	boxFlavor.DefMethod(":copy", "", boxCopyCaller{})
+	boxFlavor.DefMethod(":merge", "", boxMergeCaller{})
 }
 
 type box struct {

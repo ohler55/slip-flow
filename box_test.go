@@ -43,6 +43,7 @@ func TestBoxDocs(t *testing.T) {
 		":history",
 		":scan",
 		":copy",
+		":merge",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-box-flavor %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
