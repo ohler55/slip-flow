@@ -3,7 +3,7 @@
 package main
 
 import (
-	"fmt"
+	"sync"
 	"time"
 
 	"github.com/ohler55/slip"
@@ -42,13 +42,63 @@ arrays.
 	mergeActorFlavor.DefMethod(":shutdown", "", mergeActorShutdownCaller{})
 }
 
-// TBD struct for count and current box
+type boxCnt struct {
+	cnt     int
+	updated time.Time
+	box     *box
+}
 
 type mergeCtx struct {
 	task    *task
 	timeout time.Duration
 	number  int
-	//  mutex, map, timeout loop
+	mu      sync.Mutex
+	pending map[string]*boxCnt
+	stop    chan struct{}
+	done    chan struct{}
+}
+
+func (mc *mergeCtx) timeoutLoop(s *slip.Scope) {
+	tick := time.NewTicker(mc.timeout / 2)
+	defer tick.Stop()
+	for {
+		select {
+		case <-mc.stop:
+			mc.done <- struct{}{}
+			return
+		case <-tick.C:
+			mc.mu.Lock()
+			for k, bc := range mc.pending {
+				if mc.timeout < time.Since(bc.updated) {
+					delete(mc.pending, k)
+					bi := boxFlavor.MakeInstance().(*flavors.Instance)
+					bi.Any = bc
+					mc.task.handlePanic(s, bi)
+				}
+			}
+			mc.mu.Unlock()
+		}
+	}
+}
+
+// return a box if completed or nil otherwise
+func (mc *mergeCtx) addBox(bx *box) (full *box) {
+	id := bx.track.idString()
+	mc.mu.Lock()
+	bc := mc.pending[id]
+	if bc == nil {
+		bc = &boxCnt{cnt: 0, updated: time.Now(), box: bx}
+		mc.pending[id] = bc
+	} else {
+		bc.box.merge(bx)
+	}
+	bc.cnt++
+	if mc.number <= bc.cnt {
+		delete(mc.pending, id)
+		full = bx
+	}
+	mc.mu.Unlock()
+	return
 }
 
 type mergeInitCaller struct{}
@@ -63,16 +113,16 @@ func (caller mergeInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 		sym, _ := args[pos].(slip.Symbol)
 		switch string(sym) {
 		case ":timeout":
-			if num, ok := args[pos+1].(slip.Fixnum); ok {
+			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 < num {
 				mc.timeout = time.Duration(num) * time.Second
 			} else {
-				slip.PanicType(":timeout", args[pos+1], "fixnum")
+				slip.PanicType(":timeout", args[pos+1], "positive fixnum")
 			}
 		case ":number":
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 < num {
 				mc.number = int(num)
 			} else {
-				slip.PanicType(":number", args[pos+1], "fixnum")
+				slip.PanicType(":number", args[pos+1], "positive fixnum")
 			}
 		default:
 			slip.PanicType("keywords", args[pos], ":timeout", ":number")
@@ -97,10 +147,12 @@ type mergeActorStartCaller struct{}
 
 func (caller mergeActorStartCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	obj.Any.(*mergeCtx).task = args[0].(*flavors.Instance).Any.(*task)
-
-	// TBD start by creating map and starting timeout loop
-	//  use select for exit channel and timer
+	mc := obj.Any.(*mergeCtx)
+	mc.task = args[0].(*flavors.Instance).Any.(*task)
+	mc.pending = map[string]*boxCnt{}
+	mc.stop = make(chan struct{}, 1)
+	mc.done = make(chan struct{}, 1)
+	go mc.timeoutLoop(s)
 
 	return nil
 }
@@ -122,10 +174,9 @@ func (caller mergeActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int)
 
 	mc := obj.Any.(*mergeCtx)
 
-	// TBD
-
-	fmt.Printf("*** mc: %v %s\n", mc, bi)
-
+	if full := mc.addBox(bi.Any.(*box)); full != nil {
+		return slip.List{slip.Symbol("ok"), bi}
+	}
 	return slip.List{nil, nil}
 }
 
@@ -144,7 +195,8 @@ func (caller mergeActorShutdownCaller) Call(s *slip.Scope, args slip.List, _ int
 	obj := s.Get("self").(*flavors.Instance)
 	mc := obj.Any.(*mergeCtx)
 
-	fmt.Printf("*** mc: %v\n", mc)
+	mc.stop <- struct{}{}
+	<-mc.done
 
 	return nil
 }

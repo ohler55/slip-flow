@@ -97,6 +97,18 @@ Merge one track into this track and return the updated track.
 `
 }
 
+func (t *track) idString() (id string) {
+	switch ti := t.id.(type) {
+	case slip.String:
+		id = string(ti)
+	case slip.Symbol:
+		id = string(ti)
+	default:
+		id = slip.ObjectString(ti)
+	}
+	return
+}
+
 // Scan adds an event to the track.
 func (t *track) Scan(flow, task string) {
 	t.history = append(t.history, &event{flow: flow, task: task, when: time.Now().UTC()})
