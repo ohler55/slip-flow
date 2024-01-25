@@ -182,10 +182,12 @@ func (caller mergeActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int)
 
 func (caller mergeActorPerformCaller) Docs() string {
 	return `__:perform__ _box_
-   _:box_ [instance] TBD
+   _:box_ [instance] box to merge with other boxes received.
 
 
-TBD
+Merges all the boxes received with matching track IDs. When the expected
+number of boxes is received and merged a transition is made on the "ok"
+link. If a timeout occurs it is handled like any other error.
 `
 }
 
@@ -205,6 +207,6 @@ func (caller mergeActorShutdownCaller) Docs() string {
 	return `__:shutdown__
 
 
-Shutsdown the actor by exiting the timeout checking loop.
+Shuts down the actor by exiting the timeout checking loop.
 `
 }
