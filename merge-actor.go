@@ -108,7 +108,7 @@ func (caller mergeInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
-	var mc mergeCtx
+	mc := mergeCtx{number: 1, timeout: time.Second * 10}
 	for pos := 0; pos < len(args)-1; pos += 2 {
 		sym, _ := args[pos].(slip.Symbol)
 		switch string(sym) {
