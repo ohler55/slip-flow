@@ -32,7 +32,8 @@ arrays.
 			},
 			slip.List{
 				slip.Symbol(":init-keywords"),
-				slip.Symbol(":links"),
+				slip.Symbol(":number"),
+				slip.Symbol(":timeout"),
 			},
 		},
 	)
@@ -95,7 +96,7 @@ func (mc *mergeCtx) addBox(bx *box) (full *box) {
 	bc.cnt++
 	if mc.number <= bc.cnt {
 		delete(mc.pending, id)
-		full = bx
+		full = bc.box
 	}
 	mc.mu.Unlock()
 	return
@@ -173,8 +174,10 @@ func (caller mergeActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int)
 	bi := args[0].(*flavors.Instance)
 
 	mc := obj.Any.(*mergeCtx)
-
 	if full := mc.addBox(bi.Any.(*box)); full != nil {
+		bi = boxFlavor.MakeInstance().(*flavors.Instance)
+		bi.Any = full
+
 		return slip.List{slip.Symbol("ok"), bi}
 	}
 	return slip.List{nil, nil}

@@ -7,18 +7,19 @@
   + inspect-actor [prints out box, for debugging]
   + jump-actor
   + split-actor
-  - merge-actor [merge back multiple branch after a split]
-   - number of boxes to receive for an id
-   - timeout if not all received in alloted time
-   - keep a mutex protected map
-   - need a timeout check loop (check every timeout/2 ?)
-   - merge box track and sort by time
-   - box content merged
-    - latest overrides if necessary
-    - jp.Walk non-primary, check values and add if missing, ignore if different
+  + merge-actor
+
   - http-client-actor (specify get, post, etc)
-  - http-get-actor - is this needed?
-  - http-post-actor - is this needed?
+   - method
+   - host
+   - port
+   - url
+   - proto
+   - header
+   - trailer
+   - body (string or stream)
+   - timeout
+   -
   - trigger tasks
    - are they needed or better to call from outside flow?
    - http-server-actor

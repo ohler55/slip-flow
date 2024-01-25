@@ -3,9 +3,9 @@
 package main_test
 
 import (
-	"fmt"
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/gi"
 	"github.com/ohler55/slip/sliptest"
@@ -13,12 +13,12 @@ import (
 
 // The flow used for these tests is:
 //
-//                    ┏━━━━━━━┓
-// ┏━━━━━━━┓── one ──>┃ + x:1 ┃── ok ──>┏━━━━━━━┓         ┏━━━━━━┓
-// ┃ split ┃          ┗━━━━━━━┛         ┃ merge ┃── ok ──>┃ exit ┃
-// ┃       ┃          ┏━━━━━━━┓         ┃       ┃         ┗━━━━━━┛
-// ┗━━━━━━━┛── two ──>┃ + y:2 ┃── ok ──>┗━━━━━━━┛
-//                    ┗━━━━━━━┛
+// ┏━━━━━━━┓          ┏━━━━━━━━━┓         ┏━━━━━━━┓
+// ┃       ┃── one ──>┃ set x:1 ┃── ok ──>┃       ┃         ┏━━━━━━┓
+// ┃ split ┃          ┗━━━━━━━━━┛         ┃ merge ┃── ok ──>┃ exit ┃
+// ┃       ┃          ┏━━━━━━━━━┓         ┃       ┃         ┗━━━━━━┛
+// ┃       ┃── two ──>┃ set y:2 ┃── ok ──>┃       ┃
+// ┗━━━━━━━┛          ┗━━━━━━━━━┛         ┗━━━━━━━┛
 
 func TestMergeActorOk(t *testing.T) {
 	exitChan := make(gi.Channel, 5)
@@ -34,13 +34,13 @@ func TestMergeActorOk(t *testing.T) {
                  :actor (make-instance 'flow-split-actor :links '(one two)))
   (flow-add-task flow
                  :name "x"
-                 :actor (lambda (b) (flow-box-get b "x" 1) (list 'ok b)))
+                 :actor (lambda (b) (flow-box-set b 1 "x") (list 'ok b)))
   (flow-add-task flow
                  :name "y"
-                 :actor (lambda (b) (flow-box-get b "y" 2) (list 'ok b)))
+                 :actor (lambda (b) (flow-box-set b 2 "y") (list 'ok b)))
   (flow-add-task flow
                  :name "merge"
-                 :actor (make-instance 'flow-merge-actor) :number 2 :timeout 2)
+                 :actor (make-instance 'flow-merge-actor :number 2 :timeout 2))
   (flow-add-task flow
                  :name "exit"
                  :actor (make-instance 'flow-exit-actor))
@@ -60,10 +60,13 @@ func TestMergeActorOk(t *testing.T) {
 	out := <-exitChan
 	scope.Let("merge-test-out", out)
 
+	// Verify all tasks are present in the history along with 2 merges since
+	// the time each branch was merged is of interest.
 	history := slip.ReadString(
-		`(mapcar (lambda (ev) (cadr ev))(send (send merge-test-out :track) :history))`).Eval(scope, nil)
-	fmt.Printf("*** history: %s\n", history)
+		`(sort (mapcar (lambda (ev) (cadr ev))
+                       (send (send merge-test-out :track) :history)))`).Eval(scope, nil)
+	tt.Equal(t, `("exit" "merge" "merge" "split" "x" "y")`, slip.ObjectString(history))
 
-	value := slip.ReadString(`(send merge-test-out :native)`).Eval(scope, nil)
-	fmt.Printf("*** value: %s\n", value)
+	value := slip.ReadString(`(sort (send merge-test-out :native) nil :key 'car)`).Eval(scope, nil)
+	tt.Equal(t, `(("x" . 1) ("y" . 2) ("z" . 0))`, slip.ObjectString(value))
 }
