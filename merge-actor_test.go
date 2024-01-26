@@ -114,7 +114,7 @@ func TestMergeActorTimeout(t *testing.T) {
   (flow-set-entry flow 'split)
   (send flow :set-level 'warn)
   (flow-submit flow (make-flow-box :parse "{z:0}"))
-(sleep 2)
+  (sleep 2)
   (flow-shutdown flow))`,
 		Expect: "nil",
 	}).Test(t)
