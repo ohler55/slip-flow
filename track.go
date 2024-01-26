@@ -3,6 +3,8 @@
 package main
 
 import (
+	"fmt"
+	"sort"
 	"time"
 
 	"github.com/ohler55/slip"
@@ -29,6 +31,7 @@ _flow-box-flavor_ is traverses a flow.`),
 	trackFlavor.GoMakeOnly = true
 	trackFlavor.DefMethod(":id", "", trackIDCaller{})
 	trackFlavor.DefMethod(":history", "", trackHistoryCaller{})
+	trackFlavor.DefMethod(":merge", "", trackMergeCaller{})
 }
 
 type event struct {
@@ -73,6 +76,39 @@ the time, the task name, and the flow name.
 `
 }
 
+type trackMergeCaller struct{}
+
+func (caller trackMergeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	ti, _ := args[0].(*flavors.Instance)
+	if ti == nil || ti.Flavor != trackFlavor {
+		slip.PanicType("other", args[0], "track")
+	}
+	self.Any.(*track).merge(ti.Any.(*track))
+
+	return self
+}
+
+func (caller trackMergeCaller) Docs() string {
+	return `__:merge__ _other_ => _track_
+
+
+Merge one track into this track and return the updated track.
+`
+}
+
+func (t *track) idString() (id string) {
+	switch ti := t.id.(type) {
+	case slip.String:
+		id = string(ti)
+	case slip.Symbol:
+		id = string(ti)
+	default:
+		id = slip.ObjectString(ti)
+	}
+	return
+}
+
 // Scan adds an event to the track.
 func (t *track) Scan(flow, task string) {
 	t.history = append(t.history, &event{flow: flow, task: task, when: time.Now().UTC()})
@@ -86,6 +122,26 @@ func (t *track) historyList() (history slip.List) {
 		}
 	}
 	return
+}
+
+func (t *track) merge(t2 *track) {
+	m := map[string]*event{}
+	for _, ev := range t.history {
+		key := fmt.Sprintf("%s:%s:%d", ev.flow, ev.task, ev.when.UnixNano())
+		m[key] = ev
+	}
+	for _, ev := range t2.history {
+		key := fmt.Sprintf("%s:%s:%d", ev.flow, ev.task, ev.when.UnixNano())
+		m[key] = ev
+	}
+	history := make([]*event, 0, len(m))
+	for _, ev := range m {
+		history = append(history, ev)
+	}
+	sort.Slice(history, func(i, j int) bool {
+		return history[i].when.Before(history[j].when)
+	})
+	t.history = history
 }
 
 // MakeTrack is only public for testing purposes.
