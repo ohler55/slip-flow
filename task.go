@@ -242,33 +242,38 @@ func (t *task) transition(s *slip.Scope, linkName string, bi *flavors.Instance) 
 
 func (t *task) handlePanic(s *slip.Scope, bi *flavors.Instance) {
 	if rec := recover(); rec != nil {
-		t.errors.Add(1)
-		tr := bi.Any.(*box).track
-		ev := tr.history[len(tr.history)-1]
-		t.duration.Add(uint64(time.Since(ev.when)))
-		nb, bx := boxDup(bi)
-		msg := fmt.Sprintf("%v", rec)
-		if se, _ := rec.(slip.Error); se != nil {
-			msg = se.Error()
-		}
-		bx.content = map[string]any{
-			"content": bx.content,
-			"error":   msg,
-		}
-		if to := t.links["error"]; to != nil {
-			to.receive(s, nb)
+		t.handleError(s, bi, rec)
+	}
+}
+
+func (t *task) handleError(s *slip.Scope, bi *flavors.Instance, err any) {
+	t.errors.Add(1)
+	tr := bi.Any.(*box).track
+	ev := tr.history[len(tr.history)-1]
+	t.duration.Add(uint64(time.Since(ev.when)))
+	nb, bx := boxDup(bi)
+	msg := fmt.Sprintf("%v", err)
+	if se, _ := err.(slip.Error); se != nil {
+		msg = se.Error()
+	}
+	bx.content = map[string]any{
+		"content": bx.content,
+		"error":   msg,
+	}
+	if to := t.links["error"]; to != nil {
+		to.receive(s, nb)
+		return
+	}
+	if t.flow != nil {
+		if et := t.flow.tasks["error"]; et != nil {
+			et.receive(s, nb)
 			return
 		}
-		if t.flow != nil {
-			if et := t.flow.tasks["error"]; et != nil {
-				et.receive(s, nb)
-				return
-			}
-			msg := fmt.Sprintf("%s:%s box %s: %s",
-				t.flow.name, t.name, bi.Any.(*box).track.id, bx.content.(map[string]any)["error"])
-			t.self.Receive(s, ":error", slip.List{slip.String(msg)}, 0)
-		}
+		msg := fmt.Sprintf("%s:%s box %s: %s",
+			t.flow.name, t.name, bi.Any.(*box).track.id, bx.content.(map[string]any)["error"])
+		t.self.Receive(s, ":error", slip.List{slip.String(msg)}, 0)
 	}
+
 }
 
 func (t *task) metrics() (alist slip.List) {

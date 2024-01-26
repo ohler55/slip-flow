@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -73,8 +74,10 @@ func (mc *mergeCtx) timeoutLoop(s *slip.Scope) {
 				if mc.timeout < time.Since(bc.updated) {
 					delete(mc.pending, k)
 					bi := boxFlavor.MakeInstance().(*flavors.Instance)
-					bi.Any = bc
-					mc.task.handlePanic(s, bi)
+					bi.Any = bc.box
+					mc.task.handleError(s, bi,
+						fmt.Sprintf("%s timed out waiting for %d boxes in merge task %s",
+							bc.box.track.idString(), mc.number, mc.task.name))
 				}
 			}
 			mc.mu.Unlock()
@@ -92,6 +95,7 @@ func (mc *mergeCtx) addBox(bx *box) (full *box) {
 		mc.pending[id] = bc
 	} else {
 		bc.box.merge(bx)
+		bc.updated = time.Now()
 	}
 	bc.cnt++
 	if mc.number <= bc.cnt {
@@ -125,8 +129,6 @@ func (caller mergeInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 			} else {
 				slip.PanicType(":number", args[pos+1], "positive fixnum")
 			}
-		default:
-			slip.PanicType("keywords", args[pos], ":timeout", ":number")
 		}
 	}
 	self.Any = &mc
