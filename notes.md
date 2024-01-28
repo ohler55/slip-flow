@@ -10,20 +10,12 @@
   + merge-actor
 
   - http-client-actor (specify get, post, etc)
-   - init
-    - method
-    - host
-    - port
-    - url
-    - proto
-    - header
-    - trailer
-    - body (string or stream)
-    - timeout
-    - response-path
+    - reply-handler
      - place in box at path
      - encode header and other response data
+      - content type remains as string unless json
       - if content type is json then parse and store
+
    - :perform
     - pull params from box to override init params
      - use top path and fixed sub paths?
@@ -65,3 +57,8 @@
   - maybe list all defs (defvar, defun, defflavor, defmethod, defconstant)
    - pick which ones or all to write to a file
   - need an edit-function with option for external editor or in repl
+
+- text/x-common-lisp
+- text/x-emacs-lisp
+- application/lisp (not a recognized content-type)
+- text/lisp (not a recognized content-type)

@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/cl"
@@ -43,12 +44,12 @@ func init() {
 
 type httpClientCtx struct {
 	task    *task
-	method  slip.Object
-	url     slip.Object
-	header  slip.Object
-	trailer slip.Object
-	body    slip.Object // string or function that returns a string or stream
-	timeout slip.Object
+	method  strCaller
+	url     strCaller
+	header  slip.Object // TBD
+	trailer slip.Object // TBD
+	body    streamCaller
+	timeout durCaller
 	handler slip.Caller
 }
 
@@ -68,11 +69,9 @@ func (caller httpClientInitCaller) Call(s *slip.Scope, args slip.List, depth int
 		sym, _ := args[pos].(slip.Symbol)
 		switch string(sym) {
 		case ":method":
-			hcc.method = args[pos+1]
-			// TBD verify either string, symbol or function
+			hcc.method.extract(s, args[pos+1])
 		case ":url":
-			hcc.url = args[pos+1]
-			// TBD verify either string or function
+			hcc.method.extract(s, args[pos+1])
 		case ":header":
 			hcc.header = args[pos+1]
 			// TBD verify either assoc or function
@@ -80,10 +79,9 @@ func (caller httpClientInitCaller) Call(s *slip.Scope, args slip.List, depth int
 			hcc.trailer = args[pos+1]
 			// TBD verify either assoc or function
 		case ":body":
-			hcc.body = args[pos+1]
+			hcc.body.extract(s, args[pos+1])
 		case ":timeout":
-			hcc.timeout = args[pos+1]
-			// TBD verify either fixnum or function
+			hcc.timeout.extract(s, args[pos+1])
 		case ":reply-handler":
 			hcc.handler = cl.ResolveToCaller(s, args[pos+1], depth+1)
 		}
@@ -101,7 +99,7 @@ func (caller httpClientInitCaller) Docs() string {
    _trailer_ [assoc|function] trailers for the request.
    _body_ [string|output-stream] for of the request for PUT and POST requests as well as other that have content.
    _:timeout_ [fixnum|function] seconds before timing out waiting for a reply from the HTTP request.
-   _reply-handler_ [function] to call with the response from a request. If _nil_ then
+   _reply-handler_ [function] to call with the response from a request and the box received. If _nil_ then
 place the content in a "response" element of the box.
 
 
@@ -114,8 +112,8 @@ type httpClientActorStartCaller struct{}
 
 func (caller httpClientActorStartCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	mc := obj.Any.(*httpClientCtx)
-	mc.task = args[0].(*flavors.Instance).Any.(*task)
+	hcc := obj.Any.(*httpClientCtx)
+	hcc.task = args[0].(*flavors.Instance).Any.(*task)
 
 	return nil
 }
@@ -135,13 +133,19 @@ func (caller httpClientActorPerformCaller) Call(s *slip.Scope, args slip.List, _
 	obj := s.Get("self").(*flavors.Instance)
 	bi := args[0].(*flavors.Instance)
 
-	mc := obj.Any.(*httpClientCtx)
+	hcc := obj.Any.(*httpClientCtx)
+	method := hcc.method.value(s, bi)
+	url := hcc.method.value(s, bi)
+
+	// TBD hcc.getString(hcc.method, hcc.methodCaller)
+	// TBD maybe struct for string-caller, same for headers, timeout, body
+
 	// TBD get params
 	//  example: method
 	//   if string or symbol then set
 	//   else resolve to caller and call then verify again
 
-	fmt.Printf("*** %s %v\n", bi, mc)
+	fmt.Printf("*** method: %s url: %s\n", method, url)
 
 	return slip.List{nil, nil}
 }
@@ -156,4 +160,16 @@ _reply-handler_ the response is set as the "reponse" element of the
 box. Transition is either on a link matching the response status. If there is
 no match then the error link is followed.
 `
+}
+
+var validMethods = map[string]bool{
+	http.MethodGet:     true,
+	http.MethodPost:    true,
+	http.MethodPut:     true,
+	http.MethodDelete:  true,
+	http.MethodHead:    true,
+	http.MethodPatch:   true,
+	http.MethodConnect: true,
+	http.MethodOptions: true,
+	http.MethodTrace:   true,
 }
