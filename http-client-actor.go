@@ -3,12 +3,15 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"net/http"
 
+	"github.com/ohler55/ojg/alt"
+	"github.com/ohler55/ojg/jp"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/flavors"
+	"github.com/ohler55/slip/pkg/net"
 )
 
 var (
@@ -46,8 +49,8 @@ type httpClientCtx struct {
 	task    *task
 	method  strCaller
 	url     strCaller
-	header  slip.Object // TBD
-	trailer slip.Object // TBD
+	header  headerCaller
+	trailer headerCaller
 	body    streamCaller
 	timeout durCaller
 	handler slip.Caller
@@ -61,10 +64,6 @@ func (caller httpClientInitCaller) Call(s *slip.Scope, args slip.List, depth int
 		args = args[0].(slip.List)
 	}
 	hcc := httpClientCtx{}
-
-	// TBD check early or wait until :perform?
-	//  will need similar for both cases
-
 	for pos := 0; pos < len(args)-1; pos += 2 {
 		sym, _ := args[pos].(slip.Symbol)
 		switch string(sym) {
@@ -73,11 +72,9 @@ func (caller httpClientInitCaller) Call(s *slip.Scope, args slip.List, depth int
 		case ":url":
 			hcc.method.extract(s, args[pos+1])
 		case ":header":
-			hcc.header = args[pos+1]
-			// TBD verify either assoc or function
+			hcc.header.extract(s, args[pos+1])
 		case ":trailer":
-			hcc.trailer = args[pos+1]
-			// TBD verify either assoc or function
+			hcc.trailer.extract(s, args[pos+1])
 		case ":body":
 			hcc.body.extract(s, args[pos+1])
 		case ":timeout":
@@ -135,19 +132,41 @@ func (caller httpClientActorPerformCaller) Call(s *slip.Scope, args slip.List, _
 
 	hcc := obj.Any.(*httpClientCtx)
 	method := hcc.method.value(s, bi)
-	url := hcc.method.value(s, bi)
+	url := hcc.url.value(s, bi)
+	body := hcc.body.value(s, bi)
+	timeout := hcc.timeout.value(s, bi)
+	ctx := context.Background()
+	if 0 < timeout {
+		var cf context.CancelFunc
+		ctx, cf = context.WithTimeout(ctx, timeout)
+		defer cf()
+	}
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
+	if err != nil {
+		panic(err)
+	}
+	req.Header = hcc.header.value(s, bi)
+	req.Trailer = hcc.trailer.value(s, bi)
 
-	// TBD hcc.getString(hcc.method, hcc.methodCaller)
-	// TBD maybe struct for string-caller, same for headers, timeout, body
-
-	// TBD get params
-	//  example: method
-	//   if string or symbol then set
-	//   else resolve to caller and call then verify again
-
-	fmt.Printf("*** method: %s url: %s\n", method, url)
-
-	return slip.List{nil, nil}
+	var (
+		client http.Client
+		resp   *http.Response
+	)
+	if resp, err = client.Do(req); err != nil {
+		panic(err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+	if hcc.handler != nil {
+		_ = hcc.handler.Call(s, slip.List{net.MakeResponse(resp), bi}, 0)
+	} else {
+		bx := bi.Any.(*box)
+		if bx.frozen {
+			bx.content = alt.Dup(bx.content)
+			bx.frozen = false
+		}
+		jp.C("response").MustSet(bx.content, simplifyHTTPResponse(resp))
+	}
+	return slip.List{slip.String(resp.Status), bi}
 }
 
 func (caller httpClientActorPerformCaller) Docs() string {
@@ -162,14 +181,30 @@ no match then the error link is followed.
 `
 }
 
-var validMethods = map[string]bool{
-	http.MethodGet:     true,
-	http.MethodPost:    true,
-	http.MethodPut:     true,
-	http.MethodDelete:  true,
-	http.MethodHead:    true,
-	http.MethodPatch:   true,
-	http.MethodConnect: true,
-	http.MethodOptions: true,
-	http.MethodTrace:   true,
+func simplifyHTTPResponse(resp *http.Response) any {
+	var body string
+
+	return map[string]any{
+		"status":        int64(resp.StatusCode),
+		"proto":         resp.Proto,
+		"header":        simplifyHTTPHeader(resp.Header),
+		"contentLength": resp.ContentLength,
+		"trailer":       simplifyHTTPHeader(resp.Trailer),
+		"body":          body,
+	}
+}
+
+func simplifyHTTPHeader(h http.Header) (sh any) {
+	if h != nil {
+		header := map[string]any{}
+		for k, va := range h {
+			vlist := make([]any, len(va))
+			for i, s := range va {
+				vlist[i] = s
+			}
+			header[k] = vlist
+		}
+		sh = header
+	}
+	return
 }
