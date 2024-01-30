@@ -10,20 +10,10 @@
   + merge-actor
 
   - http-client-actor (specify get, post, etc)
-    - reply-handler
-     - place in box at path
-     - encode header and other response data
-      - content type remains as string unless json
-      - if content type is json then parse and store
-
-   - :perform
-    - pull params from box to override init params
-     - use top path and fixed sub paths?
-     - options for each init param can be a path instead
-      - how to know if it is a path
-       - since actors are created with code paths can be bag-paths
-      - or maybe a function/lambda to generate the value
-    - log info for request and response
+   - test
+    - create http server
+    - flow with http-client-actor and exit-actor
+    - various box output
 
   - trigger tasks
    - are they needed or better to call from outside flow?
