@@ -4,7 +4,9 @@ package main
 
 import (
 	"context"
+	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/ohler55/ojg/alt"
 	"github.com/ohler55/ojg/jp"
@@ -70,7 +72,7 @@ func (caller httpClientInitCaller) Call(s *slip.Scope, args slip.List, depth int
 		case ":method":
 			hcc.method.extract(s, args[pos+1])
 		case ":url":
-			hcc.method.extract(s, args[pos+1])
+			hcc.url.extract(s, args[pos+1])
 		case ":header":
 			hcc.header.extract(s, args[pos+1])
 		case ":trailer":
@@ -90,13 +92,13 @@ func (caller httpClientInitCaller) Call(s *slip.Scope, args slip.List, depth int
 
 func (caller httpClientInitCaller) Docs() string {
 	return `__:init__ &key _method_ _url_ _header_ _trailer_ _body_ _timeout_ _reply-handler_
-   _method_ [string|symbol|function] of the request.
-   _url_ [string|function] for the query including the host, port, and path.
-   _header_ [assoc|function] headers for the request.
-   _trailer_ [assoc|function] trailers for the request.
-   _body_ [string|output-stream] for of the request for PUT and POST requests as well as other that have content.
+   _:method_ [string|symbol|function] of the request.
+   _:url_ [string|function] for the query including the host, port, and path.
+   _:header_ [assoc|function] headers for the request.
+   _:trailer_ [assoc|function] trailers for the request.
+   _:body_ [string|output-stream] for of the request for PUT and POST requests as well as other that have content.
    _:timeout_ [fixnum|function] seconds before timing out waiting for a reply from the HTTP request.
-   _reply-handler_ [function] to call with the response from a request and the box received. If _nil_ then
+   _:reply-handler_ [function] to call with the response from a request and the box received. If _nil_ then
 place the content in a "response" element of the box.
 
 
@@ -164,9 +166,10 @@ func (caller httpClientActorPerformCaller) Call(s *slip.Scope, args slip.List, _
 			bx.content = alt.Dup(bx.content)
 			bx.frozen = false
 		}
-		jp.C("response").MustSet(bx.content, simplifyHTTPResponse(resp))
+		content := simplifyHTTPResponse(resp)
+		jp.C("response").MustSet(bx.content, content)
 	}
-	return slip.List{slip.String(resp.Status), bi}
+	return slip.List{slip.String(strconv.Itoa(resp.StatusCode)), bi}
 }
 
 func (caller httpClientActorPerformCaller) Docs() string {
@@ -182,15 +185,14 @@ no match then the error link is followed.
 }
 
 func simplifyHTTPResponse(resp *http.Response) any {
-	var body string
-
+	body, _ := io.ReadAll(resp.Body)
 	return map[string]any{
 		"status":        int64(resp.StatusCode),
 		"proto":         resp.Proto,
 		"header":        simplifyHTTPHeader(resp.Header),
 		"contentLength": resp.ContentLength,
 		"trailer":       simplifyHTTPHeader(resp.Trailer),
-		"body":          body,
+		"body":          string(body),
 	}
 }
 

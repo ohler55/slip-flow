@@ -8,12 +8,7 @@
   + jump-actor
   + split-actor
   + merge-actor
-
   - http-client-actor (specify get, post, etc)
-   - test
-    - create http server
-    - flow with http-client-actor and exit-actor
-    - various box output
 
   - trigger tasks
    - are they needed or better to call from outside flow?
