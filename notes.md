@@ -1,26 +1,8 @@
 # SLIP-Flow Notes
 
 - next
- - actors
-  + flow-exit-actor (places box on exit-channel)
-  + log-error-actor (logs error or what ever is in box if not an error)
-  + inspect-actor [prints out box, for debugging]
-  + jump-actor
-  + split-actor
-  + merge-actor
 
-  - http-client-actor (specify get, post, etc)
-   - method
-   - host
-   - port
-   - url
-   - proto
-   - header
-   - trailer
-   - body (string or stream)
-   - timeout
-   -
-  - trigger tasks
+  - trigger tasks/actors
    - are they needed or better to call from outside flow?
    - http-server-actor
    - queue-actor input actor for trigger tasks
@@ -42,3 +24,18 @@
  - optional method for actors to allow creation
   - init-key-values => (:foo 2 :bar "xyz")
    - what keywords and values are needed to create the same actor instance
+
+- dev env (in slip) or maybe emacs integration is enough
+ - repl
+ - ability to save functions to a file once they are good
+  - maybe save world but just for changes
+   - world.lisp
+  - would need to remember function code
+  - maybe list all defs (defvar, defun, defflavor, defmethod, defconstant)
+   - pick which ones or all to write to a file
+  - need an edit-function with option for external editor or in repl
+
+- text/x-common-lisp
+- text/x-emacs-lisp
+- application/lisp (not a recognized content-type)
+- text/lisp (not a recognized content-type)
