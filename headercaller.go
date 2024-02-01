@@ -42,19 +42,7 @@ func (hc *headerCaller) extractFromList(list slip.List) http.Header {
 		if !ok {
 			slip.PanicType("header element", v, "cons")
 		}
-		header.Add(mustBeString(cons.Car()), mustBeString(cons.Cdr()))
+		header.Add(mustBeString(cons.Car(), "header key"), mustBeString(cons.Cdr(), "header value"))
 	}
 	return header
-}
-
-func mustBeString(arg slip.Object) (str string) {
-	switch ta := arg.(type) {
-	case slip.String:
-		str = string(ta)
-	case slip.Symbol:
-		str = string(ta)
-	default:
-		slip.PanicType("string", arg, "string", "symbol")
-	}
-	return
 }

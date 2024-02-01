@@ -1,16 +1,8 @@
 # SLIP-Flow Notes
 
 - next
- - actors
-  + flow-exit-actor (places box on exit-channel)
-  + log-error-actor (logs error or what ever is in box if not an error)
-  + inspect-actor [prints out box, for debugging]
-  + jump-actor
-  + split-actor
-  + merge-actor
-  - http-client-actor (specify get, post, etc)
 
-  - trigger tasks
+  - trigger tasks/actors
    - are they needed or better to call from outside flow?
    - http-server-actor
    - queue-actor input actor for trigger tasks

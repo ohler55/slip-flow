@@ -26,14 +26,19 @@ func (sc *strCaller) extract(s *slip.Scope, arg slip.Object) {
 func (sc *strCaller) value(s *slip.Scope, bi slip.Object) (val string) {
 	val = sc.str
 	if sc.caller != nil {
-		switch tv := sc.caller.Call(s, slip.List{bi}, 0).(type) {
-		case slip.String:
-			val = string(tv)
-		case slip.Symbol:
-			val = string(tv)
-		default:
-			slip.PanicType("value", tv, "string", "symbol")
-		}
+		val = mustBeString(sc.caller.Call(s, slip.List{bi}, 0), "value")
+	}
+	return
+}
+
+func mustBeString(arg slip.Object, name string) (str string) {
+	switch ta := arg.(type) {
+	case slip.String:
+		str = string(ta)
+	case slip.Symbol:
+		str = string(ta)
+	default:
+		slip.PanicType(name, arg, "string", "symbol")
 	}
 	return
 }

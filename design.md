@@ -16,10 +16,10 @@ The classes or flavors in the package are:
 
  * flow-group
  * flow
- * task
- * actor
- * box
- * track
+ * flow-task
+ * various actors
+ * flow-box
+ * flow-track
  * flow-editor
 
 ## Classes (Flavors)
