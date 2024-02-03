@@ -11,16 +11,21 @@
 - flow-editor
  - should be part of task and flow
   - keeping separate will be hard to keep in sync
-  - task
-   - svg [string]
-   - x [fixnum]
-   - y
-  - flow
-   - width
-   - height
-   - icon-width
-   - icon-height
-   - background [string]
+ - allow tasks and flow to be updated after creation
+ - provide write for a flow to write and file that can be used to recreate
+ - task changes or updates (attributes and get and set)
+  - put each in task-x.go, task-y.go, task-svg.go
+  - :svg [string]
+  - :x [fixnum]
+  - :y
+ - flow
+  - :width
+  - :height
+  - :icon-width
+  - :icon-height
+  - :background [string]
+ - flow :link
+  - :points
  - optional method for actors to allow creation
   - init-key-values => (:foo 2 :bar "xyz")
    - what keywords and values are needed to create the same actor instance

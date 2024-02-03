@@ -74,6 +74,9 @@ type task struct {
 	done      chan struct{}
 	workers   int
 	depth     int
+	x         int
+	y         int
+	svg       string
 	qmu       sync.Mutex
 	received  atomic.Uint64
 	errors    atomic.Uint64
