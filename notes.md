@@ -16,6 +16,12 @@
     - allows server creation and configuration outside the flow so no need to deal with task/actor configuration restrictions
 
 - writeable
+ - task :update-link or :set-link-points or :set-link-mids
+  - (name mid-points) 'foo '((2 3)(4 5))
+
+ - where to put mid points for a link?
+  - task links should refer to a link struct with task and points
+  - flow :links should return list with mid points after
  - flow
   - :width
   - :height
@@ -27,13 +33,10 @@
   - :write
    - writes code to create in a let or let*
    - use (read x) to load or add to a group
-    - add read to slip
   - :draw
    - returns a string that is an SVG
  - task
-  - :svg [string] [task-svg.go]
-  - :x [fixnum] [task-x.go]
-  - :y [fixnum] [task-y.go]
+  - :update-link
  - actors
   - optional method for actors to allow creation
   - init-key-values => (:foo 2 :bar "xyz")

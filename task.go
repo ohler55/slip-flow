@@ -19,7 +19,11 @@ var (
 
 func init() {
 	taskFlavor = flavors.DefFlavor("flow-task-flavor",
-		map[string]slip.Object{},
+		map[string]slip.Object{
+			"x":   nil,
+			"y":   nil,
+			"svg": nil,
+		},
 		[]string{
 			"can-log-flavor",
 		},
@@ -47,6 +51,9 @@ See also: flow-flavor
 				slip.Symbol(":workers"),
 				slip.Symbol(":depth"),
 			},
+			slip.Symbol(":gettable-instance-variables"),
+			slip.Symbol(":settable-instance-variables"),
+			slip.Symbol(":inittable-instance-variables"),
 		},
 	)
 	taskFlavor.DefMethod(":init", "", taskInitCaller{})
@@ -61,22 +68,25 @@ See also: flow-flavor
 	taskFlavor.DefMethod(":links", "", taskLinksCaller{})
 	taskFlavor.DefMethod(":unlink", "", taskUnlinkCaller{})
 	taskFlavor.DefMethod(":transition", "", taskTransitionCaller{})
+	// taskFlavor.DefMethod(":update-link", "", taskUpdateLinkCaller{})
+}
+
+type link struct {
+	task *task
+	mids slip.List
 }
 
 type task struct {
 	name      string
 	self      *flavors.Instance
 	flow      *flow
-	links     map[string]*task
+	links     map[string]*link
 	actors    []slip.Instance
 	caller    slip.Caller
 	queue     chan *flavors.Instance // must be box instances
 	done      chan struct{}
 	workers   int
 	depth     int
-	x         int
-	y         int
-	svg       string
 	qmu       sync.Mutex
 	received  atomic.Uint64
 	errors    atomic.Uint64
@@ -224,7 +234,10 @@ func (t *task) handleResult(s *slip.Scope, result slip.Object) {
 }
 
 func (t *task) transition(s *slip.Scope, linkName string, bi *flavors.Instance) {
-	to := t.links[linkName]
+	var to *task
+	if lnk := t.links[linkName]; lnk != nil {
+		to = lnk.task
+	}
 	t.processed.Add(1)
 	tr := bi.Any.(*box).track
 	ev := tr.history[len(tr.history)-1]
@@ -263,8 +276,8 @@ func (t *task) handleError(s *slip.Scope, bi *flavors.Instance, err any) {
 		"content": bx.content,
 		"error":   msg,
 	}
-	if to := t.links["error"]; to != nil {
-		to.receive(s, nb)
+	if lnk := t.links["error"]; lnk != nil {
+		lnk.task.receive(s, nb)
 		return
 	}
 	if t.flow != nil {
@@ -313,10 +326,11 @@ func (t *task) linkList() (la slip.List) {
 		la = make(slip.List, len(keys))
 		for i, k := range keys {
 			var ti *flavors.Instance
-			if to := t.links[k]; to != nil {
-				ti = to.self
+			lnk := t.links[k]
+			if lnk != nil {
+				ti = lnk.task.self
 			}
-			la[i] = slip.List{slip.String(k), slip.Tail{Value: ti}}
+			la[i] = append(slip.List{slip.String(k), ti}, lnk.mids...)
 		}
 	}
 	return
@@ -347,7 +361,7 @@ func MakeTask(args ...slip.Object) (self *flavors.Instance, t *task) {
 }
 
 func makeTaskStruct(self *flavors.Instance, args slip.List) (tsk *task) {
-	tsk = &task{self: self, links: map[string]*task{}}
+	tsk = &task{self: self, links: map[string]*link{}}
 	for i := 0; i < len(args)-1; i += 2 {
 		switch args[i] {
 		case slip.Symbol(":name"):

@@ -210,7 +210,7 @@ func (f *flow) link(args slip.List) {
 	if to = f.tasks[strFromArg(args[2], "flow :link :to")]; to == nil {
 		slip.NewPanic("task %s not found", args[2])
 	}
-	from.links[name] = to
+	from.links[name] = &link{task: to}
 }
 
 func (f *flow) exit(bi slip.Object) {
