@@ -106,6 +106,9 @@ func (t *task) start(s *slip.Scope) {
 	}
 	if 0 < t.workers {
 		t.qmu.Lock()
+		if t.depth <= 0 {
+			t.depth = t.workers * 2
+		}
 		t.queue = make(chan *flavors.Instance, t.depth)
 		t.done = make(chan struct{}, t.depth)
 		t.qmu.Unlock()

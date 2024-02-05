@@ -15,6 +15,11 @@
      - no longer just flow forward so sub-flows need to know about tasks in other flows
     - allows server creation and configuration outside the flow so no need to deal with task/actor configuration restrictions
 
+- flow :validate
+ - get allowed transitions from actors if supported
+ - verify no tasks not linked other than error
+ - check there is an entry task (if trigger tak then one should be set as entry task)
+
 - writeable
  - task :update-link or :set-link-points or :set-link-mids
   - (name mid-points) 'foo '((2 3)(4 5))
@@ -25,8 +30,8 @@
  - flow
   - :width
   - :height
-  - :icon-width
-  - :icon-height
+  - :task-width
+  - :task-height
   - :background [string]
   - :link
    - :points keyword as list of x y pairs ((1 1)(10 20))

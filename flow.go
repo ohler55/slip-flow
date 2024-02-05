@@ -3,6 +3,9 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
+	"io"
 	"sort"
 	"sync/atomic"
 	"time"
@@ -19,7 +22,13 @@ var (
 
 func init() {
 	flowFlavor = flavors.DefFlavor("flow-flavor",
-		map[string]slip.Object{},
+		map[string]slip.Object{
+			"width":       nil,
+			"height":      nil,
+			"task-width":  nil,
+			"task-height": nil,
+			"background":  nil,
+		},
 		[]string{
 			"can-log-flavor",
 		},
@@ -60,6 +69,9 @@ See also: flow-task-flavor
 				slip.Symbol(":name"),
 				slip.Symbol(":exit-channel"),
 			},
+			slip.Symbol(":gettable-instance-variables"),
+			slip.Symbol(":settable-instance-variables"),
+			slip.Symbol(":inittable-instance-variables"),
 		},
 	)
 	flowFlavor.DefMethod(":init", "", flowInitCaller{})
@@ -79,6 +91,8 @@ See also: flow-task-flavor
 	flowFlavor.DefMethod(":metrics", "", flowMetricsCaller{})
 	flowFlavor.DefMethod(":reset-metrics", "", flowResetMetricsCaller{})
 	flowFlavor.DefMethod(":set-level", ":after", flowSetLevelCaller{})
+	flowFlavor.DefMethod(":write", "", flowWriteCaller{})
+	// flowFlavor.DefMethod(":svg", "", flowSVGCaller{})
 }
 
 type flow struct {
@@ -283,6 +297,118 @@ func (f *flow) resetMetrics() {
 	for _, t := range f.tasks {
 		t.resetMetrics()
 	}
+}
+
+func (f *flow) write(s *slip.Scope, args slip.List) slip.Object {
+	var b []byte
+
+	clos := 1 <= len(args) && args[1] != nil
+
+	b = fmt.Appendf(b, "(let ((flow (make-flow :name %q)))\n", f.name)
+	b = f.appendTasks(b, clos)
+	b = f.appendLinks(b, clos)
+	if f.entry != nil {
+		if clos {
+			b = fmt.Appendf(b, "  (flow-set-entry flow %q)\n", f.entry.name)
+		} else {
+			b = fmt.Appendf(b, "  (send flow :set-entry %q)\n", f.entry.name)
+		}
+	}
+	b = append(b, "  flow)\n"...)
+
+	os := s.Get("*standard-output*").(slip.Stream)
+	w := os.(io.Writer)
+	if 0 < len(args) {
+		switch ta := args[0].(type) {
+		case nil:
+			return slip.String(b)
+		case io.Writer:
+			w = ta
+			os = args[0].(slip.Stream)
+		default:
+			if ta != slip.True {
+				slip.PanicType("destination", ta, "output-stream", "t", "nil")
+			}
+		}
+	}
+	if _, err := w.Write(b); err != nil {
+		slip.PanicStream(os, "write failed. %s", err)
+	}
+	return nil
+}
+
+func (f *flow) appendTasks(b []byte, clos bool) []byte {
+	keys := make([]string, 0, len(f.tasks))
+	for k := range f.tasks {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	indent := "        "
+	lamPad := []byte("\n               ")
+	if clos {
+		indent = "                 "
+		lamPad = []byte("\n                        ")
+	}
+	for _, k := range keys {
+		t := f.tasks[k]
+		if clos {
+			b = append(b, "  (flow-add-task flow\n"...)
+		} else {
+			b = append(b, "  (send flow :add-task\n"...)
+		}
+		b = fmt.Appendf(b, "%s:name %q\n", indent, t.name)
+		if t.caller != nil {
+			if lam, ok := t.caller.(*slip.Lambda); ok {
+				p := *slip.DefaultPrinter()
+				p.Lambda = true
+				p.Pretty = true
+				p.Readably = true
+				p.RightMargin -= uint(len(lamPad))
+				actor := p.Append(nil, lam, 0)
+				actor = bytes.ReplaceAll(actor, []byte{'\n'}, lamPad)
+				b = fmt.Appendf(b, "%s:actor %s\n", indent, actor)
+			} else { // function
+				b = fmt.Appendf(b, "%s:actor %s\n", indent, t.caller)
+			}
+		} else if 0 < len(t.actors) {
+			// TBD add init args to make-instance
+			if 1 < len(t.actors) {
+				b = fmt.Appendf(b, "%s:actor (list", indent)
+				for _, a := range t.actors {
+					b = fmt.Appendf(b, "%s (make-instance '%s)", lamPad, a.Class().Name())
+				}
+				b = append(b, ')', '\n')
+			} else {
+				b = fmt.Appendf(b, "%s:actor (make-instance '%s)\n", indent, t.actors[0].Class().Name())
+			}
+		}
+		if 0 < t.workers {
+			b = fmt.Appendf(b, "%s:workers %d\n", indent, t.workers)
+		}
+		if 0 < t.depth {
+			b = fmt.Appendf(b, "%s:depth %d\n", indent, t.depth)
+		}
+		if x, ok := t.self.Get("x").(slip.Fixnum); ok {
+			b = fmt.Appendf(b, "%s:x %s\n", indent, x)
+		}
+		if y, ok := t.self.Get("y").(slip.Fixnum); ok {
+			b = fmt.Appendf(b, "%s:y %s\n", indent, y)
+		}
+		if svg, ok := t.self.Get("svg").(slip.String); ok {
+			b = fmt.Appendf(b, "%s:svg %s\n", indent, svg)
+		}
+	}
+	return b
+}
+
+func (f *flow) appendLinks(b []byte, clos bool) []byte {
+
+	// TBD add links
+	//  sort tasks
+	//  sort links on tasks
+	//    (flow-link flow "%q" %q %q)
+
+	return b
 }
 
 func strFromArg(arg slip.Object, argName string) (str string) {
