@@ -417,6 +417,24 @@ func makeTaskStruct(self *flavors.Instance, args slip.List) (tsk *task) {
 			} else {
 				slip.PanicType("task :init :depth", args[i+1], "fixnum greater than 0")
 			}
+		case slip.Symbol(":x"):
+			if num, ok := args[i+1].(slip.Fixnum); ok {
+				self.Let("x", num)
+			} else {
+				slip.PanicType("task :init :x", args[i+1], "fixnum")
+			}
+		case slip.Symbol(":y"):
+			if num, ok := args[i+1].(slip.Fixnum); ok {
+				self.Let("y", num)
+			} else {
+				slip.PanicType("task :init :x", args[i+1], "fixnum")
+			}
+		case slip.Symbol(":svg"):
+			if str, ok := args[i+1].(slip.String); ok {
+				self.Let("svg", str)
+			} else {
+				slip.PanicType("task :init :svg", args[i+1], "string")
+			}
 		}
 	}
 	self.Any = tsk

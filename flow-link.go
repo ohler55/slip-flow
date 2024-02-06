@@ -37,6 +37,13 @@ func init() {
 					Type: "string",
 					Text: "name of the destination task of a link.",
 				},
+				{Name: "&optional"},
+				{
+					Name: "mid-points",
+					Type: "list",
+					Text: `a list of mid points for drawing the link in an SVG or in an editor. A list
+of x and y pairs are expected. e.g., ((100 100) (100 200))`,
+				},
 			},
 			Return: "nil",
 			Text:   `__flow-link__ creates a named link between the _from_ task to the _to_ task in a flow.`,
@@ -56,7 +63,7 @@ type FlowLink struct {
 
 // Call the function with the arguments provided.
 func (f *FlowLink) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 4, 4)
+	slip.ArgCountCheck(f, args, 4, 5)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Flavor != flowFlavor {
 		slip.PanicType("flow", args[0], "flow")

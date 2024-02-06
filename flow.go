@@ -224,7 +224,30 @@ func (f *flow) link(args slip.List) {
 	if to = f.tasks[strFromArg(args[2], "flow :link :to")]; to == nil {
 		slip.NewPanic("task %s not found", args[2])
 	}
-	from.links[name] = &link{task: to}
+	lnk := link{task: to}
+	if 3 < len(args) {
+		badFun := func(v slip.Object) {
+			slip.PanicType("flow :link mid-points", v, "list of fixnum pairs")
+		}
+		if mids, ok := args[3].(slip.List); ok {
+			for _, pt := range mids {
+				var xy slip.List
+				if xy, ok = pt.(slip.List); !ok || len(xy) != 2 {
+					badFun(pt)
+				}
+				if _, ok = xy[0].(slip.Fixnum); !ok {
+					badFun(xy)
+				}
+				if _, ok = xy[1].(slip.Fixnum); !ok {
+					badFun(xy)
+				}
+			}
+			lnk.mids = mids
+		} else {
+			badFun(args[3])
+		}
+	}
+	from.links[name] = &lnk
 }
 
 func (f *flow) exit(bi slip.Object) {
@@ -304,7 +327,21 @@ func (f *flow) write(s *slip.Scope, args slip.List) slip.Object {
 
 	clos := 2 <= len(args) && args[1] != nil
 
-	b = fmt.Appendf(b, "(let ((flow (make-flow :name %q)))\n", f.name)
+	b = fmt.Appendf(b, "(let ((flow (make-flow :name %q", f.name)
+	if width, ok := f.self.Get("width").(slip.Fixnum); ok {
+		b = fmt.Appendf(b, "\n                       :width %s", width)
+	}
+	if height, ok := f.self.Get("height").(slip.Fixnum); ok {
+		b = fmt.Appendf(b, "\n                       :height %s", height)
+	}
+	if width, ok := f.self.Get("task-width").(slip.Fixnum); ok {
+		b = fmt.Appendf(b, "\n                       :task-width %s", width)
+	}
+	if height, ok := f.self.Get("task-height").(slip.Fixnum); ok {
+		b = fmt.Appendf(b, "\n                       :task-height %s", height)
+	}
+	b = append(b, ")))\n"...)
+
 	b = f.appendTasks(b, clos, s)
 	b = f.appendLinks(b, clos)
 	if f.entry != nil {
@@ -362,32 +399,6 @@ func (f *flow) appendTasks(b []byte, clos bool, s *slip.Scope) []byte {
 			b = append(b, "  (send flow :add-task\n"...)
 		}
 		b = fmt.Appendf(b, "%s:name %q\n", indent, t.name)
-		if t.caller != nil {
-			if lam, ok := t.caller.(*slip.Lambda); ok {
-				actor := p.Append(nil, lam, 0)
-				actor = bytes.ReplaceAll(actor, []byte{'\n'}, lamPad)
-				b = fmt.Appendf(b, "%s:actor %s\n", indent, actor)
-			} else { // function
-				b = fmt.Appendf(b, "%s:actor %s\n", indent, t.caller)
-			}
-		} else if 0 < len(t.actors) {
-			// TBD add init args to make-instance
-			if 1 < len(t.actors) {
-				b = fmt.Appendf(b, "%s:actor (list", indent)
-				for _, a := range t.actors {
-					b = fmt.Appendf(b, "%s (make-instance '%s)", lamPad, a.Class().Name())
-				}
-				b = append(b, ')', '\n')
-			} else {
-				b = fmt.Appendf(b, "%s:actor (make-instance '%s)\n", indent, t.actors[0].Class().Name())
-			}
-		}
-		if 0 < t.workers {
-			b = fmt.Appendf(b, "%s:workers %d\n", indent, t.workers)
-		}
-		if 0 < t.depth {
-			b = fmt.Appendf(b, "%s:depth %d\n", indent, t.depth)
-		}
 		if x, ok := t.self.Get("x").(slip.Fixnum); ok {
 			b = fmt.Appendf(b, "%s:x %s\n", indent, x)
 		}
@@ -396,6 +407,32 @@ func (f *flow) appendTasks(b []byte, clos bool, s *slip.Scope) []byte {
 		}
 		if svg, ok := t.self.Get("svg").(slip.String); ok {
 			b = fmt.Appendf(b, "%s:svg %s\n", indent, svg)
+		}
+		if 0 < t.workers {
+			b = fmt.Appendf(b, "%s:workers %d\n", indent, t.workers)
+		}
+		if 0 < t.depth {
+			b = fmt.Appendf(b, "%s:depth %d\n", indent, t.depth)
+		}
+		if t.caller != nil {
+			if lam, ok := t.caller.(*slip.Lambda); ok {
+				actor := p.Append(nil, lam, 0)
+				actor = bytes.ReplaceAll(actor, []byte{'\n'}, lamPad)
+				b = fmt.Appendf(b, "%s:actor %s)\n", indent, actor)
+			} else { // function
+				b = fmt.Appendf(b, "%s:actor %s)\n", indent, t.caller)
+			}
+		} else if 0 < len(t.actors) {
+			// TBD add init args to make-instance
+			if 1 < len(t.actors) {
+				b = fmt.Appendf(b, "%s:actor (list", indent)
+				for _, a := range t.actors {
+					b = fmt.Appendf(b, "%s (make-instance '%s)", lamPad, a.Class().Name())
+				}
+				b = append(b, ')', ')', '\n')
+			} else {
+				b = fmt.Appendf(b, "%s:actor (make-instance '%s))\n", indent, t.actors[0].Class().Name())
+			}
 		}
 	}
 	return b

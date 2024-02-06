@@ -78,3 +78,41 @@ func TestFlowLinkBadTo(t *testing.T) {
 		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }
+
+func TestFlowLinkBadMidPoints(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let* ((flow (make-instance 'flow-flavor :name 'flo))
+                        (tick (flow-add-task flow :name "tick" :actor (lambda (b) (list 'ok b))))
+                        (tock (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))))
+                  (flow-link flow 'ok 'tick "tock" t))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let* ((flow (make-instance 'flow-flavor :name 'flo))
+                        (tick (flow-add-task flow :name "tick" :actor (lambda (b) (list 'ok b))))
+                        (tock (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))))
+                  (flow-link flow 'ok 'tick "tock" '(t)))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let* ((flow (make-instance 'flow-flavor :name 'flo))
+                        (tick (flow-add-task flow :name "tick" :actor (lambda (b) (list 'ok b))))
+                        (tock (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))))
+                  (flow-link flow 'ok 'tick "tock" '((t))))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let* ((flow (make-instance 'flow-flavor :name 'flo))
+                        (tick (flow-add-task flow :name "tick" :actor (lambda (b) (list 'ok b))))
+                        (tock (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))))
+                  (flow-link flow 'ok 'tick "tock" '((1 t))))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let* ((flow (make-instance 'flow-flavor :name 'flo))
+                        (tick (flow-add-task flow :name "tick" :actor (lambda (b) (list 'ok b))))
+                        (tock (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))))
+                  (flow-link flow 'ok 'tick "tock" '((t 1))))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}
