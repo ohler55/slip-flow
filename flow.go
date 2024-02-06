@@ -302,10 +302,10 @@ func (f *flow) resetMetrics() {
 func (f *flow) write(s *slip.Scope, args slip.List) slip.Object {
 	var b []byte
 
-	clos := 1 <= len(args) && args[1] != nil
+	clos := 2 <= len(args) && args[1] != nil
 
 	b = fmt.Appendf(b, "(let ((flow (make-flow :name %q)))\n", f.name)
-	b = f.appendTasks(b, clos)
+	b = f.appendTasks(b, clos, s)
 	b = f.appendLinks(b, clos)
 	if f.entry != nil {
 		if clos {
@@ -337,7 +337,7 @@ func (f *flow) write(s *slip.Scope, args slip.List) slip.Object {
 	return nil
 }
 
-func (f *flow) appendTasks(b []byte, clos bool) []byte {
+func (f *flow) appendTasks(b []byte, clos bool, s *slip.Scope) []byte {
 	keys := make([]string, 0, len(f.tasks))
 	for k := range f.tasks {
 		keys = append(keys, k)
@@ -349,6 +349,11 @@ func (f *flow) appendTasks(b []byte, clos bool) []byte {
 		indent = "                 "
 		lamPad = []byte("\n                        ")
 	}
+	p := *slip.DefaultPrinter()
+	p.Lambda = true
+	p.Pretty = true
+	p.Readably = true
+	p.RightMargin = uint(s.Get("*print-right-margin*").(slip.Fixnum)) - uint(len(lamPad))
 	for _, k := range keys {
 		t := f.tasks[k]
 		if clos {
@@ -359,11 +364,6 @@ func (f *flow) appendTasks(b []byte, clos bool) []byte {
 		b = fmt.Appendf(b, "%s:name %q\n", indent, t.name)
 		if t.caller != nil {
 			if lam, ok := t.caller.(*slip.Lambda); ok {
-				p := *slip.DefaultPrinter()
-				p.Lambda = true
-				p.Pretty = true
-				p.Readably = true
-				p.RightMargin -= uint(len(lamPad))
 				actor := p.Append(nil, lam, 0)
 				actor = bytes.ReplaceAll(actor, []byte{'\n'}, lamPad)
 				b = fmt.Appendf(b, "%s:actor %s\n", indent, actor)
@@ -402,12 +402,34 @@ func (f *flow) appendTasks(b []byte, clos bool) []byte {
 }
 
 func (f *flow) appendLinks(b []byte, clos bool) []byte {
-
-	// TBD add links
-	//  sort tasks
-	//  sort links on tasks
-	//    (flow-link flow "%q" %q %q)
-
+	keys := make([]string, 0, len(f.tasks))
+	for k := range f.tasks {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	fun := "(send flow :link"
+	if clos {
+		fun = "(flow-link flow"
+	}
+	for _, k := range keys {
+		t := f.tasks[k]
+		if len(t.links) == 0 {
+			continue
+		}
+		lks := make([]string, 0, len(t.links))
+		for lk := range t.links {
+			lks = append(lks, lk)
+		}
+		sort.Strings(lks)
+		for _, lk := range lks {
+			lnk := t.links[lk]
+			if 0 < len(lnk.mids) {
+				b = fmt.Appendf(b, "  %s %q %q %q '%s)\n", fun, lk, t.name, lnk.task.name, lnk.mids)
+			} else {
+				b = fmt.Appendf(b, "  %s %q %q %q)\n", fun, lk, t.name, lnk.task.name)
+			}
+		}
+	}
 	return b
 }
 

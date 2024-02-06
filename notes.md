@@ -24,9 +24,7 @@
  - task :update-link or :set-link-points or :set-link-mids
   - (name mid-points) 'foo '((2 3)(4 5))
 
- - where to put mid points for a link?
-  - task links should refer to a link struct with task and points
-  - flow :links should return list with mid points after
+ - flow :links should return list with mid points after
  - flow
   - :width
   - :height
@@ -36,9 +34,7 @@
   - :link
    - :points keyword as list of x y pairs ((1 1)(10 20))
   - :write
-   - writes code to create in a let or let*
-   - use (read x) to load or add to a group
-  - :draw
+  - :svg
    - returns a string that is an SVG
  - task
   - :update-link
