@@ -2,6 +2,33 @@
 
 - next
 
+- task :update-link
+- flow :set-exit-channel
+
+
+- writeable
+ - task :update-link or :set-link-points or :set-link-mids
+  - (name mid-points) 'foo '((2 3)(4 5))
+
+ - flow :links should return list with mid points after
+ - flow
+  - :write
+  - :svg
+   - returns a string that is an SVG
+ - task
+  - :update-link
+ - actors
+  - optional method for actors to allow creation
+  - init-key-values => (:foo 2 :bar "xyz")
+   - what keywords and values are needed to create the same actor instance
+
+----------------
+- flow :validate
+ - get allowed transitions from actors if supported
+ - verify no tasks not linked other than error
+ - check there is an entry task (if trigger tak then one should be set as entry task)
+
+------------------
   - trigger tasks/actors
    - are they needed or better to call from outside flow?
    - http-server-actor
@@ -14,34 +41,6 @@
      - multiple flow entry points since nothing in box identifies as a second submission
      - no longer just flow forward so sub-flows need to know about tasks in other flows
     - allows server creation and configuration outside the flow so no need to deal with task/actor configuration restrictions
-
-- flow :validate
- - get allowed transitions from actors if supported
- - verify no tasks not linked other than error
- - check there is an entry task (if trigger tak then one should be set as entry task)
-
-- writeable
- - task :update-link or :set-link-points or :set-link-mids
-  - (name mid-points) 'foo '((2 3)(4 5))
-
- - flow :links should return list with mid points after
- - flow
-  - :width
-  - :height
-  - :task-width
-  - :task-height
-  - :background [string]
-  - :link
-   - :points keyword as list of x y pairs ((1 1)(10 20))
-  - :write
-  - :svg
-   - returns a string that is an SVG
- - task
-  - :update-link
- - actors
-  - optional method for actors to allow creation
-  - init-key-values => (:foo 2 :bar "xyz")
-   - what keywords and values are needed to create the same actor instance
 
 
 - dev env (in slip) or maybe emacs integration is enough

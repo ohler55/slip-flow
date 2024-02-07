@@ -415,27 +415,48 @@ func (f *flow) appendTasks(b []byte, clos bool, s *slip.Scope) []byte {
 			b = fmt.Appendf(b, "%s:depth %d\n", indent, t.depth)
 		}
 		if t.caller != nil {
-			if lam, ok := t.caller.(*slip.Lambda); ok {
+			if 0 < len(t.funcName) {
+				b = fmt.Appendf(b, "%s:actor '%s)\n", indent, t.funcName)
+			} else if lam, ok := t.caller.(*slip.Lambda); ok {
 				actor := p.Append(nil, lam, 0)
 				actor = bytes.ReplaceAll(actor, []byte{'\n'}, lamPad)
 				b = fmt.Appendf(b, "%s:actor %s)\n", indent, actor)
-			} else { // function
-				b = fmt.Appendf(b, "%s:actor %s)\n", indent, t.caller)
 			}
 		} else if 0 < len(t.actors) {
 			// TBD add init args to make-instance
 			if 1 < len(t.actors) {
 				b = fmt.Appendf(b, "%s:actor (list", indent)
 				for _, a := range t.actors {
-					b = fmt.Appendf(b, "%s (make-instance '%s)", lamPad, a.Class().Name())
+					b = fmt.Appendf(b, "%s (make-instance '%s", lamPad, a.Class().Name())
+					// TBD add init args is any
+					b = append(b, ')')
 				}
 				b = append(b, ')', ')', '\n')
 			} else {
-				b = fmt.Appendf(b, "%s:actor (make-instance '%s))\n", indent, t.actors[0].Class().Name())
+				b = fmt.Appendf(b, "%s:actor (make-instance '%s", indent, t.actors[0].Class().Name())
+				for _, kv := range actorInitKeyValue(s, t.actors[0]) {
+					list := kv.(slip.List)
+					switch tv := list[1].(type) {
+					case slip.List:
+						b = fmt.Appendf(b, "\n%s                      %s '%s", indent, list[0], tv)
+					case *slip.Lambda:
+					// TBD if a lambda then ...
+					default:
+						b = fmt.Appendf(b, "\n%s                      %s %s", indent, list[0], tv)
+					}
+				}
+				b = append(b, ')', ')', '\n')
 			}
 		}
 	}
 	return b
+}
+
+func actorInitKeyValue(s *slip.Scope, a slip.Instance) slip.List {
+	if a.HasMethod(":init-key-values") {
+		return a.Receive(s, ":init-key-values", slip.List{}, 0).(slip.List)
+	}
+	return nil
 }
 
 func (f *flow) appendLinks(b []byte, clos bool) []byte {

@@ -27,7 +27,9 @@ func init() {
 		slip.List{
 			slip.List{
 				slip.Symbol(":documentation"),
-				slip.String(`A flow-http-client-actor TBD
+				slip.String(`An HTTP client actor that can be used to make HTTP requests and
+then add the results to a box for transition to the next task along a link with the same name
+as the HTTP status of the response.
 `),
 			},
 			slip.List{
@@ -45,6 +47,7 @@ func init() {
 	httpClientActorFlavor.DefMethod(":init", "", httpClientInitCaller{})
 	httpClientActorFlavor.DefMethod(":start", "", httpClientActorStartCaller{})
 	httpClientActorFlavor.DefMethod(":perform", "", httpClientActorPerformCaller{})
+	httpClientActorFlavor.DefMethod(":init-key-values", "", httpClientActorInitKeyValuesCaller{})
 }
 
 type httpClientCtx struct {
@@ -181,6 +184,39 @@ Makes an HTTP request and passes the response to the _reply-handler_ or if no
 _reply-handler_ the response is set as the "reponse" element of the
 box. Transition is either on a link matching the response status. If there is
 no match then the error link is followed.
+`
+}
+
+type httpClientActorInitKeyValuesCaller struct{}
+
+func (caller httpClientActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	hcc := obj.Any.(*httpClientCtx)
+
+	var kvs slip.List
+	kvs = append(kvs, slip.List{slip.Symbol(":method"), hcc.method.raw()})
+	kvs = append(kvs, slip.List{slip.Symbol(":url"), hcc.url.raw()})
+	kvs = append(kvs, slip.List{slip.Symbol(":timeout"), hcc.timeout.raw()})
+	if h := hcc.header.raw(); h != nil {
+		kvs = append(kvs, slip.List{slip.Symbol(":header"), h})
+	}
+	if h := hcc.trailer.raw(); h != nil {
+		kvs = append(kvs, slip.List{slip.Symbol(":trailer"), h})
+	}
+	if body := hcc.body.raw(); body != slip.String("") {
+		kvs = append(kvs, slip.List{slip.Symbol(":body"), hcc.body.raw()})
+	}
+	if lam, ok := hcc.handler.(*slip.Lambda); ok {
+		kvs = append(kvs, slip.List{slip.Symbol(":reply-handler"), lam})
+	}
+	return kvs
+}
+
+func (caller httpClientActorInitKeyValuesCaller) Docs() string {
+	return `__:init-key-values__ => ((:method get) (:timeout 1))
+
+
+Returns the keywords and values needed to recreate the instance.
 `
 }
 

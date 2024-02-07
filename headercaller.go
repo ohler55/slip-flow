@@ -4,6 +4,7 @@ package main
 
 import (
 	"net/http"
+	"sort"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/cl"
@@ -45,4 +46,28 @@ func (hc *headerCaller) extractFromList(list slip.List) http.Header {
 		header.Add(mustBeString(cons.Car(), "header key"), mustBeString(cons.Cdr(), "header value"))
 	}
 	return header
+}
+
+func (hc *headerCaller) raw() (rv slip.Object) {
+	if lam, ok := hc.caller.(*slip.Lambda); ok {
+		rv = lam
+	} else {
+		var assoc slip.List
+		keys := make([]string, 0, len(hc.header))
+		for k := range hc.header {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			kv := slip.List{slip.String(k)}
+			for _, v := range hc.header[k] {
+				kv = append(kv, slip.String(v))
+			}
+			assoc = append(assoc, kv)
+		}
+		if 0 < len(assoc) {
+			rv = assoc
+		}
+	}
+	return
 }

@@ -109,8 +109,9 @@ func (g *group) start(s *slip.Scope) {
 		g.self.Let("logger", logger)
 	}
 	for _, f := range g.flows {
-		// TBD if nil logger then set else don't
-		f.self.Let("logger", logger)
+		if f.self.Get("logger") == nil {
+			f.self.Let("logger", logger)
+		}
 		f.start(s)
 	}
 }

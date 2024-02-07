@@ -80,8 +80,6 @@ func TestPkgTimeWrap(t *testing.T) {
 		Expect: `(("time" . 1.25))`,
 	}).Test(t)
 
-	// TBD verify parsed format is correct for string and int
-
 	_ = slip.ReadString(`(setq *flow-box-time-wrap* nil)`).Eval(scope, nil)
 	v = slip.ReadString(`*flow-box-time-wrap*`).Eval(scope, nil)
 	tt.Equal(t, `nil`, slip.ObjectString(v))

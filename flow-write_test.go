@@ -3,8 +3,10 @@
 package main_test
 
 import (
+	"bytes"
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
@@ -89,7 +91,18 @@ func TestFlowWriteSend(t *testing.T) {
 }
 
 func TestFlowWriteFunction(t *testing.T) {
+	scope := slip.NewScope()
+
+	var b bytes.Buffer
+	orig := scope.Get("*standard-output*")
+	defer scope.Set("*standard-output*", orig)
+	scope.Set("*standard-output*", &slip.OutputStream{Writer: &b})
+	scope.Let("*print-right-margin*", slip.Fixnum(80))
+
+	_ = slip.ReadString("(defun flow-write-test-perform (b) (list 'ok b))").Eval(scope, nil)
+
 	(&sliptest.Function{
+		Scope: scope,
 		Source: `
 (let ((flow (make-flow :name 'flo)))
   (flow-add-task flow
@@ -97,75 +110,106 @@ func TestFlowWriteFunction(t *testing.T) {
                  :x 100
                  :y 0
                  :svg "<svg></svg>"
-                 :actor (lambda (b) (list 'ok b)))
+                 :actor 'flow-write-test-perform)
   (flow-add-task flow
                  :name "done"
                  :x 200
                  :y 0
-                 :actor (make-instance 'flow-exit-actor))
+                 :actor (list (make-instance 'flow-exit-actor) (make-instance 'flow-exit-actor)))
   (flow-link flow 'ok 'start "done")
   (flow-set-entry flow 'start)
-  (flow-write flow nil t))`,
-		Expect: `"(let ((flow (make-flow :name "flo")))
+  (flow-write flow t t))`,
+		Expect: "nil",
+	}).Test(t)
+
+	tt.Equal(t, `(let ((flow (make-flow :name "flo")))
   (flow-add-task flow
                  :name "done"
                  :x 200
                  :y 0
-                 :actor (make-instance 'flow-exit-actor))
+                 :actor (list
+                         (make-instance 'flow-exit-actor)
+                         (make-instance 'flow-exit-actor)))
   (flow-add-task flow
                  :name "start"
                  :x 100
                  :y 0
                  :svg "<svg></svg>"
-                 :actor (lambda (b) (list 'ok b)))
+                 :actor 'flow-write-test-perform)
   (flow-link flow "ok" "start" "done")
   (flow-set-entry flow "start")
   flow)
-"`,
-	}).Test(t)
+`, b.String())
+
 }
 
-func TestFlowWriteBadX(t *testing.T) {
-	(&sliptest.Function{
-		Source: `
-(let ((flow (make-flow :name 'flo)))
-  (flow-add-task flow :name "start" :x t :y 0 :actor (lambda (b) (list 'ok b))))
-`,
-		PanicType: slip.Symbol("type-error"),
-	}).Test(t)
-}
+func TestFlowWriteStream(t *testing.T) {
+	scope := slip.NewScope()
 
-func TestFlowWriteBadY(t *testing.T) {
-	(&sliptest.Function{
-		Source: `
-(let ((flow (make-flow :name 'flo)))
-  (flow-add-task flow :name "start" :x 0 :y t :actor (lambda (b) (list 'ok b))))
-`,
-		PanicType: slip.Symbol("type-error"),
-	}).Test(t)
-}
+	var b bytes.Buffer
+	scope.Set("out", &slip.OutputStream{Writer: &b})
+	scope.Let("*print-right-margin*", slip.Fixnum(80))
 
-func TestFlowWriteSvg(t *testing.T) {
 	(&sliptest.Function{
+		Scope: scope,
 		Source: `
 (let ((flow (make-flow :name 'flo)))
-  (flow-add-task flow :name "start" :svg "<sgv></svg>" :actor (lambda (b) (list 'ok b)))
+  (flow-add-task flow
+                 :name "start"
+                 :x 100
+                 :y 0
+                 :svg "<svg></svg>"
+                 :actor (make-instance 'flow-http-client-actor
+                                       :method 'get
+                                       :timeout 1
+                                       :header '((Accept . "text/html"))
+                                       :url "http://localhost:7777"))
+  (flow-add-task flow
+                 :name "done"
+                 :x 200
+                 :y 0
+                 :actor (list (make-instance 'flow-exit-actor) (make-instance 'flow-exit-actor)))
+  (flow-link flow 'ok 'start "done")
+  (flow-set-entry flow 'start)
+  (flow-write flow out t))`,
+		Expect: "nil",
+	}).Test(t)
+
+	tt.Equal(t, `(let ((flow (make-flow :name "flo")))
+  (flow-add-task flow
+                 :name "done"
+                 :x 200
+                 :y 0
+                 :actor (list
+                         (make-instance 'flow-exit-actor)
+                         (make-instance 'flow-exit-actor)))
+  (flow-add-task flow
+                 :name "start"
+                 :x 100
+                 :y 0
+                 :svg "<svg></svg>"
+                 :actor (make-instance 'flow-http-client-actor
+                                       :method "get"
+                                       :url "http://localhost:7777"
+                                       :timeout 1
+                                       :header '(("Accept" "text/html"))))
+  (flow-link flow "ok" "start" "done")
+  (flow-set-entry flow "start")
   flow)
-`,
-		Expect: "/#<flow-flavor [0-9a-f]+>/",
-	}).Test(t)
-	(&sliptest.Function{
-		Source: `
-(let ((flow (make-flow :name 'flo)))
-  (flow-add-task flow :name "start" :svg t :actor (lambda (b) (list 'ok b))))
-`,
-		PanicType: slip.Symbol("type-error"),
-	}).Test(t)
+`, b.String())
+
 }
 
 func TestFlowWriteBadFlow(t *testing.T) {
 	(&sliptest.Function{
 		Source:    "(flow-write t)",
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}
+
+func TestFlowWriteBadStream(t *testing.T) {
+	(&sliptest.Function{
+		Source:    "(flow-write (make-flow :name 'flo) 7)",
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }

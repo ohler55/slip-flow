@@ -47,7 +47,21 @@ workers.`,
 					Type: "fixnum",
 					Text: "of the work queue.",
 				},
-				// TBD x, y, svg keywords
+				{
+					Name: "x",
+					Type: "fixnum",
+					Text: "horizontal offset of the task.",
+				},
+				{
+					Name: "y",
+					Type: "fixnum",
+					Text: "vertical offset of the task.",
+				},
+				{
+					Name: "svg",
+					Type: "fixnum",
+					Text: "an SVG string for the task.",
+				},
 			},
 			Return: "nil",
 			Text:   `__flow-add-task__ add-tasks all the _tasks_ in the _flow_.`,

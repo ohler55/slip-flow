@@ -83,6 +83,7 @@ type task struct {
 	links     map[string]*link
 	actors    []slip.Instance
 	caller    slip.Caller
+	funcName  string
 	queue     chan *flavors.Instance // must be box instances
 	done      chan struct{}
 	workers   int
@@ -399,6 +400,7 @@ func makeTaskStruct(self *flavors.Instance, args slip.List) (tsk *task) {
 				tsk.caller = tv
 			case *slip.FuncInfo:
 				tsk.caller = tv.Create(nil).(slip.Funky).Caller()
+				tsk.funcName = tv.Name
 			case slip.Symbol:
 				val = slip.FindFunc(string(tv))
 				goto Actor
