@@ -161,7 +161,7 @@ func TestFlowWriteStream(t *testing.T) {
                  :svg "<svg></svg>"
                  :actor (make-instance 'flow-http-client-actor
                                        :method 'get
-                                       :timeout 1
+                                       :timeout (lambda (b) 1)
                                        :header '((Accept . "text/html"))
                                        :url "http://localhost:7777"))
   (flow-add-task flow
@@ -191,7 +191,7 @@ func TestFlowWriteStream(t *testing.T) {
                  :actor (make-instance 'flow-http-client-actor
                                        :method "get"
                                        :url "http://localhost:7777"
-                                       :timeout 1
+                                       :timeout (lambda (b) 1))
                                        :header '(("Accept" "text/html"))))
   (flow-link flow "ok" "start" "done")
   (flow-set-entry flow "start")

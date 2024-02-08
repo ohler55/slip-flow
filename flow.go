@@ -453,7 +453,7 @@ func appendInitKeyValues(b []byte, s *slip.Scope, p *slip.Printer, a slip.Instan
 				case *slip.Lambda:
 					actor := p.Append(nil, tv, 0)
 					actor = bytes.ReplaceAll(actor, []byte{'\n'}, i2)
-					b = fmt.Appendf(b, "%s %s %s)\n", indent, key, actor)
+					b = fmt.Appendf(b, "\n%s %s %s)", indent, key, actor)
 				default:
 					b = fmt.Appendf(b, "\n%s %s %s", indent, key, tv)
 				}

@@ -21,10 +21,6 @@ func init() {
 				slip.String(`A flow-task-actor sets the _task_ variable with the provided task argument.`),
 			},
 			slip.Symbol(":gettable-instance-variables"),
-			slip.List{
-				slip.Symbol(":init-keywords"),
-				slip.Symbol(":links"),
-			},
 		},
 	)
 	taskActorFlavor.DefMethod(":start", "", taskActorStartCaller{})

@@ -2,10 +2,8 @@
 
 - next
 
-- test coverage
 - task :update-link
 - flow :set-exit-channel
-- split-actor does not need :links, just use all connected except 'error'
 
 - writeable
  - task :update-link or :set-link-points or :set-link-mids
