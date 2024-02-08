@@ -423,28 +423,17 @@ func (f *flow) appendTasks(b []byte, clos bool, s *slip.Scope) []byte {
 				b = fmt.Appendf(b, "%s:actor %s)\n", indent, actor)
 			}
 		} else if 0 < len(t.actors) {
-			// TBD add init args to make-instance
 			if 1 < len(t.actors) {
 				b = fmt.Appendf(b, "%s:actor (list", indent)
 				for _, a := range t.actors {
 					b = fmt.Appendf(b, "%s (make-instance '%s", lamPad, a.Class().Name())
-					// TBD add init args is any
+					b = appendInitKeyValues(b, s, &p, a, indent+"                     ")
 					b = append(b, ')')
 				}
 				b = append(b, ')', ')', '\n')
 			} else {
 				b = fmt.Appendf(b, "%s:actor (make-instance '%s", indent, t.actors[0].Class().Name())
-				for _, kv := range actorInitKeyValue(s, t.actors[0]) {
-					list := kv.(slip.List)
-					switch tv := list[1].(type) {
-					case slip.List:
-						b = fmt.Appendf(b, "\n%s                      %s '%s", indent, list[0], tv)
-					case *slip.Lambda:
-					// TBD if a lambda then ...
-					default:
-						b = fmt.Appendf(b, "\n%s                      %s %s", indent, list[0], tv)
-					}
-				}
+				b = appendInitKeyValues(b, s, &p, t.actors[0], indent+"                     ")
 				b = append(b, ')', ')', '\n')
 			}
 		}
@@ -452,11 +441,26 @@ func (f *flow) appendTasks(b []byte, clos bool, s *slip.Scope) []byte {
 	return b
 }
 
-func actorInitKeyValue(s *slip.Scope, a slip.Instance) slip.List {
+func appendInitKeyValues(b []byte, s *slip.Scope, p *slip.Printer, a slip.Instance, indent string) []byte {
 	if a.HasMethod(":init-key-values") {
-		return a.Receive(s, ":init-key-values", slip.List{}, 0).(slip.List)
+		i2 := []byte(indent + "       ")
+		for _, av := range a.Receive(s, ":init-key-values", slip.List{}, 0).(slip.List) {
+			if kv, ok := av.(slip.List); ok {
+				key := kv.Car()
+				switch tv := kv.Cdr().(type) {
+				case slip.List:
+					b = fmt.Appendf(b, "\n%s %s '%s", indent, key, tv)
+				case *slip.Lambda:
+					actor := p.Append(nil, tv, 0)
+					actor = bytes.ReplaceAll(actor, []byte{'\n'}, i2)
+					b = fmt.Appendf(b, "%s %s %s)\n", indent, key, actor)
+				default:
+					b = fmt.Appendf(b, "\n%s %s %s", indent, key, tv)
+				}
+			}
+		}
 	}
-	return nil
+	return b
 }
 
 func (f *flow) appendLinks(b []byte, clos bool) []byte {

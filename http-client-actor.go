@@ -194,20 +194,26 @@ func (caller httpClientActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.L
 	hcc := obj.Any.(*httpClientCtx)
 
 	var kvs slip.List
-	kvs = append(kvs, slip.List{slip.Symbol(":method"), hcc.method.raw()})
-	kvs = append(kvs, slip.List{slip.Symbol(":url"), hcc.url.raw()})
-	kvs = append(kvs, slip.List{slip.Symbol(":timeout"), hcc.timeout.raw()})
-	if h := hcc.header.raw(); h != nil {
-		kvs = append(kvs, slip.List{slip.Symbol(":header"), h})
+	kvs = append(kvs, slip.List{slip.Symbol(":method"), slip.Tail{Value: hcc.method.raw()}})
+	kvs = append(kvs, slip.List{slip.Symbol(":url"), slip.Tail{Value: hcc.url.raw()}})
+	kvs = append(kvs, slip.List{slip.Symbol(":timeout"), slip.Tail{Value: hcc.timeout.raw()}})
+	switch th := hcc.header.raw().(type) {
+	case slip.List:
+		kvs = append(kvs, append(slip.List{slip.Symbol(":header")}, th...))
+	case *slip.Lambda:
+		kvs = append(kvs, slip.List{slip.Symbol(":header"), slip.Tail{Value: th}})
 	}
-	if h := hcc.trailer.raw(); h != nil {
-		kvs = append(kvs, slip.List{slip.Symbol(":trailer"), h})
+	switch th := hcc.trailer.raw().(type) {
+	case slip.List:
+		kvs = append(kvs, append(slip.List{slip.Symbol(":trailer")}, th...))
+	case *slip.Lambda:
+		kvs = append(kvs, slip.List{slip.Symbol(":trailer"), slip.Tail{Value: th}})
 	}
 	if body := hcc.body.raw(); body != slip.String("") {
-		kvs = append(kvs, slip.List{slip.Symbol(":body"), hcc.body.raw()})
+		kvs = append(kvs, slip.List{slip.Symbol(":body"), slip.Tail{Value: hcc.body.raw()}})
 	}
 	if lam, ok := hcc.handler.(*slip.Lambda); ok {
-		kvs = append(kvs, slip.List{slip.Symbol(":reply-handler"), lam})
+		kvs = append(kvs, slip.List{slip.Symbol(":reply-handler"), slip.Tail{Value: lam}})
 	}
 	return kvs
 }
