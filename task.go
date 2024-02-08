@@ -68,7 +68,7 @@ See also: flow-flavor
 	taskFlavor.DefMethod(":links", "", taskLinksCaller{})
 	taskFlavor.DefMethod(":unlink", "", taskUnlinkCaller{})
 	taskFlavor.DefMethod(":transition", "", taskTransitionCaller{})
-	// taskFlavor.DefMethod(":update-link", "", taskUpdateLinkCaller{})
+	taskFlavor.DefMethod(":update-link", "", taskUpdateLinkCaller{})
 }
 
 type link struct {
@@ -355,6 +355,11 @@ func (t *task) unlink(args slip.List) {
 	t.qmu.Lock()
 	delete(t.links, name)
 	t.qmu.Unlock()
+}
+
+func (t *task) updateLink(args slip.List) {
+
+	// TBD
 }
 
 // MakeTask is only public for testing purposes.
