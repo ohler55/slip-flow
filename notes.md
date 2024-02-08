@@ -3,7 +3,6 @@
 - next
 
 - task :update-link
-- flow :set-exit-channel
 
 - writeable
  - task :update-link or :set-link-points or :set-link-mids

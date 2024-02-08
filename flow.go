@@ -88,6 +88,7 @@ See also: flow-task-flavor
 	flowFlavor.DefMethod(":link", "", flowLinkCaller{})
 	flowFlavor.DefMethod(":submit", "", flowSubmitCaller{})
 	flowFlavor.DefMethod(":exit-channel", "", flowExitChannelCaller{})
+	flowFlavor.DefMethod(":set-exit-channel", "", flowSetExitChannelCaller{})
 	flowFlavor.DefMethod(":metrics", "", flowMetricsCaller{})
 	flowFlavor.DefMethod(":reset-metrics", "", flowResetMetricsCaller{})
 	flowFlavor.DefMethod(":set-level", ":after", flowSetLevelCaller{})
@@ -101,7 +102,7 @@ type flow struct {
 	group    *group
 	tasks    map[string]*task
 	entry    *task
-	exitChan gi.Channel
+	exitChan slip.Object
 	started  bool
 
 	received  atomic.Uint64
@@ -263,7 +264,7 @@ func (f *flow) exit(bi slip.Object) {
 		}
 	}
 	if f.exitChan != nil {
-		f.exitChan <- bi
+		f.exitChan.(gi.Channel) <- bi
 	}
 }
 

@@ -197,7 +197,6 @@ func TestFlowWriteStream(t *testing.T) {
   (flow-set-entry flow "start")
   flow)
 `, b.String())
-
 }
 
 func TestFlowWriteBadFlow(t *testing.T) {
@@ -211,5 +210,15 @@ func TestFlowWriteBadStream(t *testing.T) {
 	(&sliptest.Function{
 		Source:    "(flow-write (make-flow :name 'flo) 7)",
 		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}
+
+func TestFlowWriteOutputError(t *testing.T) {
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: badWriter(0)})
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send (make-flow) :write out)`,
+		PanicType: slip.Symbol("stream-error"),
 	}).Test(t)
 }

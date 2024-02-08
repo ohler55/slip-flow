@@ -31,6 +31,7 @@ func TestFlowDocs(t *testing.T) {
 		":link",
 		":submit",
 		":exit-channel",
+		":set-exit-channel",
 		":set-level",
 		":metrics",
 		":reset-metrics",
