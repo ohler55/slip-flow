@@ -39,3 +39,11 @@ func (sc *streamCaller) value(s *slip.Scope, bi slip.Object) (val io.Reader) {
 	}
 	return
 }
+
+func (sc *streamCaller) raw() (rv slip.Object) {
+	var ok bool
+	if rv, ok = sc.caller.(*slip.Lambda); !ok {
+		rv = slip.String(sc.str)
+	}
+	return
+}

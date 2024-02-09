@@ -26,3 +26,41 @@ func TestFlowAddTaskExists(t *testing.T) {
 		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }
+
+func TestFlowAddTaskBadX(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((flow (make-flow :name 'flo)))
+  (flow-add-task flow :name "start" :x t :y 0 :actor (lambda (b) (list 'ok b))))
+`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}
+
+func TestFlowAddTaskBadY(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((flow (make-flow :name 'flo)))
+  (flow-add-task flow :name "start" :x 0 :y t :actor (lambda (b) (list 'ok b))))
+`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}
+
+func TestFlowAddTaskSvg(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((flow (make-flow :name 'flo)))
+  (flow-add-task flow :name "start" :svg "<sgv></svg>" :actor (lambda (b) (list 'ok b)))
+  flow)
+`,
+		Expect: "/#<flow-flavor [0-9a-f]+>/",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `
+(let ((flow (make-flow :name 'flo)))
+  (flow-add-task flow :name "start" :svg t :actor (lambda (b) (list 'ok b))))
+`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}

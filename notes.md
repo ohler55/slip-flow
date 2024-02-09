@@ -2,28 +2,29 @@
 
 - next
 
+----------------
+- flow :validate
+ - get allowed transitions from actors if supported
+ - verify no tasks not linked other than error
+ - check there is an entry task (if trigger task then one should be set as entry task)
+
+----------------
+- flow :svg
+
+------------------
   - trigger tasks/actors
    - are they needed or better to call from outside flow?
    - http-server-actor
    - queue-actor input actor for trigger tasks
    - schedule-actor
+   - for
+    - keeps servers in the flow (not sure if this is a good thing though)
+   - against
+    - requires loop back to original to respond for an http server
+     - multiple flow entry points since nothing in box identifies as a second submission
+     - no longer just flow forward so sub-flows need to know about tasks in other flows
+    - allows server creation and configuration outside the flow so no need to deal with task/actor configuration restrictions
 
-- flow-editor
- - should be part of task and flow
-  - keeping separate will be hard to keep in sync
-  - task
-   - svg [string]
-   - x [fixnum]
-   - y
-  - flow
-   - width
-   - height
-   - icon-width
-   - icon-height
-   - background [string]
- - optional method for actors to allow creation
-  - init-key-values => (:foo 2 :bar "xyz")
-   - what keywords and values are needed to create the same actor instance
 
 - dev env (in slip) or maybe emacs integration is enough
  - repl

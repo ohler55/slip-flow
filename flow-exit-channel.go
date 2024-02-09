@@ -5,7 +5,6 @@ package main
 import (
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
-	"github.com/ohler55/slip/pkg/gi"
 )
 
 func init() {
@@ -24,11 +23,11 @@ func init() {
 					Text: "to return the exit-channel of.",
 				},
 			},
-			Return: "string",
+			Return: "channel",
 			Text:   `__flow-exit-channel__ returns the exit-channel of a _flow-flavor_ instance.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :exit-channel "flo"))`,
-				`(flow-exit-channel flow) => "flo"`,
+				`(setq flow (make-instance 'flow-flavor :exit-channel (make-channel 1)))`,
+				`(flow-exit-channel flow) => #<channel 12345>`,
 			},
 		}, &Pkg)
 }
@@ -45,7 +44,7 @@ func (f *FlowExitChannel) Call(s *slip.Scope, args slip.List, depth int) (result
 	if !ok || self.Flavor != flowFlavor {
 		slip.PanicType("flow", args[0], "flow")
 	}
-	return gi.Channel(self.Any.(*flow).exitChan)
+	return self.Any.(*flow).exitChan
 }
 
 type flowExitChannelCaller struct{}
@@ -53,7 +52,7 @@ type flowExitChannelCaller struct{}
 func (caller flowExitChannelCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 
-	return gi.Channel(obj.Any.(*flow).exitChan)
+	return obj.Any.(*flow).exitChan
 }
 
 func (caller flowExitChannelCaller) Docs() string {

@@ -3,6 +3,9 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
+	"io"
 	"sort"
 	"sync/atomic"
 	"time"
@@ -19,7 +22,13 @@ var (
 
 func init() {
 	flowFlavor = flavors.DefFlavor("flow-flavor",
-		map[string]slip.Object{},
+		map[string]slip.Object{
+			"width":       nil,
+			"height":      nil,
+			"task-width":  nil,
+			"task-height": nil,
+			"background":  nil,
+		},
 		[]string{
 			"can-log-flavor",
 		},
@@ -60,6 +69,9 @@ See also: flow-task-flavor
 				slip.Symbol(":name"),
 				slip.Symbol(":exit-channel"),
 			},
+			slip.Symbol(":gettable-instance-variables"),
+			slip.Symbol(":settable-instance-variables"),
+			slip.Symbol(":inittable-instance-variables"),
 		},
 	)
 	flowFlavor.DefMethod(":init", "", flowInitCaller{})
@@ -76,9 +88,12 @@ See also: flow-task-flavor
 	flowFlavor.DefMethod(":link", "", flowLinkCaller{})
 	flowFlavor.DefMethod(":submit", "", flowSubmitCaller{})
 	flowFlavor.DefMethod(":exit-channel", "", flowExitChannelCaller{})
+	flowFlavor.DefMethod(":set-exit-channel", "", flowSetExitChannelCaller{})
 	flowFlavor.DefMethod(":metrics", "", flowMetricsCaller{})
 	flowFlavor.DefMethod(":reset-metrics", "", flowResetMetricsCaller{})
 	flowFlavor.DefMethod(":set-level", ":after", flowSetLevelCaller{})
+	flowFlavor.DefMethod(":write", "", flowWriteCaller{})
+	// flowFlavor.DefMethod(":svg", "", flowSVGCaller{})
 }
 
 type flow struct {
@@ -87,7 +102,7 @@ type flow struct {
 	group    *group
 	tasks    map[string]*task
 	entry    *task
-	exitChan gi.Channel
+	exitChan slip.Object
 	started  bool
 
 	received  atomic.Uint64
@@ -210,7 +225,34 @@ func (f *flow) link(args slip.List) {
 	if to = f.tasks[strFromArg(args[2], "flow :link :to")]; to == nil {
 		slip.NewPanic("task %s not found", args[2])
 	}
-	from.links[name] = to
+	lnk := link{task: to}
+	if 3 < len(args) {
+		lnk.mids = checkMidPoints(args[3])
+	}
+	from.links[name] = &lnk
+}
+
+func checkMidPoints(arg slip.Object) slip.List {
+	badFun := func(v slip.Object) {
+		slip.PanicType("link mid-points", v, "list of fixnum pairs")
+	}
+	mids, ok := arg.(slip.List)
+	if !ok {
+		badFun(arg)
+	}
+	for _, pt := range mids {
+		var xy slip.List
+		if xy, ok = pt.(slip.List); !ok || len(xy) != 2 {
+			badFun(pt)
+		}
+		if _, ok = xy[0].(slip.Fixnum); !ok {
+			badFun(xy)
+		}
+		if _, ok = xy[1].(slip.Fixnum); !ok {
+			badFun(xy)
+		}
+	}
+	return mids
 }
 
 func (f *flow) exit(bi slip.Object) {
@@ -226,7 +268,7 @@ func (f *flow) exit(bi slip.Object) {
 		}
 	}
 	if f.exitChan != nil {
-		f.exitChan <- bi
+		f.exitChan.(gi.Channel) <- bi
 	}
 }
 
@@ -283,6 +325,179 @@ func (f *flow) resetMetrics() {
 	for _, t := range f.tasks {
 		t.resetMetrics()
 	}
+}
+
+func (f *flow) write(s *slip.Scope, args slip.List) slip.Object {
+	var b []byte
+
+	clos := 2 <= len(args) && args[1] != nil
+
+	b = fmt.Appendf(b, "(let ((flow (make-flow :name %q", f.name)
+	if width, ok := f.self.Get("width").(slip.Fixnum); ok {
+		b = fmt.Appendf(b, "\n                       :width %s", width)
+	}
+	if height, ok := f.self.Get("height").(slip.Fixnum); ok {
+		b = fmt.Appendf(b, "\n                       :height %s", height)
+	}
+	if width, ok := f.self.Get("task-width").(slip.Fixnum); ok {
+		b = fmt.Appendf(b, "\n                       :task-width %s", width)
+	}
+	if height, ok := f.self.Get("task-height").(slip.Fixnum); ok {
+		b = fmt.Appendf(b, "\n                       :task-height %s", height)
+	}
+	b = append(b, ")))\n"...)
+
+	b = f.appendTasks(b, clos, s)
+	b = f.appendLinks(b, clos)
+	if f.entry != nil {
+		if clos {
+			b = fmt.Appendf(b, "  (flow-set-entry flow %q)\n", f.entry.name)
+		} else {
+			b = fmt.Appendf(b, "  (send flow :set-entry %q)\n", f.entry.name)
+		}
+	}
+	b = append(b, "  flow)\n"...)
+
+	os := s.Get("*standard-output*").(slip.Stream)
+	w := os.(io.Writer)
+	if 0 < len(args) {
+		switch ta := args[0].(type) {
+		case nil:
+			return slip.String(b)
+		case io.Writer:
+			w = ta
+			os = args[0].(slip.Stream)
+		default:
+			if ta != slip.True {
+				slip.PanicType("destination", ta, "output-stream", "t", "nil")
+			}
+		}
+	}
+	if _, err := w.Write(b); err != nil {
+		slip.PanicStream(os, "write failed. %s", err)
+	}
+	return nil
+}
+
+func (f *flow) appendTasks(b []byte, clos bool, s *slip.Scope) []byte {
+	keys := make([]string, 0, len(f.tasks))
+	for k := range f.tasks {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	indent := "        "
+	lamPad := []byte("\n               ")
+	if clos {
+		indent = "                 "
+		lamPad = []byte("\n                        ")
+	}
+	p := *slip.DefaultPrinter()
+	p.Lambda = true
+	p.Pretty = true
+	p.Readably = true
+	p.RightMargin = uint(s.Get("*print-right-margin*").(slip.Fixnum)) - uint(len(lamPad))
+	for _, k := range keys {
+		t := f.tasks[k]
+		if clos {
+			b = append(b, "  (flow-add-task flow\n"...)
+		} else {
+			b = append(b, "  (send flow :add-task\n"...)
+		}
+		b = fmt.Appendf(b, "%s:name %q\n", indent, t.name)
+		if x, ok := t.self.Get("x").(slip.Fixnum); ok {
+			b = fmt.Appendf(b, "%s:x %s\n", indent, x)
+		}
+		if y, ok := t.self.Get("y").(slip.Fixnum); ok {
+			b = fmt.Appendf(b, "%s:y %s\n", indent, y)
+		}
+		if svg, ok := t.self.Get("svg").(slip.String); ok {
+			b = fmt.Appendf(b, "%s:svg %s\n", indent, svg)
+		}
+		if 0 < t.workers {
+			b = fmt.Appendf(b, "%s:workers %d\n", indent, t.workers)
+		}
+		if 0 < t.depth {
+			b = fmt.Appendf(b, "%s:depth %d\n", indent, t.depth)
+		}
+		if t.caller != nil {
+			if 0 < len(t.funcName) {
+				b = fmt.Appendf(b, "%s:actor '%s)\n", indent, t.funcName)
+			} else if lam, ok := t.caller.(*slip.Lambda); ok {
+				actor := p.Append(nil, lam, 0)
+				actor = bytes.ReplaceAll(actor, []byte{'\n'}, lamPad)
+				b = fmt.Appendf(b, "%s:actor %s)\n", indent, actor)
+			}
+		} else if 0 < len(t.actors) {
+			if 1 < len(t.actors) {
+				b = fmt.Appendf(b, "%s:actor (list", indent)
+				for _, a := range t.actors {
+					b = fmt.Appendf(b, "%s (make-instance '%s", lamPad, a.Class().Name())
+					b = appendInitKeyValues(b, s, &p, a, indent+"                     ")
+					b = append(b, ')')
+				}
+				b = append(b, ')', ')', '\n')
+			} else {
+				b = fmt.Appendf(b, "%s:actor (make-instance '%s", indent, t.actors[0].Class().Name())
+				b = appendInitKeyValues(b, s, &p, t.actors[0], indent+"                     ")
+				b = append(b, ')', ')', '\n')
+			}
+		}
+	}
+	return b
+}
+
+func appendInitKeyValues(b []byte, s *slip.Scope, p *slip.Printer, a slip.Instance, indent string) []byte {
+	if a.HasMethod(":init-key-values") {
+		i2 := []byte(indent + "       ")
+		for _, av := range a.Receive(s, ":init-key-values", slip.List{}, 0).(slip.List) {
+			if kv, ok := av.(slip.List); ok {
+				key := kv.Car()
+				switch tv := kv.Cdr().(type) {
+				case slip.List:
+					b = fmt.Appendf(b, "\n%s %s '%s", indent, key, tv)
+				case *slip.Lambda:
+					actor := p.Append(nil, tv, 0)
+					actor = bytes.ReplaceAll(actor, []byte{'\n'}, i2)
+					b = fmt.Appendf(b, "\n%s %s %s)", indent, key, actor)
+				default:
+					b = fmt.Appendf(b, "\n%s %s %s", indent, key, tv)
+				}
+			}
+		}
+	}
+	return b
+}
+
+func (f *flow) appendLinks(b []byte, clos bool) []byte {
+	keys := make([]string, 0, len(f.tasks))
+	for k := range f.tasks {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	fun := "(send flow :link"
+	if clos {
+		fun = "(flow-link flow"
+	}
+	for _, k := range keys {
+		t := f.tasks[k]
+		if len(t.links) == 0 {
+			continue
+		}
+		lks := make([]string, 0, len(t.links))
+		for lk := range t.links {
+			lks = append(lks, lk)
+		}
+		sort.Strings(lks)
+		for _, lk := range lks {
+			lnk := t.links[lk]
+			if 0 < len(lnk.mids) {
+				b = fmt.Appendf(b, "  %s %q %q %q '%s)\n", fun, lk, t.name, lnk.task.name, lnk.mids)
+			} else {
+				b = fmt.Appendf(b, "  %s %q %q %q)\n", fun, lk, t.name, lnk.task.name)
+			}
+		}
+	}
+	return b
 }
 
 func strFromArg(arg slip.Object, argName string) (str string) {

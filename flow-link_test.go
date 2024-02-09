@@ -16,7 +16,7 @@ func TestFlowLinkFunction(t *testing.T) {
                         (tock (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))))
                   (flow-link flow 'ok 'tick "tock")
                   (flow-task-links tick))`,
-		Expect: `/\(\("ok" . #<flow-task-flavor [0-9a-f]+>\)\)/`,
+		Expect: `/\(\("ok" #<flow-task-flavor [0-9a-f]+>\)\)/`,
 	}).Test(t)
 }
 
@@ -27,7 +27,7 @@ func TestFlowLinkSend(t *testing.T) {
                         (tock (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))))
                   (send flow :link 'ok 'tick 'tock)
                   (send tick :links))`,
-		Expect: `/\(\("ok" . #<flow-task-flavor [0-9a-f]+>\)\)/`,
+		Expect: `/\(\("ok" #<flow-task-flavor [0-9a-f]+>\)\)/`,
 	}).Test(t)
 }
 
@@ -38,7 +38,7 @@ func TestFlowLinkNilName(t *testing.T) {
                         (tock (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))))
                   (flow-link flow nil 'tick "tock")
                   (flow-task-links tick))`,
-		Expect: `/\(\("" . #<flow-task-flavor [0-9a-f]+>\)\)/`,
+		Expect: `/\(\("" #<flow-task-flavor [0-9a-f]+>\)\)/`,
 	}).Test(t)
 }
 
@@ -76,5 +76,43 @@ func TestFlowLinkBadTo(t *testing.T) {
                         (tock (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))))
                   (flow-link flow 'ok 'tick 'bad))`,
 		PanicType: slip.Symbol("error"),
+	}).Test(t)
+}
+
+func TestFlowLinkBadMidPoints(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let* ((flow (make-instance 'flow-flavor :name 'flo))
+                        (tick (flow-add-task flow :name "tick" :actor (lambda (b) (list 'ok b))))
+                        (tock (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))))
+                  (flow-link flow 'ok 'tick "tock" t))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let* ((flow (make-instance 'flow-flavor :name 'flo))
+                        (tick (flow-add-task flow :name "tick" :actor (lambda (b) (list 'ok b))))
+                        (tock (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))))
+                  (flow-link flow 'ok 'tick "tock" '(t)))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let* ((flow (make-instance 'flow-flavor :name 'flo))
+                        (tick (flow-add-task flow :name "tick" :actor (lambda (b) (list 'ok b))))
+                        (tock (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))))
+                  (flow-link flow 'ok 'tick "tock" '((t))))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let* ((flow (make-instance 'flow-flavor :name 'flo))
+                        (tick (flow-add-task flow :name "tick" :actor (lambda (b) (list 'ok b))))
+                        (tock (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))))
+                  (flow-link flow 'ok 'tick "tock" '((1 t))))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let* ((flow (make-instance 'flow-flavor :name 'flo))
+                        (tick (flow-add-task flow :name "tick" :actor (lambda (b) (list 'ok b))))
+                        (tock (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))))
+                  (flow-link flow 'ok 'tick "tock" '((t 1))))`,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }

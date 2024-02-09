@@ -24,7 +24,7 @@ func TestSplitActor(t *testing.T) {
 (let ((flow (make-flow :name 'flo :exit-channel exit-channel)))
   (flow-add-task flow
                  :name "start"
-                 :actor (make-instance 'flow-split-actor :links '(one "two")))
+                 :actor (make-instance 'flow-split-actor))
   (flow-add-task flow
                  :name "branch-one"
                  :actor (make-instance 'flow-exit-actor))
@@ -55,27 +55,12 @@ func TestSplitActor(t *testing.T) {
 	tt.Equal(t, true, strings.Contains(hstr, "branch-two"))
 }
 
-func TestSplitActorLinksNotList(t *testing.T) {
-	(&sliptest.Function{
-		Source:    `(make-instance 'flow-split-actor :links t)`,
-		PanicType: slip.Symbol("type-error"),
-	}).Test(t)
-}
-
-func TestSplitActorLinksNotString(t *testing.T) {
-	(&sliptest.Function{
-		Source:    `(make-instance 'flow-split-actor :links '(one t))`,
-		PanicType: slip.Symbol("type-error"),
-	}).Test(t)
-}
-
 func TestSplitActorDocs(t *testing.T) {
 	scope := slip.NewScope()
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
 	for _, method := range []string{
-		":init",
 		":start",
 		":perform",
 	} {

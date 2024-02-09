@@ -33,7 +33,7 @@ func TestMergeActorOk(t *testing.T) {
 (let ((flow (make-flow :name 'flo :exit-channel exit-channel)))
   (flow-add-task flow
                  :name "split"
-                 :actor (make-instance 'flow-split-actor :links '(one two)))
+                 :actor (make-instance 'flow-split-actor))
   (flow-add-task flow
                  :name "x"
                  :actor (lambda (b) (flow-box-set b 1 "x") (list 'ok b)))
@@ -89,7 +89,7 @@ func TestMergeActorTimeout(t *testing.T) {
 (let ((flow (make-flow :name 'flo :exit-channel exit-channel)))
   (flow-add-task flow
                  :name "split"
-                 :actor (make-instance 'flow-split-actor :links '(one two)))
+                 :actor (make-instance 'flow-split-actor))
   (flow-add-task flow
                  :name "x"
                  :actor (lambda (b) (flow-box-set b 1 "x") (list 'ok b)))

@@ -153,6 +153,55 @@ func testHTTPClientActorOk(t *testing.T, actor string, checkAll bool) {
 	tt.Equal(t, `"text/plain; charset=utf-8"`, slip.ObjectString(value))
 }
 
+func TestHTTPClientActorInitKeyValues(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(send (make-instance 'flow-http-client-actor
+                                      :method "post"
+                                      :timeout 1
+                                      :header '((Accept . "text/html"))
+                                      :trailer '((Expires . "Wed, 7 Feb 2024 23:19:00 GMT"))
+                                      :body "Hello"
+                                      :reply-handler (lambda (r) (format t "~A~%" r))
+                                      :url "http://localhost:7777") :init-key-values)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			for i, x := range []string{
+				`(:method . "post")`,
+				`(:url . "http://localhost:7777")`,
+				`(:timeout . 1)`,
+				`(:header ("Accept" "text/html"))`,
+				`(:trailer ("Expires" "Wed, 7 Feb 2024 23:19:00 GMT"))`,
+				`(:body . "Hello")`,
+				`/\(:reply-handler . #<function \(lambda \(r\)\) \{[0-9a-f]+\}>\)/`,
+			} {
+				tt.Equal(t, x, slip.ObjectString(v.(slip.List)[i]), x)
+			}
+		},
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(send (make-instance 'flow-http-client-actor
+                                      :method "post"
+                                      :timeout 1
+                                      :header (lambda (b) '((Accept . "text/html")))
+                                      :trailer (lambda (b) '((Expires . "Wed, 7 Feb 2024 23:19:00 GMT")))
+                                      :body "Hello"
+                                      :reply-handler (lambda (r) (format t "~A~%" r))
+                                      :url "http://localhost:7777") :init-key-values)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			for i, x := range []string{
+				`(:method . "post")`,
+				`(:url . "http://localhost:7777")`,
+				`(:timeout . 1)`,
+				`/\(:header . #<function \(lambda \(b\)\) \{[0-9a-f]+\}>\)/`,
+				`/\(:trailer . #<function \(lambda \(b\)\) \{[0-9a-f]+\}>\)/`,
+				`(:body . "Hello")`,
+				`/\(:reply-handler . #<function \(lambda \(r\)\) \{[0-9a-f]+\}>\)/`,
+			} {
+				tt.Equal(t, x, slip.ObjectString(v.(slip.List)[i]), x)
+			}
+		},
+	}).Test(t)
+}
+
 func TestHTTPClientActorDocs(t *testing.T) {
 	scope := slip.NewScope()
 	var out strings.Builder
@@ -162,6 +211,7 @@ func TestHTTPClientActorDocs(t *testing.T) {
 		":init",
 		":start",
 		":perform",
+		":init-key-values",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-http-client-actor %s out)`, method)).Eval(scope, nil)
 		// fmt.Printf("*** %s\n", out.String())

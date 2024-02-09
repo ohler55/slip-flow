@@ -31,6 +31,14 @@ func (sc *strCaller) value(s *slip.Scope, bi slip.Object) (val string) {
 	return
 }
 
+func (sc *strCaller) raw() (rv slip.Object) {
+	var ok bool
+	if rv, ok = sc.caller.(*slip.Lambda); !ok {
+		rv = slip.String(sc.str)
+	}
+	return
+}
+
 func mustBeString(arg slip.Object, name string) (str string) {
 	switch ta := arg.(type) {
 	case slip.String:

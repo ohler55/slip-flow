@@ -21,67 +21,17 @@ func init() {
 				slip.String(`A flow-split-actor sends a _box_ on multiple links in parallel.
 A _flow-merge-actor_ can be used to merge the branch of the slit back together.`),
 			},
-			slip.List{
-				slip.Symbol(":init-keywords"),
-				slip.Symbol(":links"),
-			},
 		},
 	)
-	splitActorFlavor.DefMethod(":init", "", splitInitCaller{})
 	splitActorFlavor.DefMethod(":start", "", splitActorStartCaller{})
 	splitActorFlavor.DefMethod(":perform", "", splitActorPerformCaller{})
-}
-
-type splitCtx struct {
-	task  *task
-	links []string
-}
-
-type splitInitCaller struct{}
-
-func (caller splitInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	self := s.Get("self").(*flavors.Instance)
-	if 0 < len(args) {
-		args = args[0].(slip.List)
-	}
-	var sc splitCtx
-	for pos := 0; pos < len(args)-1; pos += 2 {
-		if string(args[pos].(slip.Symbol)) == ":links" {
-			names, ok := args[pos+1].(slip.List)
-			if !ok {
-				slip.PanicType("links", args[pos+1], "list")
-			}
-			for _, n := range names {
-				switch tn := n.(type) {
-				case slip.String:
-					sc.links = append(sc.links, string(tn))
-				case slip.Symbol:
-					sc.links = append(sc.links, string(tn))
-				default:
-					slip.PanicType("links element", tn, "string", "symbol")
-				}
-			}
-		}
-	}
-	self.Any = &sc
-
-	return nil
-}
-
-func (caller splitInitCaller) Docs() string {
-	return `__:init__ &key _links_
-   _:links_ [list] a list of link names as either strings or symbols.
-
-
-Sets the initial value when _make-instance_ is called.
-`
 }
 
 type splitActorStartCaller struct{}
 
 func (caller splitActorStartCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	obj.Any.(*splitCtx).task = args[0].(*flavors.Instance).Any.(*task)
+	obj.Any = args[0].(*flavors.Instance).Any
 
 	return nil
 }
@@ -101,10 +51,11 @@ func (caller splitActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int)
 	obj := s.Get("self").(*flavors.Instance)
 	bi := args[0].(*flavors.Instance)
 
-	sc := obj.Any.(*splitCtx)
-	tsk := sc.task
-	for _, name := range sc.links {
-		tsk.transition(s, name, bi)
+	tsk := obj.Any.(*task)
+	for name := range tsk.links {
+		if name != "error" {
+			tsk.transition(s, name, bi)
+		}
 	}
 	return slip.List{nil, nil}
 }

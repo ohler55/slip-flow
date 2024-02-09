@@ -59,3 +59,11 @@ func (dc *durCaller) value(s *slip.Scope, bi slip.Object) (val time.Duration) {
 	}
 	return
 }
+
+func (dc *durCaller) raw() (rv slip.Object) {
+	var ok bool
+	if rv, ok = dc.caller.(*slip.Lambda); !ok {
+		rv = slip.Fixnum(dc.dur / time.Second)
+	}
+	return
+}
