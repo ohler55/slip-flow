@@ -42,6 +42,7 @@ arrays.
 	mergeActorFlavor.DefMethod(":start", "", mergeActorStartCaller{})
 	mergeActorFlavor.DefMethod(":perform", "", mergeActorPerformCaller{})
 	mergeActorFlavor.DefMethod(":shutdown", "", mergeActorShutdownCaller{})
+	mergeActorFlavor.DefMethod(":links", "", mergeActorLinksCaller{})
 }
 
 type boxCnt struct {
@@ -213,5 +214,19 @@ func (caller mergeActorShutdownCaller) Docs() string {
 
 
 Shuts down the actor by exiting the timeout checking loop.
+`
+}
+
+type mergeActorLinksCaller struct{}
+
+func (caller mergeActorLinksCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	return slip.List{slip.String("ok")}
+}
+
+func (caller mergeActorLinksCaller) Docs() string {
+	return `__:links__ => _list_
+
+
+Returns a list of transitions that can be followed.
 `
 }

@@ -129,6 +129,13 @@ func TestMergeActorTimeout(t *testing.T) {
 	tt.Equal(t, `"error"`, slip.ObjectString(history))
 }
 
+func TestMergeActorLinks(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(send (make-instance 'flow-merge-actor) :links)`,
+		Expect: `("ok")`,
+	}).Test(t)
+}
+
 func TestMergeActorDocs(t *testing.T) {
 	scope := slip.NewScope()
 	var out strings.Builder
@@ -139,6 +146,7 @@ func TestMergeActorDocs(t *testing.T) {
 		":start",
 		":perform",
 		":shutdown",
+		":links",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-merge-actor %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))

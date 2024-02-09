@@ -93,6 +93,7 @@ See also: flow-task-flavor
 	flowFlavor.DefMethod(":reset-metrics", "", flowResetMetricsCaller{})
 	flowFlavor.DefMethod(":set-level", ":after", flowSetLevelCaller{})
 	flowFlavor.DefMethod(":write", "", flowWriteCaller{})
+	flowFlavor.DefMethod(":validate", "", flowValidateCaller{})
 	// flowFlavor.DefMethod(":svg", "", flowSVGCaller{})
 }
 
@@ -498,6 +499,32 @@ func (f *flow) appendLinks(b []byte, clos bool) []byte {
 		}
 	}
 	return b
+}
+
+func (f *flow) validate(s *slip.Scope) (fails slip.List) {
+	tasks := map[string]bool{}
+	for name := range f.tasks {
+		tasks[name] = false
+	}
+	if f.entry == nil {
+		fails = append(fails, slip.String("no entry task"))
+	} else {
+		tasks[f.entry.name] = true
+	}
+	for _, t := range f.tasks {
+		for _, lnk := range t.links {
+			tasks[lnk.task.name] = true
+		}
+	}
+	for name, ok := range tasks {
+		if name != "error" && !ok {
+			fails = append(fails, slip.String(fmt.Sprintf("%s is not reachable", name)))
+		}
+	}
+	for _, t := range f.tasks {
+		fails = append(fails, t.validate(s)...)
+	}
+	return
 }
 
 func strFromArg(arg slip.Object, argName string) (str string) {

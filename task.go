@@ -293,7 +293,6 @@ func (t *task) handleError(s *slip.Scope, bi *flavors.Instance, err any) {
 			t.flow.name, t.name, bi.Any.(*box).track.id, bx.content.(map[string]any)["error"])
 		t.self.Receive(s, ":error", slip.List{slip.String(msg)}, 0)
 	}
-
 }
 
 func (t *task) metrics() (alist slip.List) {
@@ -387,6 +386,28 @@ func (t *task) updateLink(args slip.List) {
 	} else {
 		slip.NewPanic("task %s has no %s link", t.name, name)
 	}
+}
+
+func (t *task) validate(s *slip.Scope) (fails slip.List) {
+	allowed := map[string]bool{}
+	for _, a := range t.actors {
+		if a.HasMethod(":links") {
+			al, _ := a.Receive(s, ":links", slip.List{}, 0).(slip.List)
+			for _, v := range al {
+				if name, ok := v.(slip.String); ok {
+					allowed[string(name)] = true
+				}
+			}
+		}
+	}
+	if 0 < len(allowed) {
+		for name := range t.links {
+			if !allowed[name] {
+				fails = append(fails, slip.String(fmt.Sprintf("task %s can not return a %s link", t.name, name)))
+			}
+		}
+	}
+	return
 }
 
 // MakeTask is only public for testing purposes.

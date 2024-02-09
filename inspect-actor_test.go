@@ -85,6 +85,13 @@ func TestInspectActorLog(t *testing.T) {
 	tt.Equal(t, "W [3]\n", b.String())
 }
 
+func TestInspectActorLinks(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(send (make-instance 'flow-inspect-actor) :links)`,
+		Expect: `("ok")`,
+	}).Test(t)
+}
+
 func TestInspectActorBadOutput(t *testing.T) {
 	scope := slip.NewScope()
 	var b bytes.Buffer
@@ -121,6 +128,7 @@ func TestInspectActorDocs(t *testing.T) {
 		":init",
 		":start",
 		":perform",
+		":links",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-inspect-actor %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))

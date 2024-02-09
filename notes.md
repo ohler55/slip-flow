@@ -3,12 +3,6 @@
 - next
 
 ----------------
-- flow :validate
- - get allowed transitions from actors if supported
- - verify no tasks not linked other than error
- - check there is an entry task (if trigger task then one should be set as entry task)
-
-----------------
 - flow :svg
 
 ------------------

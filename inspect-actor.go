@@ -41,6 +41,7 @@ func init() {
 	inspectActorFlavor.DefMethod(":init", "", inspectInitCaller{})
 	inspectActorFlavor.DefMethod(":start", "", inspectActorStartCaller{})
 	inspectActorFlavor.DefMethod(":perform", "", inspectActorPerformCaller{})
+	inspectActorFlavor.DefMethod(":links", "", inspectActorLinksCaller{})
 }
 
 type inspectCtx struct {
@@ -129,5 +130,19 @@ func (caller inspectActorPerformCaller) Docs() string {
 
 
 Write the box to either _*standard-output*_ or to the logger.
+`
+}
+
+type inspectActorLinksCaller struct{}
+
+func (caller inspectActorLinksCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	return slip.List{slip.String("ok")}
+}
+
+func (caller inspectActorLinksCaller) Docs() string {
+	return `__:links__ => _list_
+
+
+Returns a list of transitions that can be followed.
 `
 }
