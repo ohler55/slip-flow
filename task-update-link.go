@@ -49,7 +49,7 @@ type TaskUpdateLink struct {
 
 // Call the function with the arguments provided.
 func (f *TaskUpdateLink) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.ArgCountCheck(f, args, 3, 3)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Flavor != taskFlavor {
 		slip.PanicType("task", args[0], "task")

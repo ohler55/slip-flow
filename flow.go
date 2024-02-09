@@ -227,28 +227,32 @@ func (f *flow) link(args slip.List) {
 	}
 	lnk := link{task: to}
 	if 3 < len(args) {
-		badFun := func(v slip.Object) {
-			slip.PanicType("flow :link mid-points", v, "list of fixnum pairs")
-		}
-		if mids, ok := args[3].(slip.List); ok {
-			for _, pt := range mids {
-				var xy slip.List
-				if xy, ok = pt.(slip.List); !ok || len(xy) != 2 {
-					badFun(pt)
-				}
-				if _, ok = xy[0].(slip.Fixnum); !ok {
-					badFun(xy)
-				}
-				if _, ok = xy[1].(slip.Fixnum); !ok {
-					badFun(xy)
-				}
-			}
-			lnk.mids = mids
-		} else {
-			badFun(args[3])
-		}
+		lnk.mids = checkMidPoints(args[3])
 	}
 	from.links[name] = &lnk
+}
+
+func checkMidPoints(arg slip.Object) slip.List {
+	badFun := func(v slip.Object) {
+		slip.PanicType("link mid-points", v, "list of fixnum pairs")
+	}
+	mids, ok := arg.(slip.List)
+	if !ok {
+		badFun(arg)
+	}
+	for _, pt := range mids {
+		var xy slip.List
+		if xy, ok = pt.(slip.List); !ok || len(xy) != 2 {
+			badFun(pt)
+		}
+		if _, ok = xy[0].(slip.Fixnum); !ok {
+			badFun(xy)
+		}
+		if _, ok = xy[1].(slip.Fixnum); !ok {
+			badFun(xy)
+		}
+	}
+	return mids
 }
 
 func (f *flow) exit(bi slip.Object) {

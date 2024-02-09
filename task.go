@@ -358,8 +358,35 @@ func (t *task) unlink(args slip.List) {
 }
 
 func (t *task) updateLink(args slip.List) {
-
-	// TBD
+	var (
+		name string
+		mids slip.List
+	)
+	switch ta := args[0].(type) {
+	case nil:
+		// leave name as ""
+	case slip.String:
+		name = string(ta)
+	case slip.Symbol:
+		name = string(ta)
+	default:
+		slip.PanicType("link-name", ta, "string", "symbol")
+	}
+	switch ta := args[1].(type) {
+	case nil:
+		// leave empty or nil
+	case slip.List:
+		mids = checkMidPoints(ta)
+	default:
+		slip.PanicType("mid-points", ta, "list")
+	}
+	t.qmu.Lock()
+	defer t.qmu.Unlock()
+	if lnk := t.links[name]; lnk != nil {
+		lnk.mids = mids
+	} else {
+		slip.NewPanic("task %s has no %s link", t.name, name)
+	}
 }
 
 // MakeTask is only public for testing purposes.

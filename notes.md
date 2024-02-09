@@ -2,29 +2,14 @@
 
 - next
 
-- task :update-link
-
-- writeable
- - task :update-link or :set-link-points or :set-link-mids
-  - (name mid-points) 'foo '((2 3)(4 5))
-
- - flow :links should return list with mid points after
- - flow
-  - :write
-  - :svg
-   - returns a string that is an SVG
- - task
-  - :update-link
- - actors
-  - optional method for actors to allow creation
-  - init-key-values => (:foo 2 :bar "xyz")
-   - what keywords and values are needed to create the same actor instance
-
 ----------------
 - flow :validate
  - get allowed transitions from actors if supported
  - verify no tasks not linked other than error
- - check there is an entry task (if trigger tak then one should be set as entry task)
+ - check there is an entry task (if trigger task then one should be set as entry task)
+
+----------------
+- flow :svg
 
 ------------------
   - trigger tasks/actors

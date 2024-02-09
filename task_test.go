@@ -39,6 +39,7 @@ func TestTaskDocs(t *testing.T) {
 		":links",
 		":unlink",
 		":transition",
+		":update-link",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-task-flavor %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
