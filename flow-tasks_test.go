@@ -11,7 +11,7 @@ import (
 
 func TestFlowTasksFunction(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo)))
+		Source: `(let ((flow (make-instance 'flow :name 'flo)))
                   (flow-add-task flow :name "tick" :actor (lambda (b) (list 'ok b)))
                   (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))
                   (mapcar (lambda (task) (send task :name)) (flow-tasks flow)))`,
@@ -21,7 +21,7 @@ func TestFlowTasksFunction(t *testing.T) {
 
 func TestFlowTasksSend(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo)))
+		Source: `(let ((flow (make-instance 'flow :name 'flo)))
                   (send flow :add-task :name "tick" :actor (lambda (b) (list 'ok b)))
                   (send flow :add-task :name "tock" :actor (lambda (b) (list 'ok b)))
                   (mapcar (lambda (task) (send task :name)) (send flow :tasks)))`,

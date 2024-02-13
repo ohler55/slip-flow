@@ -26,8 +26,8 @@ func TestJumpActorBasic(t *testing.T) {
 (let* ((lg (make-instance 'logger-flavor))
        (echan (make-channel 5))
        (group (make-flow-group :logger lg))
-       (s0 (make-instance 'flow-flavor :name 'first-stage))
-       (s1 (make-instance 'flow-flavor :name 'second-stage :exit-channel echan)))
+       (s0 (make-instance 'flow :name 'first-stage))
+       (s1 (make-instance 'flow :name 'second-stage :exit-channel echan)))
   (flow-add-task s0
                  :name "triple"
                  :actor (lambda (b)
@@ -104,7 +104,7 @@ func TestJumpActorNotInGroup(t *testing.T) {
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `
-(let ((s0 (make-instance 'flow-flavor :name 'first-stage)))
+(let ((s0 (make-instance 'flow :name 'first-stage)))
   (flow-add-task s0
                  :name "triple"
                  :actor (lambda (b)
@@ -136,7 +136,7 @@ func TestJumpActorNotInSameGroup(t *testing.T) {
 		Scope: scope,
 		Source: `
 (let ((group (make-flow-group))
-      (s0 (make-instance 'flow-flavor :name 'first-stage)))
+      (s0 (make-instance 'flow :name 'first-stage)))
   (flow-add-task s0
                  :name "triple"
                  :actor (lambda (b)

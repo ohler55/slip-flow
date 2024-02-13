@@ -38,7 +38,7 @@ func TestFlowDocs(t *testing.T) {
 		":write",
 		":validate",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-flavor %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}
@@ -48,7 +48,7 @@ func TestFlowDocs(t *testing.T) {
 // 	scope := slip.NewScope()
 // 	var out strings.Builder
 // 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-// 	_ = slip.ReadString(`(describe-method flow-flavor :init out)`).Eval(scope, nil)
+// 	_ = slip.ReadString(`(describe-method flow :init out)`).Eval(scope, nil)
 // 	fmt.Printf("*** docs: \n%s\n", out.String())
-// 	_ = slip.ReadString(`(describe-flavor flow-flavor)`).Eval(scope, nil)
+// 	_ = slip.ReadString(`(describe-flavor flow)`).Eval(scope, nil)
 // }

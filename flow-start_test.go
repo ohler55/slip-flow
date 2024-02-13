@@ -11,7 +11,7 @@ import (
 
 func TestFlowStartFunction(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo))
+		Source: `(let ((flow (make-instance 'flow :name 'flo))
                        running)
                   (flow-add-task flow :name "tisk" :workers 1 :actor (lambda (b) (list 'ok b)))
                   (flow-start flow)
@@ -24,7 +24,7 @@ func TestFlowStartFunction(t *testing.T) {
 
 func TestFlowStartSend(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo))
+		Source: `(let ((flow (make-instance 'flow :name 'flo))
                        running)
                   (send flow :add-task :name "tisk" :workers 1 :actor (lambda (b) (list 'ok b)))
                   (send flow :start)
@@ -44,7 +44,7 @@ func TestFlowStartNotFlow(t *testing.T) {
 
 func TestFlowStartArgCount(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(flow-start (make-instance 'flow-flavor :name 'flo) t)`,
+		Source:    `(flow-start (make-instance 'flow :name 'flo) t)`,
 		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }

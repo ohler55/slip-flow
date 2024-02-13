@@ -12,7 +12,7 @@ import (
 func TestGroupStartFunction(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((group (make-flow-group))
-                       (flow (make-instance 'flow-flavor :name 'flo))
+                       (flow (make-instance 'flow :name 'flo))
                        running)
                   (flow-add-task flow :name "tisk" :workers 1 :actor (lambda (b) (list 'ok b)))
                   (flow-group-add group flow)
@@ -26,8 +26,8 @@ func TestGroupStartFunction(t *testing.T) {
 
 func TestGroupStartSend(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((group (make-instance 'flow-group-flavor))
-                       (flow (make-instance 'flow-flavor :name 'flo))
+		Source: `(let ((group (make-instance 'flow-group))
+                       (flow (make-instance 'flow :name 'flo))
                        running)
                   (send flow :add-task :name "tisk" :workers 1 :actor (lambda (b) (list 'ok b)))
                   (send group :add flow)
@@ -48,7 +48,7 @@ func TestGroupStartNotGroup(t *testing.T) {
 
 func TestGroupStartArgCount(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(flow-group-start (make-instance 'flow-group-flavor) t)`,
+		Source:    `(flow-group-start (make-instance 'flow-group) t)`,
 		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }

@@ -18,7 +18,7 @@ func TestFlowRemoveTaskNotFlow(t *testing.T) {
 
 func TestFlowRemoveTaskBadTask(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo)))
+		Source: `(let ((flow (make-instance 'flow :name 'flo)))
                   (flow-remove-task flow t))`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
@@ -26,7 +26,7 @@ func TestFlowRemoveTaskBadTask(t *testing.T) {
 
 func TestFlowRemoveTaskOk(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo)))
+		Source: `(let ((flow (make-instance 'flow :name 'flo)))
                   (flow-add-task flow :name "tick" :actor (lambda (b) (list 'ok b)))
                   (flow-add-task flow :name "tock" :actor (lambda (b) (list 'ok b)))
                   (flow-remove-task flow "tick")

@@ -19,7 +19,7 @@ var (
 )
 
 func init() {
-	canLogFlavor = flavors.DefFlavor("can-log-flavor",
+	canLogFlavor = flavors.DefFlavor("can-log",
 		map[string]slip.Object{ // instance variables
 			"log-level": slip.Fixnum(1),
 			"logger":    nil, // boolean

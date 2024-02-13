@@ -14,10 +14,10 @@ var (
 )
 
 func init() {
-	groupFlavor = flavors.DefFlavor("flow-group-flavor",
+	groupFlavor = flavors.DefFlavor("flow-group",
 		map[string]slip.Object{},
 		[]string{
-			"can-log-flavor",
+			"can-log",
 		},
 		slip.List{
 			slip.List{

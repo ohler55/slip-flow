@@ -11,12 +11,12 @@ import (
 
 func TestTaskWorkersOk(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk :workers 3)))
+		Source: `(let ((task (make-instance 'flow-task :name 'tisk :workers 3)))
                   (flow-task-workers task))`,
 		Expect: "3",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk :workers 3)))
+		Source: `(let ((task (make-instance 'flow-task :name 'tisk :workers 3)))
                   (send task :workers))`,
 		Expect: "3",
 	}).Test(t)
@@ -31,7 +31,7 @@ func TestTaskWorkersNotTask(t *testing.T) {
 
 func TestTaskWorkersArgCount(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk :workers 3)))
+		Source: `(let ((task (make-instance 'flow-task :name 'tisk :workers 3)))
                   (flow-task-workers task t))`,
 		PanicType: slip.Symbol("error"),
 	}).Test(t)

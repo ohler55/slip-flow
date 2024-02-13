@@ -21,7 +21,7 @@ var (
 )
 
 func init() {
-	flowFlavor = flavors.DefFlavor("flow-flavor",
+	flowFlavor = flavors.DefFlavor("flow",
 		map[string]slip.Object{
 			"width":       nil,
 			"height":      nil,
@@ -30,7 +30,7 @@ func init() {
 			"background":  nil,
 		},
 		[]string{
-			"can-log-flavor",
+			"can-log",
 		},
 		slip.List{
 			slip.List{
@@ -45,7 +45,7 @@ error handler task. If set the flow error task is transitioned to on errors.
 An optional entry task can be identified as the starting point for
 processing. Data submitted to a flow is passed to the entry task. The entry
 task is optional if a trigger task is included in the flow. A trigger taask is
-one that generates a data _box_ when an event occurs such as receiving an HTTP
+one that generates a data _flow-box_ when an event occurs such as receiving an HTTP
 request or a timer triggers.
 
 
@@ -55,12 +55,12 @@ is reserved for handling errors and panics.
 
 
 Once a flow has been built data is submitted as an instance of the
-_box-flavor_ which collects tracking information as it traverses the graph of
-linked tasks. If provided the final tasks in a flow will place the _box_ with
+_flow-box_ which collects tracking information as it traverses the graph of
+linked tasks. If provided the final tasks in a flow will place the _flow-box_ with
 tracking information on an exit channel.
 
 
-See also: flow-task-flavor
+See also: flow-task
 
 `),
 			},
@@ -280,7 +280,7 @@ func (f *flow) submit(s *slip.Scope, data slip.Object) {
 	if !f.started {
 		f.start(s)
 	}
-	var bi *flavors.Instance // box-flavor
+	var bi *flavors.Instance // box
 	if inst, _ := data.(*flavors.Instance); inst != nil {
 		switch {
 		case inst.Flavor == boxFlavor:
@@ -291,7 +291,7 @@ func (f *flow) submit(s *slip.Scope, data slip.Object) {
 			bx.content = inst.Any
 			bx.frozen = true
 		default:
-			slip.PanicType("box", data, "flow-box-flavor", "bag-flavor")
+			slip.PanicType("box", data, "flow-box", "bag-flavor")
 		}
 	} else {
 		var bx *box
@@ -576,7 +576,7 @@ func (caller flowInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 func (caller flowInitCaller) Docs() string {
 	return `__:init__ &key _name_ _exit-channel_ _logger_
    _:name_ [string] sets the name of the flow.
-   _:exit-channel_ [gi:channel] if provided the exit tasks of a flow place the _box_ being processed on this channel.
+   _:exit-channel_ [gi:channel] if provided the exit tasks of a flow place the _flow-box_ being processed on this channel.
    _:logger_ [instance] an instance that has the _:log_ method.
 
 

@@ -13,7 +13,7 @@ import (
 
 func TestFlowRunningFunction(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo)))
+		Source: `(let ((flow (make-instance 'flow :name 'flo)))
                   (flow-add-task flow :name "tisk" :workers 1 :actor (lambda (b) (list 'ok b)))
                   (flow-running flow))`,
 		Expect: "nil",
@@ -22,7 +22,7 @@ func TestFlowRunningFunction(t *testing.T) {
 
 func TestFlowRunningSend(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo)))
+		Source: `(let ((flow (make-instance 'flow :name 'flo)))
                   (send flow :add-task :name "tisk" :workers 1 :actor (lambda (b) (list 'ok b)))
                   (send flow :running))`,
 		Expect: "nil",
@@ -38,7 +38,7 @@ func TestFlowRunningNotFlow(t *testing.T) {
 
 func TestFlowRunningArgCount(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(flow-running (make-instance 'flow-flavor :name 'flo) t)`,
+		Source:    `(flow-running (make-instance 'flow :name 'flo) t)`,
 		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }

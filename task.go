@@ -18,14 +18,14 @@ var (
 )
 
 func init() {
-	taskFlavor = flavors.DefFlavor("flow-task-flavor",
+	taskFlavor = flavors.DefFlavor("flow-task",
 		map[string]slip.Object{
 			"x":   nil,
 			"y":   nil,
 			"svg": nil,
 		},
 		[]string{
-			"can-log-flavor",
+			"can-log",
 		},
 		slip.List{
 			slip.List{
@@ -40,7 +40,7 @@ more. After processing the _box_ is sent through a link to the destination
 _task_ at the end of the link.
 
 
-See also: flow-flavor
+See also: flow
 
 `),
 			},
@@ -516,7 +516,7 @@ func (caller taskInitCaller) Docs() string {
    _:depth_ [fixnum] of the work queue.
    _:logger_ [instance] an instance that has the _:log_ method.
    _:actor_ [instance|function|list] if an instance that instance is used for processing and must have the
-_perform_ method that expectes an instance of the _flow-box-flavor_. If the instance has a _start_ or _shutdown_
+_perform_ method that expectes an instance of the _flow-box_. If the instance has a _start_ or _shutdown_
 those will be called when starting or stoping a flow. If the value of _:actor_ is a function is must expect one
 box argument just as the _:perform_ method does. If the actor is a list of instances those will be used as
 workers.

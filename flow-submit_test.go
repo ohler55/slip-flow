@@ -64,7 +64,7 @@ func TestFlowSubmitBag(t *testing.T) {
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `
-(let ((flow (make-instance 'flow-flavor :name 'flo :exit-channel exit-channel)))
+(let ((flow (make-instance 'flow :name 'flo :exit-channel exit-channel)))
   (flow-add-task flow
                  :name "start"
                  :actor (lambda (b)
@@ -109,7 +109,7 @@ func TestFlowSubmitSend(t *testing.T) {
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `
-(let ((flow (make-instance 'flow-flavor :name 'flo :exit-channel exit-channel)))
+(let ((flow (make-instance 'flow :name 'flo :exit-channel exit-channel)))
   (flow-add-task flow
                  :name "start"
                  :actor (lambda (b)
@@ -157,7 +157,7 @@ func TestFlowSubmitNotFlow(t *testing.T) {
 func TestFlowSubmitNoEntry(t *testing.T) {
 	(&sliptest.Function{
 		Source: `
-(let ((flow (make-instance 'flow-flavor :name 'flo)))
+(let ((flow (make-instance 'flow :name 'flo)))
   (flow-add-task flow
                  :name "start"
                  :actor (lambda (b)
@@ -171,7 +171,7 @@ func TestFlowSubmitNoEntry(t *testing.T) {
 func TestFlowSubmitNotBox(t *testing.T) {
 	(&sliptest.Function{
 		Source: `
-(let ((flow (make-instance 'flow-flavor :name 'flo)))
+(let ((flow (make-instance 'flow :name 'flo)))
   (flow-add-task flow
                  :name "start"
                  :actor (lambda (b)

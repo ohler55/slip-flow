@@ -11,27 +11,27 @@ import (
 
 func TestFlowEntryFunction(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo)))
+		Source: `(let ((flow (make-instance 'flow :name 'flo)))
                   (flow-add-task flow :name "tisk" :actor (lambda (b) (list 'ok b)))
                   (flow-set-entry flow "tisk")
                   (flow-entry flow))`,
-		Expect: "/#<flow-task-flavor [0-9a-f]+>/",
+		Expect: "/#<flow-task [0-9a-f]+>/",
 	}).Test(t)
 }
 
 func TestFlowEntryFoundSend(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo)))
+		Source: `(let ((flow (make-instance 'flow :name 'flo)))
                   (send flow :add-task :name "tisk" :actor (lambda (b) (list 'ok b)))
                   (send flow :set-entry 'tisk)
                   (send flow :entry))`,
-		Expect: "/#<flow-task-flavor [0-9a-f]+>/",
+		Expect: "/#<flow-task [0-9a-f]+>/",
 	}).Test(t)
 }
 
 func TestFlowEntryNil(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo)))
+		Source: `(let ((flow (make-instance 'flow :name 'flo)))
                   (send flow :add-task :name "tisk" :actor (lambda (b) (list 'ok b)))
                   (send flow :entry))`,
 		Expect: "nil",
@@ -40,7 +40,7 @@ func TestFlowEntryNil(t *testing.T) {
 
 func TestFlowEntryNotFound(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo)))
+		Source: `(let ((flow (make-instance 'flow :name 'flo)))
                   (flow-add-task flow :name "tisk" :actor (lambda (b) (list 'ok b)))
                   (flow-set-entry flow "who"))`,
 		PanicType: slip.Symbol("error"),

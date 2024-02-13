@@ -15,22 +15,22 @@ import (
 func TestTaskActor(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(`
-(defflavor task-actor-test-flavor () (flow-task-actor))
-(defmethod (task-actor-test-flavor :perform) (box) (list 'ok box))
+(defflavor task-actor-test () (flow-task-actor))
+(defmethod (task-actor-test :perform) (box) (list 'ok box))
 `).Eval(scope, nil)
 
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(let ((actor (make-instance 'task-actor-test-flavor))) (send actor :task))`,
+		Source: `(let ((actor (make-instance 'task-actor-test))) (send actor :task))`,
 		Expect: "nil",
 	}).Test(t)
 
 	(&sliptest.Function{
-		Source: `(let* ((actor (make-instance 'task-actor-test-flavor))
-                        (task (make-instance 'flow-task-flavor :actor actor)))
+		Source: `(let* ((actor (make-instance 'task-actor-test))
+                        (task (make-instance 'flow-task :actor actor)))
                   (send actor :start task)
                   (send actor :task))`,
-		Expect: "/#<flow-task-flavor [0-9a-f]+>/",
+		Expect: "/#<flow-task [0-9a-f]+>/",
 	}).Test(t)
 }
 

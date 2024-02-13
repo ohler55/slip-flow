@@ -11,25 +11,25 @@ import (
 
 func TestFlowFindTaskFoundFunction(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo)))
+		Source: `(let ((flow (make-instance 'flow :name 'flo)))
                   (flow-add-task flow :name "tisk" :actor (lambda (b) (list 'ok b)))
                   (flow-find-task flow "tisk"))`,
-		Expect: "/#<flow-task-flavor [0-9a-f]+>/",
+		Expect: "/#<flow-task [0-9a-f]+>/",
 	}).Test(t)
 }
 
 func TestFlowFindTaskFoundSend(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo)))
+		Source: `(let ((flow (make-instance 'flow :name 'flo)))
                   (send flow :add-task :name "tisk" :actor (lambda (b) (list 'ok b)))
                   (send flow :find-task 'tisk))`,
-		Expect: "/#<flow-task-flavor [0-9a-f]+>/",
+		Expect: "/#<flow-task [0-9a-f]+>/",
 	}).Test(t)
 }
 
 func TestFlowFindTaskNotFound(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo)))
+		Source: `(let ((flow (make-instance 'flow :name 'flo)))
                   (flow-add-task flow :name "tisk" :actor (lambda (b) (list 'ok b)))
                   (flow-find-task flow "who"))`,
 		Expect: "nil",
@@ -45,7 +45,7 @@ func TestFlowFindTaskNotFlow(t *testing.T) {
 
 func TestFlowFindTaskBadTask(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo)))
+		Source: `(let ((flow (make-instance 'flow :name 'flo)))
                   (flow-find-task flow t))`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)

@@ -112,29 +112,29 @@ func TestTaskTransitionSend(t *testing.T) {
 
 func TestTaskTransitionNotTask(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(flow-task-transition t 'ok (make-instance 'flow-box-flavor))`,
+		Source:    `(flow-task-transition t 'ok (make-instance 'flow-box))`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestTaskTransitionNotBox(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(flow-task-transition (make-instance 'flow-task-flavor) t 'ok)`,
+		Source:    `(flow-task-transition (make-instance 'flow-task) t 'ok)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 	(&sliptest.Function{
-		Source:    `(send (make-instance 'flow-task-flavor) :transition t 'ok)`,
+		Source:    `(send (make-instance 'flow-task) :transition t 'ok)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestTaskTransitionNotLink(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(flow-task-transition (make-instance 'flow-task-flavor) (make-instance 'flow-box-flavor) t)`,
+		Source:    `(flow-task-transition (make-instance 'flow-task) (make-instance 'flow-box) t)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 	(&sliptest.Function{
-		Source:    `(send (make-instance 'flow-task-flavor) :transition (make-instance 'flow-box-flavor) t)`,
+		Source:    `(send (make-instance 'flow-task) :transition (make-instance 'flow-box) t)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }

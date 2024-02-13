@@ -21,7 +21,7 @@ func TestTaskReceiveSync(t *testing.T) {
 		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((task (make-instance 'flow-task-flavor
+		Source: `(let ((task (make-instance 'flow-task
                                             :name "tisk"
                                             :actor (lambda (b)
                                                     (flow-box-set b 3 "c")
@@ -35,7 +35,7 @@ func TestTaskReceiveSync(t *testing.T) {
 		`(setq task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((task (make-instance 'flow-task-flavor
+		Source: `(let ((task (make-instance 'flow-task
                                             :name 'tisk
                                             :actor (lambda (b)
                                                     (flow-box-set b 3 "c")
@@ -53,7 +53,7 @@ func TestTaskReceiveAsync(t *testing.T) {
 		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((task (make-instance 'flow-task-flavor
+		Source: `(let ((task (make-instance 'flow-task
                                             :name 'tisk
                                             :workers 3
                                             :depth 5
@@ -71,7 +71,7 @@ func TestTaskReceiveAsync(t *testing.T) {
 		`(setq task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((task (make-instance 'flow-task-flavor
+		Source: `(let ((task (make-instance 'flow-task
                                             :name 'tisk
                                             :workers 3
                                             :depth 5
@@ -97,7 +97,7 @@ func TestTaskReceiveFunction(t *testing.T) {
                           (list 'ok b))`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((task (make-instance 'flow-task-flavor
+		Source: `(let ((task (make-instance 'flow-task
                                             :name "tisk"
                                             :actor 'task-receive-func)))
                   (flow-task-receive task task-receive-test-box)
@@ -108,7 +108,7 @@ func TestTaskReceiveFunction(t *testing.T) {
 		`(setq task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((task (make-instance 'flow-task-flavor
+		Source: `(let ((task (make-instance 'flow-task
                                             :name 'tisk
                                             :actor 'task-receive-func)))
                   (send task :receive task-receive-test-box)
@@ -124,7 +124,7 @@ func TestTaskReceiveInstanceSync(t *testing.T) {
 	assureTaskRecieveTestActor(scope)
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((task (make-instance 'flow-task-flavor
+		Source: `(let ((task (make-instance 'flow-task
                                             :name "tisk"
                                             :actor (make-instance 'task-receiver-test-actor))))
                   (send task :start)
@@ -143,7 +143,7 @@ func TestTaskReceiveInstanceAsync(t *testing.T) {
 
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((task (make-instance 'flow-task-flavor
+		Source: `(let ((task (make-instance 'flow-task
                                             :name "tisk"
                                             :workers 3
                                             :actor (list
@@ -166,7 +166,7 @@ func assureTaskRecieveTestActor(scope *slip.Scope) {
                                                              :settable-instance-variables)`).Eval(scope, nil)
 		_ = slip.ReadString(`(defmethod (task-receiver-test-actor :start) (tsk) (setq task tsk))`).Eval(scope, nil)
 		_ = slip.ReadString(`(defmethod (task-receiver-test-actor :shutdown) ()
-                          (unless (string= "flow-task-flavor" (send (send task :flavor) :name))
+                          (unless (string= "flow-task" (send (send task :flavor) :name))
                                   (panic "task not set")))`).Eval(scope, nil)
 		_ = slip.ReadString(`(defmethod (task-receiver-test-actor :perform) (b)
                                      (flow-box-set b 3 "c")
@@ -184,7 +184,7 @@ func TestTaskReceiveNotTask(t *testing.T) {
 
 func TestTaskReceiveArgCount(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk)))
+		Source: `(let ((task (make-instance 'flow-task :name 'tisk)))
                   (flow-task-receive task))`,
 		PanicType: slip.Symbol("error"),
 	}).Test(t)
@@ -192,12 +192,12 @@ func TestTaskReceiveArgCount(t *testing.T) {
 
 func TestTaskReceiveNotBox(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk)))
+		Source: `(let ((task (make-instance 'flow-task :name 'tisk)))
                   (flow-task-receive task t))`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk)))
+		Source: `(let ((task (make-instance 'flow-task :name 'tisk)))
                   (send task :receive t))`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
@@ -209,14 +209,14 @@ func TestTaskReceiveInstanceNoPerform(t *testing.T) {
 		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(make-instance 'flow-task-flavor
+		Source: `(make-instance 'flow-task
                                             :name "tisk"
                                             :actor (make-instance 'vanilla-flavor))`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(make-instance 'flow-task-flavor
+		Source: `(make-instance 'flow-task
                                             :name "tisk"
                                             :actor (list
                                                     (make-instance 'vanilla-flavor)
@@ -228,7 +228,7 @@ func TestTaskReceiveInstanceNoPerform(t *testing.T) {
 func TestTaskReceiveNoErrorTask(t *testing.T) {
 	testTaskReceive(t, `
 (let* ((lg (make-instance 'logger-flavor))
-       (flow (make-instance 'flow-flavor :name 'flo :logger lg)))
+       (flow (make-instance 'flow :name 'flo :logger lg)))
   (flow-add-task flow
                  :name "start"
                  :actor (lambda (b) (list 'ok)))
@@ -241,7 +241,7 @@ func TestTaskReceiveNoErrorTask(t *testing.T) {
 func TestTaskReceiveErrorTask(t *testing.T) {
 	testTaskReceive(t, `
 (let* ((lg (make-instance 'logger-flavor))
-       (flow (make-instance 'flow-flavor :name 'flo :logger lg)))
+       (flow (make-instance 'flow :name 'flo :logger lg)))
   (flow-add-task flow
                  :name "start"
                  :actor (lambda (b) (list 'ok)))
@@ -257,7 +257,7 @@ func TestTaskReceiveErrorTask(t *testing.T) {
 func TestTaskReceiveErrorLink(t *testing.T) {
 	testTaskReceive(t, `
 (let* ((lg (make-instance 'logger-flavor))
-       (flow (make-instance 'flow-flavor :name 'flo :logger lg)))
+       (flow (make-instance 'flow :name 'flo :logger lg)))
   (flow-add-task flow
                  :name "start"
                  :actor (lambda (b) (list 'ok)))
@@ -274,7 +274,7 @@ func TestTaskReceiveErrorLink(t *testing.T) {
 func TestTaskReceiveLogInfo(t *testing.T) {
 	testTaskReceive(t, `
 (let* ((lg (make-instance 'logger-flavor))
-       (flow (make-instance 'flow-flavor :name 'flo :logger lg)))
+       (flow (make-instance 'flow :name 'flo :logger lg)))
   (flow-add-task flow
                  :name "start"
                  :actor (lambda (b) (list "ok" b)))
@@ -292,7 +292,7 @@ func TestTaskReceiveLogInfo(t *testing.T) {
 func TestTaskReceiveEmptyLinkName(t *testing.T) {
 	testTaskReceive(t, `
 (let* ((lg (make-instance 'logger-flavor))
-       (flow (make-instance 'flow-flavor :name 'flo :logger lg)))
+       (flow (make-instance 'flow :name 'flo :logger lg)))
   (flow-add-task flow
                  :name "start"
                  :actor (lambda (b) (list nil b)))

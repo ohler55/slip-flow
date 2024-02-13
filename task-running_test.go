@@ -11,23 +11,23 @@ import (
 
 func TestTaskRunningOk(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk :workers 3)))
+		Source: `(let ((task (make-instance 'flow-task :name 'tisk :workers 3)))
                   (flow-task-running task))`,
 		Expect: "nil",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk :workers 3)))
+		Source: `(let ((task (make-instance 'flow-task :name 'tisk :workers 3)))
                   (flow-task-start task)
                   (flow-task-running task))`,
 		Expect: "t",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk :workers 3)))
+		Source: `(let ((task (make-instance 'flow-task :name 'tisk :workers 3)))
                   (send task :running))`,
 		Expect: "nil",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk :workers 3)))
+		Source: `(let ((task (make-instance 'flow-task :name 'tisk :workers 3)))
                   (send task :start)
                   (send task :running))`,
 		Expect: "t",
@@ -43,7 +43,7 @@ func TestTaskRunningNotTask(t *testing.T) {
 
 func TestTaskRunningArgCount(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk :workers 3)))
+		Source: `(let ((task (make-instance 'flow-task :name 'tisk :workers 3)))
                   (flow-task-running task t))`,
 		PanicType: slip.Symbol("error"),
 	}).Test(t)

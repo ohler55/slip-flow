@@ -20,7 +20,7 @@ func TestCanLogErrorLevel(t *testing.T) {
 	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor))").Eval(scope, nil)
 	_ = slip.ReadString("(send logger :set-out log-out)").Eval(scope, nil)
 	_ = slip.ReadString(`(unless (find-flavor 'can-log-tester)
-                          (defflavor can-log-tester () (can-log-flavor)))`).Eval(scope, nil)
+                          (defflavor can-log-tester () (can-log)))`).Eval(scope, nil)
 
 	_ = slip.ReadString(`(let ((can (make-instance 'can-log-tester :log-level 0 :logger logger)))
                   (send can :error "error ~D" 0)
@@ -115,7 +115,7 @@ func TestCanLogDocs(t *testing.T) {
 		":debug",
 		":set-level",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method can-log-flavor %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method can-log %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}

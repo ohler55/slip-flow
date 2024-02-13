@@ -20,7 +20,7 @@ func TestFlowAddTaskNotFlow(t *testing.T) {
 
 func TestFlowAddTaskExists(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((flow (make-instance 'flow-flavor :name 'flo)))
+		Source: `(let ((flow (make-instance 'flow :name 'flo)))
                   (flow-add-task flow :name "tisk" :workers 1 :actor (lambda (b) (list 'ok b)))
                   (flow-add-task flow :name "tisk" :workers 2 :actor (lambda (b) (list 'ok b))))`,
 		PanicType: slip.Symbol("error"),
@@ -54,7 +54,7 @@ func TestFlowAddTaskSvg(t *testing.T) {
   (flow-add-task flow :name "start" :svg "<sgv></svg>" :actor (lambda (b) (list 'ok b)))
   flow)
 `,
-		Expect: "/#<flow-flavor [0-9a-f]+>/",
+		Expect: "/#<flow [0-9a-f]+>/",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `

@@ -12,7 +12,7 @@ import (
 func TestFlowResetMetricsFunction(t *testing.T) {
 	(&sliptest.Function{
 		Source: `
-(let ((flow (make-instance 'flow-flavor :name 'flo)))
+(let ((flow (make-instance 'flow :name 'flo)))
   (flow-add-task flow
                  :name "start"
                  :actor (lambda (b)
@@ -47,7 +47,7 @@ func TestFlowResetMetricsFunction(t *testing.T) {
 func TestFlowResetMetricsSend(t *testing.T) {
 	(&sliptest.Function{
 		Source: `
-(let ((flow (make-instance 'flow-flavor :name 'flo)))
+(let ((flow (make-instance 'flow :name 'flo)))
   (send flow :add-task
              :name "start"
              :actor (lambda (b)

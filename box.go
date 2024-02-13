@@ -17,13 +17,13 @@ var (
 )
 
 func init() {
-	boxFlavor = flavors.DefFlavor("flow-box-flavor",
+	boxFlavor = flavors.DefFlavor("flow-box",
 		map[string]slip.Object{},
 		nil,
 		slip.List{
 			slip.List{
 				slip.Symbol(":documentation"),
-				slip.String(`A container for data passed between instances of the _flow-task-flavor_ in a
+				slip.String(`A container for data passed between instances of the _flow-task_ in a
 flow. The content of the box can be frozen which forces a if an attempt is
 made to modify the content. Typically when transitioning from one task to
 another a shallow copy of the box is made and the new box as well as the
@@ -103,7 +103,7 @@ func (caller boxInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 			if inst, ok := args[i+1].(*flavors.Instance); ok && inst.Flavor == trackFlavor {
 				bx.track = *inst.Any.(*track)
 			} else {
-				slip.PanicType("box :init :track", args[i+1], "flow-track-flavor instance")
+				slip.PanicType("box :init :track", args[i+1], "flow-track instance")
 			}
 		case slip.Symbol(":set"):
 			if inst, ok := args[i+1].(*flavors.Instance); ok {

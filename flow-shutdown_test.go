@@ -20,7 +20,7 @@ func TestFlowShutdownNotFlow(t *testing.T) {
 
 func TestFlowShutdownArgCount(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(flow-shutdown (make-instance 'flow-flavor :name 'flo) t)`,
+		Source:    `(flow-shutdown (make-instance 'flow :name 'flo) t)`,
 		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }

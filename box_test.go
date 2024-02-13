@@ -14,7 +14,7 @@ import (
 
 func TestMakeBox(t *testing.T) {
 	box, _ := flow.MakeBox(slip.Fixnum(123))
-	tt.Equal(t, "/#<flow-box-flavor [0-9a-f]+>/", box.String())
+	tt.Equal(t, "/#<flow-box [0-9a-f]+>/", box.String())
 }
 
 func TestBoxDocs(t *testing.T) {
@@ -45,7 +45,7 @@ func TestBoxDocs(t *testing.T) {
 		":copy",
 		":merge",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-box-flavor %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-box %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}
@@ -55,7 +55,7 @@ func TestBoxDocs(t *testing.T) {
 // 	scope := slip.NewScope()
 // 	var out strings.Builder
 // 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-// 	_ = slip.ReadString(`(describe-method flow-box-flavor :write out)`).Eval(scope, nil)
+// 	_ = slip.ReadString(`(describe-method flow-box :write out)`).Eval(scope, nil)
 // 	fmt.Printf("***\n%s\n", out.String())
-// 	_ = slip.ReadString(`(describe-flavor flow-box-flavor)`).Eval(scope, nil)
+// 	_ = slip.ReadString(`(describe-flavor flow-box)`).Eval(scope, nil)
 // }

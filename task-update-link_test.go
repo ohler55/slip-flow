@@ -23,7 +23,7 @@ func TestTaskUpdateLinkFunction(t *testing.T) {
   (flow-task-update-link task 'ok '((100 200)))
   (flow-task-links task))
 `,
-		Expect: `/\(\("ok" #<flow-task-flavor [0-9a-f]+> \(100 200\)\)\)/`,
+		Expect: `/\(\("ok" #<flow-task [0-9a-f]+> \(100 200\)\)\)/`,
 	}).Test(t)
 }
 
@@ -41,7 +41,7 @@ func TestTaskUpdateLinkSend(t *testing.T) {
   (send task :update-link "ok" '((100 200)))
   (send task :links))
 `,
-		Expect: `/\(\("ok" #<flow-task-flavor [0-9a-f]+> \(100 200\)\)\)/`,
+		Expect: `/\(\("ok" #<flow-task [0-9a-f]+> \(100 200\)\)\)/`,
 	}).Test(t)
 }
 

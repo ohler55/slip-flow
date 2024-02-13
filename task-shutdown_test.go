@@ -11,14 +11,14 @@ import (
 
 func TestTaskShutdownOk(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk :workers 3 :actor (lambda (b) nil))))
+		Source: `(let ((task (make-instance 'flow-task :name 'tisk :workers 3 :actor (lambda (b) nil))))
                   (flow-task-start task)
                   (flow-task-shutdown task)
                   (flow-task-running task))`,
 		Expect: "nil",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk :workers 3 :actor (lambda (b) nil))))
+		Source: `(let ((task (make-instance 'flow-task :name 'tisk :workers 3 :actor (lambda (b) nil))))
                   (send task :start)
                   (send task :shutdown)
                   (send task :running))`,
@@ -35,7 +35,7 @@ func TestTaskShutdownNotTask(t *testing.T) {
 
 func TestTaskShutdownArgCount(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((task (make-instance 'flow-task-flavor :name 'tisk :workers 3)))
+		Source: `(let ((task (make-instance 'flow-task :name 'tisk :workers 3)))
                   (flow-task-shutdown task t))`,
 		PanicType: slip.Symbol("error"),
 	}).Test(t)

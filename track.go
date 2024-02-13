@@ -16,14 +16,14 @@ var (
 )
 
 func init() {
-	trackFlavor = flavors.DefFlavor("flow-track-flavor",
+	trackFlavor = flavors.DefFlavor("flow-track",
 		map[string]slip.Object{},
 		nil,
 		slip.List{
 			slip.List{
 				slip.Symbol(":documentation"),
 				slip.String(`A container for tracking information as an instance of the
-_flow-box-flavor_ is traverses a flow.`),
+_flow-box_ is traverses a flow.`),
 			},
 		},
 	)

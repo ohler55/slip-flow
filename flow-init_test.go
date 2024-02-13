@@ -11,14 +11,14 @@ import (
 
 func TestFlowInitBadName(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-instance 'flow-flavor :name t)`,
+		Source:    `(make-instance 'flow :name t)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestFlowInitBadExitChannel(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-instance 'flow-flavor :exit-channel t)`,
+		Source:    `(make-instance 'flow :exit-channel t)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }

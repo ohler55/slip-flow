@@ -26,7 +26,7 @@ func TestGroupDocs(t *testing.T) {
 		":shutdown",
 		":set-level",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-group-flavor %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-group %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}

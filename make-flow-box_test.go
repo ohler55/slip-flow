@@ -17,7 +17,7 @@ func TestMakeFlowBoxParse(t *testing.T) {
 	tf := sliptest.Function{
 		Scope:  scope,
 		Source: `(make-flow-box :parse "{x:7}")`,
-		Expect: "/#<flow-box-flavor [0-9a-f]+>/",
+		Expect: "/#<flow-box [0-9a-f]+>/",
 	}
 	tf.Test(t)
 	scope.Let("box", tf.Result)
@@ -35,7 +35,7 @@ func TestMakeFlowBoxSet(t *testing.T) {
 	tf := sliptest.Function{
 		Scope:  scope,
 		Source: `(make-flow-box :set (make-instance 'bag-flavor :parse "{x:7}"))`,
-		Expect: "/#<flow-box-flavor [0-9a-f]+>/",
+		Expect: "/#<flow-box [0-9a-f]+>/",
 	}
 	tf.Test(t)
 	scope.Let("box", tf.Result)
@@ -58,7 +58,7 @@ func TestMakeFlowBoxRead(t *testing.T) {
 	tf := sliptest.Function{
 		Scope:  scope,
 		Source: `(make-flow-box :read (make-string-input-stream "{x:7}"))`,
-		Expect: "/#<flow-box-flavor [0-9a-f]+>/",
+		Expect: "/#<flow-box [0-9a-f]+>/",
 	}
 	tf.Test(t)
 	scope.Let("box", tf.Result)

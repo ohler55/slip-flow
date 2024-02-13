@@ -15,10 +15,10 @@ import (
 
 func TestMakeTask(t *testing.T) {
 	task, _ := flow.MakeTask(slip.Symbol(":name"), slip.String("tisk"))
-	tt.Equal(t, "/#<flow-task-flavor [0-9a-f]+>/", task.String())
+	tt.Equal(t, "/#<flow-task [0-9a-f]+>/", task.String())
 
 	task, _ = flow.MakeTask(slip.Symbol(":name"), slip.Symbol("tisk"))
-	tt.Equal(t, "/#<flow-task-flavor [0-9a-f]+>/", task.String())
+	tt.Equal(t, "/#<flow-task [0-9a-f]+>/", task.String())
 }
 
 func TestTaskDocs(t *testing.T) {
@@ -41,7 +41,7 @@ func TestTaskDocs(t *testing.T) {
 		":transition",
 		":update-link",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-task-flavor %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-task %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}
@@ -49,42 +49,42 @@ func TestTaskDocs(t *testing.T) {
 
 func TestTaskInitLogger(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(make-instance 'flow-task-flavor :name "tisk" :logger (make-instance 'logger-flavor))`,
-		Expect: "/#<flow-task-flavor [0-9a-f]+>/",
+		Source: `(make-instance 'flow-task :name "tisk" :logger (make-instance 'logger-flavor))`,
+		Expect: "/#<flow-task [0-9a-f]+>/",
 	}).Test(t)
 }
 
 func TestTaskInitBadName(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-instance 'flow-task-flavor :name 123)`,
+		Source:    `(make-instance 'flow-task :name 123)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestTaskInitBadWorkers(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-instance 'flow-task-flavor :workers t)`,
+		Source:    `(make-instance 'flow-task :workers t)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestTaskInitBadDepth(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-instance 'flow-task-flavor :depth t)`,
+		Source:    `(make-instance 'flow-task :depth t)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestTaskInitBadActor(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-instance 'flow-task-flavor :actor t)`,
+		Source:    `(make-instance 'flow-task :actor t)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestTaskInitBadKeyword(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-instance 'flow-task-flavor :bad t)`,
+		Source:    `(make-instance 'flow-task :bad t)`,
 		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }
@@ -93,7 +93,7 @@ func TestTaskInitBadKeyword(t *testing.T) {
 // 	scope := slip.NewScope()
 // 	var out strings.Builder
 // 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-// 	// _ = slip.ReadString(`(describe-method flow-task-flavor :init out)`).Eval(scope, nil)
+// 	// _ = slip.ReadString(`(describe-method flow-task :init out)`).Eval(scope, nil)
 // 	// fmt.Printf("*** docs: \n%s\n", out.String())
-// 	_ = slip.ReadString(`(describe-flavor flow-task-flavor)`).Eval(scope, nil)
+// 	_ = slip.ReadString(`(describe-flavor flow-task)`).Eval(scope, nil)
 // }
