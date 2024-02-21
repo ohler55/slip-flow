@@ -79,12 +79,16 @@ to identify one or more values.
 	boxFlavor.DefMethod(":scan", "", boxScanCaller{})
 	boxFlavor.DefMethod(":copy", "", boxCopyCaller{})
 	boxFlavor.DefMethod(":merge", "", boxMergeCaller{})
+	boxFlavor.DefMethod(":watch", "", boxWatchCaller{})
+	boxFlavor.DefMethod(":unwatch", "", boxUnwatchCaller{})
+	boxFlavor.DefMethod(":notify", "", boxNotifyCaller{})
 }
 
 type box struct {
-	track   track
-	content any
-	frozen  bool
+	track    track
+	content  any
+	watchers map[string]gi.Channel
+	frozen   bool
 }
 
 type boxInitCaller struct{}
@@ -94,7 +98,7 @@ func (caller boxInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
-	var bx box
+	bx := box{watchers: map[string]gi.Channel{}}
 	for i := 0; i < len(args)-1; i += 2 {
 		switch args[i] {
 		case slip.Symbol(":tracking-id"):
@@ -171,14 +175,17 @@ func MakeBox(id slip.Object) (self *flavors.Instance, bx *box) {
 func boxDup(bi *flavors.Instance) (self *flavors.Instance, bx *box) {
 	b := bi.Any.(*box)
 	self = boxFlavor.MakeInstance().(*flavors.Instance)
-
 	bx = &box{
-		track:   track{id: b.track.id, history: make([]*event, len(b.track.history))},
-		content: b.content,
-		frozen:  true,
+		track:    track{id: b.track.id, history: make([]*event, len(b.track.history))},
+		content:  b.content,
+		watchers: map[string]gi.Channel{},
+		frozen:   true,
 	}
 	for i, ev := range b.track.history {
 		bx.track.history[i] = &event{when: ev.when, flow: ev.flow, task: ev.task}
+	}
+	for k, c := range b.watchers {
+		bx.watchers[k] = c
 	}
 	self.Any = bx
 

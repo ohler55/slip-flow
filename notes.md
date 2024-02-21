@@ -2,6 +2,23 @@
 
 - next
 
+ - box-watchers
+  - add watchers to box
+   - for unwatch, if no name then remove all
+   - test
+  - exit actor optionally provide a list or channel names to send a box on instead of on flow
+  - remove exit-channel from flow
+   - use channel on box
+   - add channel-label  or name to exit-actor
+  - add http server actor
+
+  - or task listens on flow exit channel
+   - but then subflow can only have one listener
+   - also need to establish channels
+  - want to be able to reply from multiple place/flows
+  - http server could keep a reply channel
+   - limitation is no external (other process) terminations (not really a restriction)
+
 ----------------
 - flow :svg
 
