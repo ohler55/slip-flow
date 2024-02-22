@@ -5,6 +5,7 @@ package main
 import (
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
+	"github.com/ohler55/slip/pkg/gi"
 )
 
 func init() {
@@ -20,25 +21,23 @@ func init() {
 				{
 					Name: "box",
 					Type: "flow-box",
-					Text: "to unwatch a whatch channel to.",
+					Text: "to unwatch a named channel of.",
 				},
+				{Name: "&optional"},
 				{
 					Name: "name",
 					Type: "string",
-					Text: `of the unwatcher to add.`,
-				},
-				{
-					Name: "channel",
-					Type: "channel",
-					Text: `channel to push notifications to.`,
+					Text: `of the watcher to remove.`,
 				},
 			},
 			Return: "nil",
-			Text:   `__flow-box-unwatch__ adds a unwatcher _channel_ associated with the _name_.`,
+			Text: `__flow-box-unwatch__ removed a watcher _channel_ associated with the _name_
+of if not _name_ is provided all watchers are removed.`,
 			Examples: []string{
 				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}")) => #<flow-box-flavor 12345>`,
 				`(setq chan (make-channel 5) => #<channel 12345>`,
-				`(flow-box-unwatch box "done" chan) => nil`,
+				`(flow-box-watch box "done" chan) => nil`,
+				`(flow-box-unwatch box "done") => nil`,
 			},
 		}, &Pkg)
 }
@@ -63,10 +62,13 @@ type boxUnwatchCaller struct{}
 
 func (caller boxUnwatchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	if len(args) == 1 {
+	switch len(args) {
+	case 0:
+		unwatchBox(obj, nil)
+	case 1:
 		unwatchBox(obj, args[0])
-	} else {
-		flavors.PanicMethodArgChoice(obj, ":unwatch", len(args), "1")
+	default:
+		flavors.PanicMethodArgChoice(obj, ":unwatch", len(args), "0 or 1")
 	}
 	return nil
 }
@@ -76,14 +78,18 @@ func (caller boxUnwatchCaller) Docs() string {
 }
 
 func unwatchBox(obj *flavors.Instance, name slip.Object) {
-	var key string
-	switch tn := name.(type) {
-	case slip.String:
-		key = string(tn)
-	case slip.Symbol:
-		key = string(tn)
-	default:
-		slip.PanicType("name", tn, "string", "symbol")
+	if name == nil {
+		obj.Any.(*box).watchers = map[string]gi.Channel{}
+	} else {
+		var key string
+		switch tn := name.(type) {
+		case slip.String:
+			key = string(tn)
+		case slip.Symbol:
+			key = string(tn)
+		default:
+			slip.PanicType("name", tn, "string", "symbol")
+		}
+		delete(obj.Any.(*box).watchers, key)
 	}
-	delete(obj.Any.(*box).watchers, key)
 }
