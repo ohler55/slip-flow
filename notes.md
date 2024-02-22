@@ -1,10 +1,6 @@
 # SLIP-Flow Notes
 
 - next
-
- - box-watchers
-  - tests
-
  - add http server actor
   - http server could keep a reply channel
    - limitation is no external (other process) terminations (not really a restriction)
