@@ -1,6 +1,9 @@
 # SLIP-Flow Notes
 
 - next
+ - add http server actor
+  - http server could keep a reply channel
+   - limitation is no external (other process) terminations (not really a restriction)
 
 ----------------
 - flow :svg

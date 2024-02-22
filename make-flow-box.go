@@ -49,6 +49,11 @@ can be a string, fixnum, or gi:uuid.`,
 					Type: "bag-flavor instance|JSON compatible LISP",
 					Text: "Read from an _input-stream_ and parses read JSON or SEN to form the content.",
 				},
+				{
+					Name: "watch",
+					Type: "symbol bound to a gi:channel",
+					Text: "Add a watcher to the box with the name of the symbol which must be bound to a gi:channel",
+				},
 			},
 			Return: "box",
 			Text: `__make-flow-box__ make a new instance of the _flow-box-flavor_.

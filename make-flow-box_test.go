@@ -99,3 +99,14 @@ func TestMakeFlowBoxBadKeyword(t *testing.T) {
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
+
+func TestMakeFlowBoxBadWatch(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(make-flow-box :watch t)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(let ((quux 7)) (make-flow-box :watch 'quux))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}

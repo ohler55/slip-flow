@@ -9,7 +9,6 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/gi"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -23,46 +22,46 @@ import (
 // ┗━━━━━━━┛          ┗━━━━━━━━━┛         ┗━━━━━━━┛
 
 func TestMergeActorOk(t *testing.T) {
-	exitChan := make(gi.Channel, 5)
 	scope := slip.NewScope()
-	scope.Let("exit-channel", exitChan)
-
-	(&sliptest.Function{
+	tf := sliptest.Function{
 		Scope: scope,
 		Source: `
-(let ((flow (make-flow :name 'flo :exit-channel exit-channel)))
-  (flow-add-task flow
-                 :name "split"
-                 :actor (make-instance 'flow-split-actor))
-  (flow-add-task flow
-                 :name "x"
-                 :actor (lambda (b) (flow-box-set b 1 "x") (list 'ok b)))
-  (flow-add-task flow
-                 :name "y"
-                 :actor (lambda (b) (flow-box-set b 2 "y") (list 'ok b)))
-  (flow-add-task flow
-                 :name "merge"
-                 :actor (make-instance 'flow-merge-actor :number 2 :timeout 2))
-  (flow-add-task flow
-                 :name "exit"
-                 :actor (make-instance 'flow-exit-actor))
+(let ((done (make-channel 3))
+      (flow (make-flow :name 'flo))
+      result)
+ (flow-add-task flow
+                :name "split"
+                :actor (make-instance 'flow-split-actor))
+ (flow-add-task flow
+                :name "x"
+                :actor (lambda (b) (flow-box-set b 1 "x") (list 'ok b)))
+ (flow-add-task flow
+                :name "y"
+                :actor (lambda (b) (flow-box-set b 2 "y") (list 'ok b)))
+ (flow-add-task flow
+                :name "merge"
+                :actor (make-instance 'flow-merge-actor :number 2 :timeout 2))
+ (flow-add-task flow
+                :name "exit"
+                :actor (make-instance 'flow-exit-actor))
 
-  (flow-link flow 'one 'split 'x)
-  (flow-link flow 'two 'split 'y)
-  (flow-link flow 'ok "x" 'merge)
-  (flow-link flow 'ok "y" 'merge)
-  (flow-link flow 'ok 'merge 'exit)
-  (flow-set-entry flow 'split)
-  (send flow :set-level 'warn)
-  (flow-submit flow (make-flow-box :parse "{z:0}"))
-  (flow-submit flow (make-flow-box :tracking-id 'zz00 :parse "{z:0}"))
-  (flow-submit flow (make-flow-box :tracking-id "zz01" :parse "{z:0}"))
-  (flow-shutdown flow))`,
-		Expect: "nil",
-	}).Test(t)
-
-	out := <-exitChan
-	scope.Let("merge-test-out", out)
+ (flow-link flow 'one 'split 'x)
+ (flow-link flow 'two 'split 'y)
+ (flow-link flow 'ok "x" 'merge)
+ (flow-link flow 'ok "y" 'merge)
+ (flow-link flow 'ok 'merge 'exit)
+ (flow-set-entry flow 'split)
+ (send flow :set-level 'warn)
+ (flow-submit flow (make-flow-box :parse "{z:0}" :watch 'done))
+ (flow-submit flow (make-flow-box :tracking-id 'zz00 :parse "{z:0}" :watch 'done))
+ (flow-submit flow (make-flow-box :tracking-id "zz01" :parse "{z:0}" :watch 'done))
+ (setq result (channel-pop done))
+ (flow-shutdown flow)
+ result)`,
+		Expect: `/#<flow-box [0-9a-f]+>/`,
+	}
+	tf.Test(t)
+	scope.Let("merge-test-out", tf.Result)
 
 	// Verify all tasks are present in the history along with 2 merges since
 	// the time each branch was merged is of interest.
@@ -73,54 +72,50 @@ func TestMergeActorOk(t *testing.T) {
 
 	value := slip.ReadString(`(sort (send merge-test-out :native) nil :key 'car)`).Eval(scope, nil)
 	tt.Equal(t, `(("x" . 1) ("y" . 2) ("z" . 0))`, slip.ObjectString(value))
-
-	<-exitChan
-	<-exitChan
 }
 
 func TestMergeActorTimeout(t *testing.T) {
-	exitChan := make(gi.Channel, 5)
 	scope := slip.NewScope()
-	scope.Let("exit-channel", exitChan)
-
-	(&sliptest.Function{
+	tf := sliptest.Function{
 		Scope: scope,
 		Source: `
-(let ((flow (make-flow :name 'flo :exit-channel exit-channel)))
-  (flow-add-task flow
-                 :name "split"
-                 :actor (make-instance 'flow-split-actor))
-  (flow-add-task flow
-                 :name "x"
-                 :actor (lambda (b) (flow-box-set b 1 "x") (list 'ok b)))
-  (flow-add-task flow
-                 :name "y"
-                 :actor (lambda (b) (flow-box-set b 2 "y") (list 'ok b)))
-  (flow-add-task flow
-                 :name "merge"
-                 :actor (make-instance 'flow-merge-actor :number 3 :timeout 1))
-  (flow-add-task flow
-                 :name "exit"
-                 :actor (make-instance 'flow-exit-actor))
-  (flow-add-task flow
-                 :name "error"
-                 :actor (make-instance 'flow-exit-actor))
+(let ((done (make-channel 3))
+      (flow (make-flow :name 'flo))
+      result)
+ (flow-add-task flow
+                :name "split"
+                :actor (make-instance 'flow-split-actor))
+ (flow-add-task flow
+                :name "x"
+                :actor (lambda (b) (flow-box-set b 1 "x") (list 'ok b)))
+ (flow-add-task flow
+                :name "y"
+                :actor (lambda (b) (flow-box-set b 2 "y") (list 'ok b)))
+ (flow-add-task flow
+                :name "merge"
+                :actor (make-instance 'flow-merge-actor :number 3 :timeout 1))
+ (flow-add-task flow
+                :name "exit"
+                :actor (make-instance 'flow-exit-actor))
+ (flow-add-task flow
+                :name "error"
+                :actor (make-instance 'flow-exit-actor))
 
-  (flow-link flow 'one 'split 'x)
-  (flow-link flow 'two 'split 'y)
-  (flow-link flow 'ok "x" 'merge)
-  (flow-link flow 'ok "y" 'merge)
-  (flow-link flow 'ok 'merge 'exit)
-  (flow-set-entry flow 'split)
-  (send flow :set-level 'warn)
-  (flow-submit flow (make-flow-box :parse "{z:0}"))
-  (sleep 2)
-  (flow-shutdown flow))`,
-		Expect: "nil",
-	}).Test(t)
-
-	out := <-exitChan
-	scope.Let("merge-test-out", out)
+ (flow-link flow 'one 'split 'x)
+ (flow-link flow 'two 'split 'y)
+ (flow-link flow 'ok "x" 'merge)
+ (flow-link flow 'ok "y" 'merge)
+ (flow-link flow 'ok 'merge 'exit)
+ (flow-set-entry flow 'split)
+ (send flow :set-level 'warn)
+ (flow-submit flow (make-flow-box :parse "{z:0}" :watch 'done))
+ (setq result (channel-pop done))
+ (flow-shutdown flow)
+ result)`,
+		Expect: `/#<flow-box [0-9a-f]+>/`,
+	}
+	tf.Test(t)
+	scope.Let("merge-test-out", tf.Result)
 
 	// Verify all tasks are present in the history along with 2 merges since
 	// the time each branch was merged is of interest.

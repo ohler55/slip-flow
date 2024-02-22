@@ -9,16 +9,18 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestFlowInitBadName(t *testing.T) {
+// Mostly tested in box-watch_test.go
+
+func TestBoxNotifyNotBox(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-instance 'flow :name t)`,
+		Source:    `(flow-box-notify 7 'test)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
-func TestFlowInitBadKeyword(t *testing.T) {
+func TestBoxNotifyBadName(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-instance 'flow t t)`,
+		Source:    `(flow-box-notify (make-flow-box) 7)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }

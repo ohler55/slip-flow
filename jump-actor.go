@@ -102,7 +102,7 @@ func (caller jumpActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	if f == nil {
 		slip.NewPanic("flow %s is not in the same group that %s is in", jc.target, jc.task.flow.name)
 	}
-	f.submit(s, args[0])
+	f.submit(s, args[0], nil)
 
 	return slip.List{nil, nil}
 }

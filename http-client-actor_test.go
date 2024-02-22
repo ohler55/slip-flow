@@ -11,7 +11,6 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/gi"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -101,10 +100,7 @@ func TestHTTPClientActorPostString(t *testing.T) {
 }
 
 func testHTTPClientActorOk(t *testing.T, actor string, checkAll bool) {
-	exitChan := make(gi.Channel, 5)
 	scope := slip.NewScope()
-	scope.Let("exit-channel", exitChan)
-
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		_, _ = w.Write([]byte("Hello\n"))
 	}))
@@ -113,10 +109,11 @@ func testHTTPClientActorOk(t *testing.T, actor string, checkAll bool) {
 	scope.Let("test-url", slip.String(server.URL))
 	scope.Let("actor", slip.ReadString(actor).Eval(scope, nil))
 
-	(&sliptest.Function{
+	tf := sliptest.Function{
 		Scope: scope,
 		Source: `
-(let ((flow (make-flow :name 'flo :exit-channel exit-channel)))
+(let ((done (make-channel 3))
+      (flow (make-flow :name 'flo)))
   (flow-add-task flow
                  :name "start"
                  :actor actor)
@@ -127,14 +124,13 @@ func testHTTPClientActorOk(t *testing.T, actor string, checkAll bool) {
   (flow-link flow "200" 'start "done")
   (flow-set-entry flow 'start)
   (send flow :set-level 'warn)
-  (flow-submit flow (make-flow-box :parse "{a:1}"))
+  (flow-submit flow (make-flow-box :parse "{a:1}" :watch 'done))
   (flow-shutdown flow)
-)`,
-		Expect: "nil",
-	}).Test(t)
-
-	out := <-exitChan
-	scope.Let("http-client-out", out)
+  (channel-pop done))`,
+		Expect: "/#<flow-box [0-9a-f]+>/",
+	}
+	tf.Test(t)
+	scope.Let("http-client-out", tf.Result)
 
 	value := slip.ReadString(`(send http-client-out :get "response.body")`).Eval(scope, nil)
 	tt.Equal(t, `"Hello

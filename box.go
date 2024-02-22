@@ -79,22 +79,26 @@ to identify one or more values.
 	boxFlavor.DefMethod(":scan", "", boxScanCaller{})
 	boxFlavor.DefMethod(":copy", "", boxCopyCaller{})
 	boxFlavor.DefMethod(":merge", "", boxMergeCaller{})
+	boxFlavor.DefMethod(":watch", "", boxWatchCaller{})
+	boxFlavor.DefMethod(":unwatch", "", boxUnwatchCaller{})
+	boxFlavor.DefMethod(":notify", "", boxNotifyCaller{})
 }
 
 type box struct {
-	track   track
-	content any
-	frozen  bool
+	track    track
+	content  any
+	watchers map[string]gi.Channel
+	frozen   bool
 }
 
 type boxInitCaller struct{}
 
-func (caller boxInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller boxInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
-	var bx box
+	bx := box{watchers: map[string]gi.Channel{}}
 	for i := 0; i < len(args)-1; i += 2 {
 		switch args[i] {
 		case slip.Symbol(":tracking-id"):
@@ -132,6 +136,17 @@ func (caller boxInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 			if options.Converter != nil {
 				bx.content = options.Converter.Convert(bx.content)
 			}
+		case slip.Symbol(":watch"):
+			sym, ok := args[i+1].(slip.Symbol)
+			if !ok {
+				slip.PanicType("box :init :watch", args[i+1], "symbol bound to a gi:channel")
+			}
+			var sc gi.Channel
+			if sc, ok = sym.Eval(s, depth+1).(gi.Channel); ok {
+				bx.watchers[string(sym)] = sc
+			} else {
+				slip.PanicType("box :init :watch", sym, "symbol bound to a gi:channel")
+			}
 		default:
 			slip.PanicType("box :init", args[i], ":tracking-id", ":track", ":set")
 		}
@@ -162,7 +177,7 @@ See also: __make-flow-box__
 // MakeBox is only public for testing purposes.
 func MakeBox(id slip.Object) (self *flavors.Instance, bx *box) {
 	self = boxFlavor.MakeInstance().(*flavors.Instance)
-	bx = &box{track: track{id: id}}
+	bx = &box{track: track{id: id}, watchers: map[string]gi.Channel{}}
 	self.Any = bx
 
 	return
@@ -171,14 +186,17 @@ func MakeBox(id slip.Object) (self *flavors.Instance, bx *box) {
 func boxDup(bi *flavors.Instance) (self *flavors.Instance, bx *box) {
 	b := bi.Any.(*box)
 	self = boxFlavor.MakeInstance().(*flavors.Instance)
-
 	bx = &box{
-		track:   track{id: b.track.id, history: make([]*event, len(b.track.history))},
-		content: b.content,
-		frozen:  true,
+		track:    track{id: b.track.id, history: make([]*event, len(b.track.history))},
+		content:  b.content,
+		watchers: map[string]gi.Channel{},
+		frozen:   true,
 	}
 	for i, ev := range b.track.history {
 		bx.track.history[i] = &event{when: ev.when, flow: ev.flow, task: ev.task}
+	}
+	for k, c := range b.watchers {
+		bx.watchers[k] = c
 	}
 	self.Any = bx
 
