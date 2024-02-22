@@ -67,7 +67,6 @@ See also: flow-task
 			slip.List{
 				slip.Symbol(":init-keywords"),
 				slip.Symbol(":name"),
-				slip.Symbol(":exit-channel"),
 			},
 			slip.Symbol(":gettable-instance-variables"),
 			slip.Symbol(":settable-instance-variables"),
@@ -87,8 +86,6 @@ See also: flow-task
 	flowFlavor.DefMethod(":set-entry", "", flowSetEntryCaller{})
 	flowFlavor.DefMethod(":link", "", flowLinkCaller{})
 	flowFlavor.DefMethod(":submit", "", flowSubmitCaller{})
-	flowFlavor.DefMethod(":exit-channel", "", flowExitChannelCaller{})
-	flowFlavor.DefMethod(":set-exit-channel", "", flowSetExitChannelCaller{})
 	flowFlavor.DefMethod(":metrics", "", flowMetricsCaller{})
 	flowFlavor.DefMethod(":reset-metrics", "", flowResetMetricsCaller{})
 	flowFlavor.DefMethod(":set-level", ":after", flowSetLevelCaller{})
@@ -98,13 +95,12 @@ See also: flow-task
 }
 
 type flow struct {
-	name     string
-	self     *flavors.Instance
-	group    *group
-	tasks    map[string]*task
-	entry    *task
-	exitChan slip.Object
-	started  bool
+	name    string
+	self    *flavors.Instance
+	group   *group
+	tasks   map[string]*task
+	entry   *task
+	started bool
 
 	received  atomic.Uint64
 	errors    atomic.Uint64
@@ -268,12 +264,9 @@ func (f *flow) exit(bi slip.Object) {
 			f.duration.Add(uint64(last.when.Sub(first.when)))
 		}
 	}
-	if f.exitChan != nil {
-		f.exitChan.(gi.Channel) <- bi
-	}
 }
 
-func (f *flow) submit(s *slip.Scope, data slip.Object) {
+func (f *flow) submit(s *slip.Scope, data, watcher slip.Object) slip.Object {
 	if f.entry == nil {
 		slip.NewPanic("no entry task has been set for the %s flow", f.name)
 	}
@@ -298,7 +291,19 @@ func (f *flow) submit(s *slip.Scope, data slip.Object) {
 		bi, bx = MakeBox(gi.NewUUID())
 		bx.content = bag.ObjectToBag(data)
 	}
+	if watcher != nil {
+		if sym, ok := watcher.(slip.Symbol); ok {
+			var gc gi.Channel
+			if gc, ok = sym.Eval(s, 0).(gi.Channel); ok {
+				bi.Any.(*box).watchers[string(sym)] = gc
+			}
+		} else {
+			slip.PanicType(":watch", watcher, "symbol bound to a gi:channel")
+		}
+	}
 	f.entry.receive(s, bi)
+
+	return bi
 }
 
 func (f *flow) metrics() (alist slip.List) {
@@ -550,8 +555,7 @@ func (caller flowInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	}
 	flo := flow{self: obj, tasks: map[string]*task{}}
 	for i := 0; i < len(args)-1; i += 2 {
-		switch args[i] {
-		case slip.Symbol(":name"):
+		if args[i] == slip.Symbol(":name") {
 			switch tv := args[i+1].(type) {
 			case slip.String:
 				flo.name = string(tv)
@@ -559,12 +563,6 @@ func (caller flowInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 				flo.name = string(tv)
 			default:
 				slip.PanicType("flow :init :name", args[i+1], "string", "symbol")
-			}
-		case slip.Symbol(":exit-channel"):
-			if ch, ok := args[i+1].(gi.Channel); ok {
-				flo.exitChan = ch
-			} else {
-				slip.PanicType("flow :init :exit-channel", args[i+1], "gi:chanel")
 			}
 		}
 	}

@@ -126,7 +126,7 @@ func (caller inspectActorPerformCaller) Call(s *slip.Scope, args slip.List, _ in
 
 func (caller inspectActorPerformCaller) Docs() string {
 	return `__:perform__ _box_
-   _:box_ [instance] the data to log and then place on the flow exit-channel.
+   _:box_ [instance] the data to log.
 
 
 Write the box to either _*standard-output*_ or to the logger.

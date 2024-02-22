@@ -27,8 +27,14 @@ func init() {
 					Type: "instance",
 					Text: "instance of the flow-box-flavor to process by the flow.",
 				},
+				{Name: "&optional"},
+				{
+					Name: "watch",
+					Type: "symbol bound to a gi:channel",
+					Text: "Add a watcher to the box with the name of the symbol which must be bound to a gi:channel",
+				},
 			},
-			Return: "nil",
+			Return: "box",
 			Text:   `__flow-submit__ submits an instance of the _flow-box-flavor_ for processing by the _flow_.`,
 			Examples: []string{
 				`(setq flow (make-instance 'flow-flavor :submit "flo"))`,
@@ -45,24 +51,27 @@ type FlowSubmit struct {
 
 // Call the function with the arguments provided.
 func (f *FlowSubmit) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.ArgCountCheck(f, args, 2, 3)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Flavor != flowFlavor {
 		slip.PanicType("flow", args[0], "flow")
 	}
-	self.Any.(*flow).submit(s, args[1])
-
-	return nil
+	var watcher slip.Object
+	if 2 < len(args) {
+		watcher = args[2]
+	}
+	return self.Any.(*flow).submit(s, args[1], watcher)
 }
 
 type flowSubmitCaller struct{}
 
 func (caller flowSubmitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-
-	obj.Any.(*flow).submit(s, args[0])
-
-	return nil
+	var watcher slip.Object
+	if 1 < len(args) {
+		watcher = args[1]
+	}
+	return obj.Any.(*flow).submit(s, args[0], watcher)
 }
 
 func (caller flowSubmitCaller) Docs() string {

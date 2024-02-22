@@ -23,41 +23,41 @@ func TestJumpActorBasic(t *testing.T) {
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `
-(let* ((lg (make-instance 'logger-flavor))
-       (echan (make-channel 5))
+(let* ((done (make-channel 3))
+       (lg (make-instance 'logger-flavor))
        (group (make-flow-group :logger lg))
        (s0 (make-instance 'flow :name 'first-stage))
-       (s1 (make-instance 'flow :name 'second-stage :exit-channel echan)))
-  (flow-add-task s0
-                 :name "triple"
-                 :actor (lambda (b)
-                          (flow-box-set b (* 3 (flow-box-get b "[0]")) "[0]")
-                          (list 'ok b)))
-  (flow-add-task s0
-                 :name "jump"
-                 :actor (make-instance 'flow-jump-actor :target 'second-stage))
-  (flow-link s0 'ok 'triple 'jump)
-  (flow-set-entry s0 'triple)
-  (flow-group-add group s0)
+       (s1 (make-instance 'flow :name 'second-stage)))
+ (flow-add-task s0
+                :name "triple"
+                :actor (lambda (b)
+                         (flow-box-set b (* 3 (flow-box-get b "[0]")) "[0]")
+                         (list 'ok b)))
+ (flow-add-task s0
+                :name "jump"
+                :actor (make-instance 'flow-jump-actor :target 'second-stage))
+ (flow-link s0 'ok 'triple 'jump)
+ (flow-set-entry s0 'triple)
+ (flow-group-add group s0)
 
-  (flow-add-task s1
-                 :name "double"
-                 :actor (lambda (b)
-                          (flow-box-set b (* 2 (flow-box-get b "[0]")) "[0]")
-                          (list 'ok b)))
-  (flow-add-task s1
-                 :name "done"
-                 :actor (make-instance 'flow-exit-actor))
-  (flow-link s1 'ok 'double 'done)
-  (flow-set-entry s1 'double)
-  (flow-group-add group s1)
+ (flow-add-task s1
+                :name "double"
+                :actor (lambda (b)
+                         (flow-box-set b (* 2 (flow-box-get b "[0]")) "[0]")
+                         (list 'ok b)))
+ (flow-add-task s1
+                :name "done"
+                :actor (make-instance 'flow-exit-actor))
+ (flow-link s1 'ok 'double 'done)
+ (flow-set-entry s1 'double)
+ (flow-group-add group s1)
 
-  (send group :set-level 'info)
-  (flow-group-start group)
-  (flow-submit s0 (make-flow-box :set '(1)))
-  (channel-pop echan)
-  (flow-group-shutdown group)
-  (send lg :shutdown))
+ (send group :set-level 'info)
+ (flow-group-start group)
+ (flow-submit s0 (make-flow-box :set '(1) :watch 'done))
+ (channel-pop done)
+ (flow-group-shutdown group)
+ (send lg :shutdown))
 `,
 		Expect: "nil",
 	}).Test(t)

@@ -8,15 +8,11 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/gi"
 	"github.com/ohler55/slip/sliptest"
 )
 
 func TestTaskTransitionFunction(t *testing.T) {
-	exitChan := make(gi.Channel, 5)
 	scope := slip.NewScope()
-	scope.Let("exit-channel", exitChan)
-
 	_ = slip.ReadString(`
 (defflavor task-transition-test-actor () (flow-task-actor))
 (defmethod (task-transition-test-actor :perform) (box)
@@ -25,33 +21,34 @@ func TestTaskTransitionFunction(t *testing.T) {
  (list nil nil))
 `).Eval(scope, nil)
 
-	(&sliptest.Function{
+	tf := sliptest.Function{
 		Scope: scope,
-		Source: `(let ((flow (make-flow :name 'flo :exit-channel exit-channel)))
-  (flow-add-task flow
-                 :name "start"
-                 :actor (make-instance 'task-transition-test-actor))
-  (flow-add-task flow
-                 :name "branch-one"
-                 :actor (make-instance 'flow-exit-actor))
-  (flow-add-task flow
-                 :name "branch-two"
-                 :actor (make-instance 'flow-exit-actor))
+		Source: `
+(let ((done (make-channel 3))
+      (flow (make-flow :name 'flo)))
+ (flow-add-task flow
+                :name "start"
+                :actor (make-instance 'task-transition-test-actor))
+ (flow-add-task flow
+                :name "branch-one"
+                :actor (make-instance 'flow-exit-actor))
+ (flow-add-task flow
+                :name "branch-two"
+                :actor (make-instance 'flow-exit-actor))
 
-  (flow-link flow 'one 'start "branch-one")
-  (flow-link flow 'two 'start "branch-two")
-  (flow-set-entry flow 'start)
-  (flow-submit flow (make-flow-box :set '(1))))`,
-		Expect: "nil",
-	}).Test(t)
-
-	out := <-exitChan
-	scope.Let("split-out", out)
+ (flow-link flow 'one 'start "branch-one")
+ (flow-link flow 'two 'start "branch-two")
+ (flow-set-entry flow 'start)
+ (flow-submit flow (make-flow-box :set '(1) :watch 'done))
+ (list (channel-pop done) (channel-pop done)))`,
+		Expect: `/\(#<flow-box [0-9a-f]+> #<flow-box [0-9a-f]+>\)/`,
+	}
+	tf.Test(t)
+	scope.Let("split-out", tf.Result.(slip.List)[0])
 	history := slip.ReadString(
 		`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`).Eval(scope, nil).(slip.List)
 
-	out = <-exitChan
-	scope.Let("split-out", out)
+	scope.Let("split-out", tf.Result.(slip.List)[1])
 	history = append(history,
 		slip.ReadString(
 			`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`).Eval(scope, nil).(slip.List)...,
@@ -62,10 +59,7 @@ func TestTaskTransitionFunction(t *testing.T) {
 }
 
 func TestTaskTransitionSend(t *testing.T) {
-	exitChan := make(gi.Channel, 5)
 	scope := slip.NewScope()
-	scope.Let("exit-channel", exitChan)
-
 	_ = slip.ReadString(`
 (defflavor task-transition-test2-actor () (flow-task-actor))
 (defmethod (task-transition-test2-actor :perform) (box)
@@ -74,33 +68,34 @@ func TestTaskTransitionSend(t *testing.T) {
  (list nil nil))
 `).Eval(scope, nil)
 
-	(&sliptest.Function{
+	tf := sliptest.Function{
 		Scope: scope,
-		Source: `(let ((flow (make-flow :name 'flo :exit-channel exit-channel)))
-  (flow-add-task flow
-                 :name "start"
-                 :actor (make-instance 'task-transition-test2-actor))
-  (flow-add-task flow
-                 :name "branch-one"
-                 :actor (make-instance 'flow-exit-actor))
-  (flow-add-task flow
-                 :name "branch-two"
-                 :actor (make-instance 'flow-exit-actor))
+		Source: `
+(let ((done (make-channel 3))
+      (flow (make-flow :name 'flo)))
+ (flow-add-task flow
+                :name "start"
+                :actor (make-instance 'task-transition-test2-actor))
+ (flow-add-task flow
+                :name "branch-one"
+                :actor (make-instance 'flow-exit-actor))
+ (flow-add-task flow
+                :name "branch-two"
+                :actor (make-instance 'flow-exit-actor))
 
-  (flow-link flow 'one 'start "branch-one")
-  (flow-link flow 'two 'start "branch-two")
-  (flow-set-entry flow 'start)
-  (flow-submit flow (make-flow-box :set '(1))))`,
-		Expect: "nil",
-	}).Test(t)
-
-	out := <-exitChan
-	scope.Let("split-out", out)
+ (flow-link flow 'one 'start "branch-one")
+ (flow-link flow 'two 'start "branch-two")
+ (flow-set-entry flow 'start)
+ (flow-submit flow (make-flow-box :set '(1) :watch 'done))
+ (list (channel-pop done) (channel-pop done)))`,
+		Expect: `/\(#<flow-box [0-9a-f]+> #<flow-box [0-9a-f]+>\)/`,
+	}
+	tf.Test(t)
+	scope.Let("split-out", tf.Result.(slip.List)[0])
 	history := slip.ReadString(
 		`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`).Eval(scope, nil).(slip.List)
 
-	out = <-exitChan
-	scope.Let("split-out", out)
+	scope.Let("split-out", tf.Result.(slip.List)[1])
 	history = append(history,
 		slip.ReadString(
 			`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`).Eval(scope, nil).(slip.List)...,

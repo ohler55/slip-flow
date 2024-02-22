@@ -17,14 +17,19 @@ var (
 
 func init() {
 	logErrorActorFlavor = flavors.DefFlavor("flow-log-error-actor",
-		map[string]slip.Object{},
+		map[string]slip.Object{ // instance variables
+			"notifiers": nil, // list of strings or symbols
+		},
 		nil,
 		slip.List{
+			slip.Symbol(":gettable-instance-variables"),
+			slip.Symbol(":settable-instance-variables"),
+			slip.Symbol(":inittable-instance-variables"),
 			slip.List{
 				slip.Symbol(":documentation"),
 				slip.String(`A flow-log-error-actor is an actor that logs an error and exits the flow if
-no links are attached. If the _flow_ _log-error-channel_ has been and set there are no attached links
-then then _box_ received is placed on the _log-error-channel_.
+no links are attached. If the _box_ has a watcher are no attached links
+then then _box_ received is placed on the watcher channel.
 `),
 			},
 			slip.List{
@@ -123,6 +128,18 @@ func (caller logErrorActorPerformCaller) Call(s *slip.Scope, args slip.List, _ i
 	for linkName := range tsk.links {
 		return slip.List{slip.String(linkName), args[0]}
 	}
+	var notifiers slip.List
+	switch tn := obj.Get("notifiers").(type) {
+	case nil:
+		// leave as nil
+	case slip.Symbol, slip.String:
+		notifiers = slip.List{tn}
+	case slip.List:
+		notifiers = tn
+	}
+	if bi, ok := args[0].(*flavors.Instance); ok && bi.Flavor == boxFlavor {
+		notifyBox(bi, notifiers)
+	}
 	tsk.flow.exit(args[0])
 
 	return slip.List{nil, nil}
@@ -130,10 +147,9 @@ func (caller logErrorActorPerformCaller) Call(s *slip.Scope, args slip.List, _ i
 
 func (caller logErrorActorPerformCaller) Docs() string {
 	return `__:perform__ _box_
-   _:box_ [instance] the data to log and then place on the flow exit-channel.
+   _:box_ [instance] the data to log and then place on any watcher channels.
 
 
-Log the box error message or the content and then place the _box_ on the flow exit-channel
-is the log-error-channel is not nil.
+Log the box error message or the content and then place the _box_ on the watcher channels.
 `
 }

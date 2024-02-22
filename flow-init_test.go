@@ -16,9 +16,9 @@ func TestFlowInitBadName(t *testing.T) {
 	}).Test(t)
 }
 
-func TestFlowInitBadExitChannel(t *testing.T) {
+func TestFlowInitBadKeyword(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-instance 'flow :exit-channel t)`,
+		Source:    `(make-instance 'flow t t)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
