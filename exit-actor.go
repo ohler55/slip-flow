@@ -12,6 +12,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize(nil)
 	exitActorFlavor = flavors.DefFlavor("flow-exit-actor",
 		map[string]slip.Object{ // instance variables
 			"notifiers": nil, // list of strings or symbols
@@ -29,6 +30,7 @@ all watchers if no _notifiers_ have been identified.
 `),
 			},
 		},
+		&Pkg,
 	)
 	exitActorFlavor.DefMethod(":start", "", exitActorStartCaller{})
 	exitActorFlavor.DefMethod(":perform", "", exitActorPerformCaller{})

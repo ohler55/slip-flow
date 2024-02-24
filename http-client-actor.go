@@ -21,6 +21,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize(nil)
 	httpClientActorFlavor = flavors.DefFlavor("flow-http-client-actor",
 		map[string]slip.Object{},
 		nil,
@@ -43,6 +44,7 @@ as the HTTP status of the response.
 				slip.Symbol(":reply-handler"),
 			},
 		},
+		&Pkg,
 	)
 	httpClientActorFlavor.DefMethod(":init", "", httpClientInitCaller{})
 	httpClientActorFlavor.DefMethod(":start", "", httpClientActorStartCaller{})

@@ -12,6 +12,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize(nil)
 	jumpActorFlavor = flavors.DefFlavor("flow-jump-actor",
 		map[string]slip.Object{},
 		nil,
@@ -26,6 +27,7 @@ the entry of another flow in the current group.`),
 				slip.Symbol(":target"),
 			},
 		},
+		&Pkg,
 	)
 	jumpActorFlavor.DefMethod(":init", "", jumpInitCaller{})
 	jumpActorFlavor.DefMethod(":start", "", jumpActorStartCaller{})

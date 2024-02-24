@@ -16,6 +16,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize(nil)
 	mergeActorFlavor = flavors.DefFlavor("flow-merge-actor",
 		map[string]slip.Object{},
 		nil,
@@ -37,6 +38,7 @@ arrays.
 				slip.Symbol(":timeout"),
 			},
 		},
+		&Pkg,
 	)
 	mergeActorFlavor.DefMethod(":init", "", mergeInitCaller{})
 	mergeActorFlavor.DefMethod(":start", "", mergeActorStartCaller{})

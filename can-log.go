@@ -19,6 +19,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize(nil)
 	canLogFlavor = flavors.DefFlavor("can-log",
 		map[string]slip.Object{ // instance variables
 			"log-level": slip.Fixnum(1),
@@ -34,6 +35,7 @@ func init() {
 				slip.String(`An abstract mixin that adds support for logging.`),
 			},
 		},
+		&Pkg,
 	)
 	canLogFlavor.DefMethod(":error", "", canLogErrorCaller{})
 	canLogFlavor.DefMethod(":warn", "", canLogWarnCaller{})

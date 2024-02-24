@@ -16,6 +16,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize(nil)
 	trackFlavor = flavors.DefFlavor("flow-track",
 		map[string]slip.Object{},
 		nil,
@@ -26,6 +27,7 @@ func init() {
 _flow-box_ is traverses a flow.`),
 			},
 		},
+		&Pkg,
 	)
 	trackFlavor.Final = true
 	trackFlavor.GoMakeOnly = true

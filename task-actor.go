@@ -12,6 +12,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize(nil)
 	taskActorFlavor = flavors.DefFlavor("flow-task-actor",
 		map[string]slip.Object{"task": nil},
 		nil,
@@ -22,6 +23,7 @@ func init() {
 			},
 			slip.Symbol(":gettable-instance-variables"),
 		},
+		&Pkg,
 	)
 	taskActorFlavor.DefMethod(":start", "", taskActorStartCaller{})
 }

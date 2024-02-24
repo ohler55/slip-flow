@@ -12,6 +12,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize(nil)
 	splitActorFlavor = flavors.DefFlavor("flow-split-actor",
 		map[string]slip.Object{},
 		nil,
@@ -22,6 +23,7 @@ func init() {
 A _flow-merge-actor_ can be used to merge the branch of the slit back together.`),
 			},
 		},
+		&Pkg,
 	)
 	splitActorFlavor.DefMethod(":start", "", splitActorStartCaller{})
 	splitActorFlavor.DefMethod(":perform", "", splitActorPerformCaller{})

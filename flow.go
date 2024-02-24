@@ -21,6 +21,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize(nil)
 	flowFlavor = flavors.DefFlavor("flow",
 		map[string]slip.Object{
 			"width":       nil,
@@ -72,6 +73,7 @@ See also: flow-task
 			slip.Symbol(":settable-instance-variables"),
 			slip.Symbol(":inittable-instance-variables"),
 		},
+		&Pkg,
 	)
 	flowFlavor.DefMethod(":init", "", flowInitCaller{})
 	flowFlavor.DefMethod(":name", "", flowNameCaller{})

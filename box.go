@@ -17,6 +17,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize(nil)
 	boxFlavor = flavors.DefFlavor("flow-box",
 		map[string]slip.Object{},
 		nil,
@@ -56,6 +57,7 @@ to identify one or more values.
 				slip.Symbol(":read"),
 			},
 		},
+		&Pkg,
 	)
 	boxFlavor.Final = true
 	boxFlavor.DefMethod(":init", "", boxInitCaller{})

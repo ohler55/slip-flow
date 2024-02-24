@@ -16,6 +16,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize(nil)
 	logErrorActorFlavor = flavors.DefFlavor("flow-log-error-actor",
 		map[string]slip.Object{ // instance variables
 			"notifiers": nil, // list of strings or symbols
@@ -45,6 +46,7 @@ then then _box_ received is placed on the watcher channel.
 				slip.Symbol(":full"),
 			},
 		},
+		&Pkg,
 	)
 	logErrorActorFlavor.DefMethod(":init", "", logErrorInitCaller{})
 	logErrorActorFlavor.DefMethod(":start", "", logErrorActorStartCaller{})

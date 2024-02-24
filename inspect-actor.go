@@ -15,6 +15,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize(nil)
 	inspectActorFlavor = flavors.DefFlavor("flow-inspect-actor",
 		map[string]slip.Object{},
 		nil,
@@ -37,6 +38,7 @@ func init() {
 				slip.Symbol(":output"),
 			},
 		},
+		&Pkg,
 	)
 	inspectActorFlavor.DefMethod(":init", "", inspectInitCaller{})
 	inspectActorFlavor.DefMethod(":start", "", inspectActorStartCaller{})

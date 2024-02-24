@@ -14,6 +14,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize(nil)
 	groupFlavor = flavors.DefFlavor("flow-group",
 		map[string]slip.Object{},
 		[]string{
@@ -26,6 +27,7 @@ func init() {
 `),
 			},
 		},
+		&Pkg,
 	)
 	groupFlavor.DefMethod(":init", "", groupInitCaller{})
 	groupFlavor.DefMethod(":add", "", groupAddCaller{})
