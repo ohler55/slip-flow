@@ -72,7 +72,7 @@ func (caller inspectInitCaller) Docs() string {
 	return `__:init__ &key _pretty_ _depth_ _right-margin_ _indent_ _time-format_ _time-wrap_ _json_ _color_ _full_
    _:pretty_ [boolean] value to use in place of the _*print-pretty*_ value.
 If _t_ then the JSON or SEN output is indented according to the other keyword options.
-   _:depth [fixnum] maximum number of nested elements on a line in the output.
+   _:depth_ [fixnum] maximum number of nested elements on a line in the output.
 A value of zero outputs a tight single line output. Default: 4.
    _:right-margin_ [fixnum] value to use in place of the _*print-right-margin*_ value.
    _:indent_ [fixnum] is the number of spaces to indent JSON or SEN output if :pretty is not non-nil.
