@@ -29,3 +29,6 @@ path to the directory containing the `flow.so` file.
 ```lisp
 (require 'flow "my-package-directory")
 ```
+
+Note the code is in a flow sub directory to allow that sub-package to
+be imported in the flow-editor.
