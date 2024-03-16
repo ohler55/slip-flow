@@ -60,6 +60,7 @@ See also: flow
 	)
 	taskFlavor.DefMethod(":init", "", taskInitCaller{})
 	taskFlavor.DefMethod(":name", "", taskNameCaller{})
+	taskFlavor.DefMethod(":actors", "", taskActorsCaller{})
 	taskFlavor.DefMethod(":workers", "", taskWorkersCaller{})
 	taskFlavor.DefMethod(":start", "", taskStartCaller{})
 	taskFlavor.DefMethod(":shutdown", "", taskShutdownCaller{})
@@ -336,6 +337,23 @@ func (t *task) linkList() (la slip.List) {
 				ti = lnk.task.self
 			}
 			la[i] = append(slip.List{slip.String(k), ti}, lnk.mids...)
+		}
+	}
+	return
+}
+
+func (t *task) actorList() (al slip.List) {
+	switch {
+	case 0 < len(t.actors):
+		al = make(slip.List, len(t.actors))
+		for i, v := range t.actors {
+			al[i] = v
+		}
+	case 0 < len(t.funcName):
+		al = append(al, slip.Symbol(t.funcName))
+	case t.caller != nil:
+		if obj, ok := t.caller.(*slip.Lambda); ok {
+			al = append(al, obj)
 		}
 	}
 	return
