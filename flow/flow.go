@@ -24,11 +24,9 @@ func init() {
 	Pkg.Initialize(nil)
 	flowFlavor = flavors.DefFlavor("flow",
 		map[string]slip.Object{
-			"width":       nil,
-			"height":      nil,
-			"task-width":  nil,
-			"task-height": nil,
-			"background":  nil,
+			"task-width":  slip.Fixnum(64),
+			"task-height": slip.Fixnum(64),
+			"gui":         nil, // an assoc with what ever data the flow editor wishs to save
 		},
 		[]string{
 			"can-log",
@@ -93,6 +91,8 @@ See also: flow-task
 	flowFlavor.DefMethod(":set-level", ":after", flowSetLevelCaller{})
 	flowFlavor.DefMethod(":write", "", flowWriteCaller{})
 	flowFlavor.DefMethod(":validate", "", flowValidateCaller{})
+	flowFlavor.DefMethod(":width", "", flowWidthCaller{})
+	flowFlavor.DefMethod(":height", "", flowHeightCaller{})
 	// flowFlavor.DefMethod(":svg", "", flowSVGCaller{})
 }
 
@@ -341,17 +341,14 @@ func (f *flow) write(s *slip.Scope, args slip.List) slip.Object {
 	clos := 2 <= len(args) && args[1] != nil
 
 	b = fmt.Appendf(b, "(let ((flow (make-flow :name %q", f.name)
-	if width, ok := f.self.Get("width").(slip.Fixnum); ok {
-		b = fmt.Appendf(b, "\n                       :width %s", width)
-	}
-	if height, ok := f.self.Get("height").(slip.Fixnum); ok {
-		b = fmt.Appendf(b, "\n                       :height %s", height)
-	}
 	if width, ok := f.self.Get("task-width").(slip.Fixnum); ok {
 		b = fmt.Appendf(b, "\n                       :task-width %s", width)
 	}
 	if height, ok := f.self.Get("task-height").(slip.Fixnum); ok {
 		b = fmt.Appendf(b, "\n                       :task-height %s", height)
+	}
+	if gui := f.self.Get("gui"); gui != nil {
+		b = fmt.Appendf(b, "\n                       :gui '%s", gui)
 	}
 	b = append(b, ")))\n"...)
 
@@ -530,6 +527,30 @@ func (f *flow) validate(s *slip.Scope) (fails slip.List) {
 	}
 	for _, t := range f.tasks {
 		fails = append(fails, t.validate(s)...)
+	}
+	return
+}
+
+func (f *flow) width() (w slip.Fixnum) {
+	tw, _ := f.self.Get("task-width").(slip.Fixnum)
+	for _, t := range f.tasks {
+		x, _ := t.self.Get("x").(slip.Fixnum)
+		x += tw
+		if w < x {
+			w = x
+		}
+	}
+	return
+}
+
+func (f *flow) height() (h slip.Fixnum) {
+	th, _ := f.self.Get("task-height").(slip.Fixnum)
+	for _, t := range f.tasks {
+		y, _ := t.self.Get("y").(slip.Fixnum)
+		y += th
+		if h < y {
+			h = y
+		}
 	}
 	return
 }

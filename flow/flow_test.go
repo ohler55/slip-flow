@@ -17,24 +17,26 @@ func TestFlowDocs(t *testing.T) {
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
 	for _, method := range []string{
-		":init",
-		":name",
-		":start",
-		":shutdown",
-		":running",
 		":add-task",
-		":tasks",
-		":remove-task",
-		":find-task",
 		":entry",
-		":set-entry",
+		":find-task",
+		":height",
+		":init",
 		":link",
-		":submit",
-		":set-level",
 		":metrics",
+		":name",
+		":remove-task",
 		":reset-metrics",
-		":write",
+		":running",
+		":set-entry",
+		":set-level",
+		":shutdown",
+		":start",
+		":submit",
+		":tasks",
 		":validate",
+		":width",
+		":write",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))

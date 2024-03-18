@@ -62,6 +62,7 @@ See also: flow
 	taskFlavor.DefMethod(":name", "", taskNameCaller{})
 	taskFlavor.DefMethod(":actors", "", taskActorsCaller{})
 	taskFlavor.DefMethod(":workers", "", taskWorkersCaller{})
+	taskFlavor.DefMethod(":depth", "", taskDepthCaller{})
 	taskFlavor.DefMethod(":start", "", taskStartCaller{})
 	taskFlavor.DefMethod(":shutdown", "", taskShutdownCaller{})
 	taskFlavor.DefMethod(":running", "", taskRunningCaller{})

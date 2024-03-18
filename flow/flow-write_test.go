@@ -17,7 +17,7 @@ func TestFlowWriteSend(t *testing.T) {
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `
-(let ((flow (make-flow :name 'flo :width 300 :height 280 :task-width 40 :task-height 40)))
+(let ((flow (make-flow :name 'flo :task-width 40 :task-height 40 :gui '((grid-size . 10)))))
   (flow-add-task flow
                  :name "start"
                  :x 100
@@ -51,10 +51,9 @@ func TestFlowWriteSend(t *testing.T) {
   (flow-set-entry flow 'start)
   (send flow :write nil))`,
 		Expect: `"(let ((flow (make-flow :name "flo"
-                       :width 300
-                       :height 280
                        :task-width 40
-                       :task-height 40)))
+                       :task-height 40
+                       :gui '((grid-size . 10)))))
   (send flow :add-task
         :name "even"
         :x 0
@@ -122,7 +121,9 @@ func TestFlowWriteFunction(t *testing.T) {
 		Expect: "nil",
 	}).Test(t)
 
-	tt.Equal(t, `(let ((flow (make-flow :name "flo")))
+	tt.Equal(t, `(let ((flow (make-flow :name "flo"
+                       :task-width 64
+                       :task-height 64)))
   (flow-add-task flow
                  :name "done"
                  :x 200
@@ -175,7 +176,9 @@ func TestFlowWriteStream(t *testing.T) {
 		Expect: "nil",
 	}).Test(t)
 
-	tt.Equal(t, `(let ((flow (make-flow :name "flo")))
+	tt.Equal(t, `(let ((flow (make-flow :name "flo"
+                       :task-width 64
+                       :task-height 64)))
   (flow-add-task flow
                  :name "done"
                  :x 200

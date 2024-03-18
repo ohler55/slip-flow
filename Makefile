@@ -11,6 +11,6 @@ build:
 	go build -buildmode=plugin -o flow.so *.go
 
 test: lint
-	go test -coverprofile=cov.out ./...
+	make -C flow test
 
 .PHONY: all build
