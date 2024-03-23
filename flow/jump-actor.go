@@ -32,6 +32,7 @@ the entry of another flow in the current group.`),
 	jumpActorFlavor.DefMethod(":init", "", jumpInitCaller{})
 	jumpActorFlavor.DefMethod(":start", "", jumpActorStartCaller{})
 	jumpActorFlavor.DefMethod(":perform", "", jumpActorPerformCaller{})
+	jumpActorFlavor.DefMethod(":init-key-values", "", jumpActorInitKeyValuesCaller{})
 }
 
 type jumpCtx struct {
@@ -115,5 +116,22 @@ func (caller jumpActorPerformCaller) Docs() string {
 
 
 Submits a box to the target flow.
+`
+}
+
+type jumpActorInitKeyValuesCaller struct{}
+
+func (caller jumpActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	jc := obj.Any.(*jumpCtx)
+
+	return slip.List{slip.Symbol(":target"), slip.String(jc.target)}
+}
+
+func (caller jumpActorInitKeyValuesCaller) Docs() string {
+	return `__:init-key-values__ => (:target "sub-flow")
+
+
+Returns the keywords and values needed to recreate the instance as a property list.
 `
 }

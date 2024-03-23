@@ -80,6 +80,7 @@ func TestJumpActorDocs(t *testing.T) {
 		":init",
 		":start",
 		":perform",
+		":init-key-values",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-jump-actor %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
@@ -158,4 +159,19 @@ func TestJumpActorNotInSameGroup(t *testing.T) {
 	}).Test(t)
 
 	tt.Equal(t, `/E first-stage:jump .* flow second-stage is not in the same group that first-stage is in/`, b.String())
+}
+
+func TestJumpActorInitKeyValues(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(send (make-instance 'flow-jump-actor
+                                      :target 'subby) :init-key-values)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			for i, x := range []string{
+				`:target`,
+				`"subby"`,
+			} {
+				tt.Equal(t, x, slip.ObjectString(v.(slip.List)[i]), x)
+			}
+		},
+	}).Test(t)
 }

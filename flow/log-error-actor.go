@@ -51,6 +51,7 @@ then then _box_ received is placed on the watcher channel.
 	logErrorActorFlavor.DefMethod(":init", "", logErrorInitCaller{})
 	logErrorActorFlavor.DefMethod(":start", "", logErrorActorStartCaller{})
 	logErrorActorFlavor.DefMethod(":perform", "", logErrorActorPerformCaller{})
+	logErrorActorFlavor.DefMethod(":init-key-values", "", logErrorActorInitKeyValuesCaller{})
 }
 
 type logErrorCtx struct {
@@ -153,5 +154,50 @@ func (caller logErrorActorPerformCaller) Docs() string {
 
 
 Log the box error message or the content and then place the _box_ on the watcher channels.
+`
+}
+
+type logErrorActorInitKeyValuesCaller struct{}
+
+func (caller logErrorActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	lec := obj.Any.(*logErrorCtx)
+
+	kvs := slip.List{
+		slip.Symbol(":notifiers"), obj.Get("notifiers"),
+		slip.Symbol(":depth"), slip.Fixnum(lec.pw.MaxDepth),
+		slip.Symbol(":right-margin"), slip.Fixnum(lec.pw.Width),
+		slip.Symbol(":indent"), slip.Fixnum(lec.pw.Indent),
+		slip.Symbol(":time-format"), slip.String(lec.pw.TimeFormat),
+		slip.Symbol(":time-wrap"), slip.String(lec.pw.TimeWrap),
+	}
+	if lec.pw.SEN {
+		kvs = append(kvs, slip.Symbol(":json"), nil)
+	} else {
+		kvs = append(kvs, slip.Symbol(":json"), slip.True)
+	}
+	if lec.pw.Color {
+		kvs = append(kvs, slip.Symbol(":color"), slip.True)
+	} else {
+		kvs = append(kvs, slip.Symbol(":color"), nil)
+	}
+	if lec.prty {
+		kvs = append(kvs, slip.Symbol(":pretty"), slip.True)
+	} else {
+		kvs = append(kvs, slip.Symbol(":pretty"), nil)
+	}
+	if lec.full {
+		kvs = append(kvs, slip.Symbol(":full"), slip.True)
+	} else {
+		kvs = append(kvs, slip.Symbol(":full"), nil)
+	}
+	return kvs
+}
+
+func (caller logErrorActorInitKeyValuesCaller) Docs() string {
+	return `__:init-key-values__ => (:full t)
+
+
+Returns the keywords and values needed to recreate the instance as a property list.
 `
 }

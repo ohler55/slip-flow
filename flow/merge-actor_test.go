@@ -142,6 +142,7 @@ func TestMergeActorDocs(t *testing.T) {
 		":perform",
 		":shutdown",
 		":links",
+		":init-key-values",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-merge-actor %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
@@ -160,5 +161,23 @@ func TestMergeActorBadNumber(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(make-instance 'flow-merge-actor :number t)`,
 		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}
+
+func TestMergeActorInitKeyValues(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(send (make-instance 'flow-merge-actor
+                                      :number 2
+                                      :timeout 3) :init-key-values)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			for i, x := range []string{
+				`:number`,
+				`2`,
+				`:timeout`,
+				`3`,
+			} {
+				tt.Equal(t, x, slip.ObjectString(v.(slip.List)[i]), x)
+			}
+		},
 	}).Test(t)
 }

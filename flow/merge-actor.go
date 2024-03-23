@@ -45,6 +45,7 @@ arrays.
 	mergeActorFlavor.DefMethod(":perform", "", mergeActorPerformCaller{})
 	mergeActorFlavor.DefMethod(":shutdown", "", mergeActorShutdownCaller{})
 	mergeActorFlavor.DefMethod(":links", "", mergeActorLinksCaller{})
+	mergeActorFlavor.DefMethod(":init-key-values", "", mergeActorInitKeyValuesCaller{})
 }
 
 type boxCnt struct {
@@ -230,5 +231,25 @@ func (caller mergeActorLinksCaller) Docs() string {
 
 
 Returns a list of transitions that can be followed.
+`
+}
+
+type mergeActorInitKeyValuesCaller struct{}
+
+func (caller mergeActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	mc := obj.Any.(*mergeCtx)
+
+	return slip.List{
+		slip.Symbol(":number"), slip.Fixnum(mc.number),
+		slip.Symbol(":timeout"), slip.Fixnum(mc.timeout / time.Second),
+	}
+}
+
+func (caller mergeActorInitKeyValuesCaller) Docs() string {
+	return `__:init-key-values__ => (:number 2 :timeout 10)
+
+
+Returns the keywords and values needed to recreate the instance as a property list.
 `
 }
