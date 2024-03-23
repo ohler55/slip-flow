@@ -161,13 +161,20 @@ func TestHTTPClientActorInitKeyValues(t *testing.T) {
                                       :url "http://localhost:7777") :init-key-values)`,
 		Validate: func(t *testing.T, v slip.Object) {
 			for i, x := range []string{
-				`(:method . "post")`,
-				`(:url . "http://localhost:7777")`,
-				`(:timeout . 1)`,
-				`(:header ("Accept" "text/html"))`,
-				`(:trailer ("Expires" "Wed, 7 Feb 2024 23:19:00 GMT"))`,
-				`(:body . "Hello")`,
-				`/\(:reply-handler . #<function \(lambda \(r\)\) \{[0-9a-f]+\}>\)/`,
+				`:method`,
+				`"post"`,
+				`:url`,
+				`"http://localhost:7777"`,
+				`:timeout`,
+				`1`,
+				`:header`,
+				`(("Accept" "text/html"))`,
+				`:trailer`,
+				`(("Expires" "Wed, 7 Feb 2024 23:19:00 GMT"))`,
+				`:body`,
+				`"Hello"`,
+				`:reply-handler`,
+				`/#<function \(lambda \(r\)\) \{[0-9a-f]+\}>/`,
 			} {
 				tt.Equal(t, x, slip.ObjectString(v.(slip.List)[i]), x)
 			}
@@ -184,13 +191,20 @@ func TestHTTPClientActorInitKeyValues(t *testing.T) {
                                       :url "http://localhost:7777") :init-key-values)`,
 		Validate: func(t *testing.T, v slip.Object) {
 			for i, x := range []string{
-				`(:method . "post")`,
-				`(:url . "http://localhost:7777")`,
-				`(:timeout . 1)`,
-				`/\(:header . #<function \(lambda \(b\)\) \{[0-9a-f]+\}>\)/`,
-				`/\(:trailer . #<function \(lambda \(b\)\) \{[0-9a-f]+\}>\)/`,
-				`(:body . "Hello")`,
-				`/\(:reply-handler . #<function \(lambda \(r\)\) \{[0-9a-f]+\}>\)/`,
+				`:method`,
+				`"post"`,
+				`:url`,
+				`"http://localhost:7777"`,
+				`:timeout`,
+				`1`,
+				`:header`,
+				`/#<function \(lambda \(b\)\) \{[0-9a-f]+\}>/`,
+				`:trailer`,
+				`/#<function \(lambda \(b\)\) \{[0-9a-f]+\}>/`,
+				`:body`,
+				`"Hello"`,
+				`:reply-handler`,
+				`/#<function \(lambda \(r\)\) \{[0-9a-f]+\}>/`,
 			} {
 				tt.Equal(t, x, slip.ObjectString(v.(slip.List)[i]), x)
 			}

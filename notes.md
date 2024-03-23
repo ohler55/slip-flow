@@ -1,6 +1,13 @@
  # SLIP-Flow Notes
 
 - next
+ - add :init-key-values
+  - log-error-actor
+  - inspect-actor
+  - jump-actor
+  - merge-actor
+  - split-actor
+
  - add http server actor
   - http server could keep a reply channel
    - limitation is no external (other process) terminations (not really a restriction)
@@ -23,16 +30,7 @@
     - allows server creation and configuration outside the flow so no need to deal with task/actor configuration restrictions
 
 
-- dev env (in slip) or maybe emacs integration is enough
- - repl
- - ability to save functions to a file once they are good
-  - maybe save world but just for changes
-   - world.lisp
-  - would need to remember function code
-  - maybe list all defs (defvar, defun, defflavor, defmethod, defconstant)
-   - pick which ones or all to write to a file
-  - need an edit-function with option for external editor or in repl
-
+---------------
 - text/x-common-lisp
 - text/x-emacs-lisp
 - application/lisp (not a recognized content-type)
