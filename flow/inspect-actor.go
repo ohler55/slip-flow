@@ -44,6 +44,7 @@ func init() {
 	inspectActorFlavor.DefMethod(":start", "", inspectActorStartCaller{})
 	inspectActorFlavor.DefMethod(":perform", "", inspectActorPerformCaller{})
 	inspectActorFlavor.DefMethod(":links", "", inspectActorLinksCaller{})
+	inspectActorFlavor.DefMethod(":init-key-values", "", inspectActorInitKeyValuesCaller{})
 }
 
 type inspectCtx struct {
@@ -146,5 +147,50 @@ func (caller inspectActorLinksCaller) Docs() string {
 
 
 Returns a list of transitions that can be followed.
+`
+}
+
+type inspectActorInitKeyValuesCaller struct{}
+
+func (caller inspectActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	ic := obj.Any.(*inspectCtx)
+
+	kvs := slip.List{
+		slip.Symbol(":depth"), slip.Fixnum(ic.pw.MaxDepth),
+		slip.Symbol(":right-margin"), slip.Fixnum(ic.pw.Width),
+		slip.Symbol(":indent"), slip.Fixnum(ic.pw.Indent),
+		slip.Symbol(":time-format"), slip.String(ic.pw.TimeFormat),
+		slip.Symbol(":time-wrap"), slip.String(ic.pw.TimeWrap),
+		slip.Symbol(":output"), ic.output,
+	}
+	if ic.pw.SEN {
+		kvs = append(kvs, slip.Symbol(":json"), nil)
+	} else {
+		kvs = append(kvs, slip.Symbol(":json"), slip.True)
+	}
+	if ic.pw.Color {
+		kvs = append(kvs, slip.Symbol(":color"), slip.True)
+	} else {
+		kvs = append(kvs, slip.Symbol(":color"), nil)
+	}
+	if ic.prty {
+		kvs = append(kvs, slip.Symbol(":pretty"), slip.True)
+	} else {
+		kvs = append(kvs, slip.Symbol(":pretty"), nil)
+	}
+	if ic.full {
+		kvs = append(kvs, slip.Symbol(":full"), slip.True)
+	} else {
+		kvs = append(kvs, slip.Symbol(":full"), nil)
+	}
+	return kvs
+}
+
+func (caller inspectActorInitKeyValuesCaller) Docs() string {
+	return `__:init-key-values__ => (:full t)
+
+
+Returns the keywords and values needed to recreate the instance as a property list.
 `
 }

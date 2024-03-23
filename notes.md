@@ -1,12 +1,6 @@
  # SLIP-Flow Notes
 
 - next
- - add :init-key-values
-  - log-error-actor
-  - inspect-actor
-  - jump-actor
-  - merge-actor
-  - split-actor
 
  - add http server actor
   - http server could keep a reply channel

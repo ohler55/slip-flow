@@ -129,9 +129,91 @@ func TestInspectActorDocs(t *testing.T) {
 		":start",
 		":perform",
 		":links",
+		":init-key-values",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-inspect-actor %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}
+}
+
+func TestInspectActorInitKeyValues(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(send (make-instance 'flow-inspect-actor
+                                      :depth 4
+                                      :right-margin 80
+                                      :indent 2
+                                      :time-format "2006-01-02"
+                                      :time-wrap "@"
+                                      :json t
+                                      :color t
+                                      :pretty t
+                                      :full t
+                                      :output :info) :init-key-values)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			for i, x := range []string{
+				`:depth`,
+				`4`,
+				`:right-margin`,
+				`80`,
+				`:indent`,
+				`2`,
+				`:time-format`,
+				`"2006-01-02"`,
+				`:time-wrap`,
+				`"@"`,
+				`:output`,
+				`:info`,
+				`:json`,
+				`t`,
+				`:color`,
+				`t`,
+				`:pretty`,
+				`t`,
+				`:full`,
+				`t`,
+			} {
+				tt.Equal(t, x, slip.ObjectString(v.(slip.List)[i]), x)
+			}
+		},
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(send (make-instance 'flow-inspect-actor
+                                      :depth 4
+                                      :right-margin 80
+                                      :indent 2
+                                      :time-format "2006-01-02"
+                                      :time-wrap "@"
+                                      :json nil
+                                      :color nil
+                                      :pretty nil
+                                      :full nil
+                                      :output nil) :init-key-values)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			for i, x := range []string{
+				`:depth`,
+				`4`,
+				`:right-margin`,
+				`80`,
+				`:indent`,
+				`2`,
+				`:time-format`,
+				`"2006-01-02"`,
+				`:time-wrap`,
+				`"@"`,
+				`:output`,
+				`nil`,
+				`:json`,
+				`nil`,
+				`:color`,
+				`nil`,
+				`:pretty`,
+				`nil`,
+				`:full`,
+				`nil`,
+			} {
+				tt.Equal(t, x, slip.ObjectString(v.(slip.List)[i]), x)
+			}
+		},
+	}).Test(t)
 }

@@ -175,9 +175,91 @@ func TestLogErrorActorDocs(t *testing.T) {
 		":init",
 		":start",
 		":perform",
+		":init-key-values",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-log-error-actor %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}
+}
+
+func TestLogErrorActorInitKeyValues(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(send (make-instance 'flow-log-error-actor
+                                      :notifiers '(chan1)
+                                      :depth 4
+                                      :right-margin 80
+                                      :indent 2
+                                      :time-format "2006-01-02"
+                                      :time-wrap "@"
+                                      :json t
+                                      :color t
+                                      :pretty t
+                                      :full t) :init-key-values)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			for i, x := range []string{
+				`:notifiers`,
+				`(chan1)`,
+				`:depth`,
+				`4`,
+				`:right-margin`,
+				`80`,
+				`:indent`,
+				`2`,
+				`:time-format`,
+				`"2006-01-02"`,
+				`:time-wrap`,
+				`"@"`,
+				`:json`,
+				`t`,
+				`:color`,
+				`t`,
+				`:pretty`,
+				`t`,
+				`:full`,
+				`t`,
+			} {
+				tt.Equal(t, x, slip.ObjectString(v.(slip.List)[i]), x)
+			}
+		},
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(send (make-instance 'flow-log-error-actor
+                                      :notifiers '(chan1)
+                                      :depth 4
+                                      :right-margin 80
+                                      :indent 2
+                                      :time-format "2006-01-02"
+                                      :time-wrap "@"
+                                      :json nil
+                                      :color nil
+                                      :pretty nil
+                                      :full nil) :init-key-values)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			for i, x := range []string{
+				`:notifiers`,
+				`(chan1)`,
+				`:depth`,
+				`4`,
+				`:right-margin`,
+				`80`,
+				`:indent`,
+				`2`,
+				`:time-format`,
+				`"2006-01-02"`,
+				`:time-wrap`,
+				`"@"`,
+				`:json`,
+				`nil`,
+				`:color`,
+				`nil`,
+				`:pretty`,
+				`nil`,
+				`:full`,
+				`nil`,
+			} {
+				tt.Equal(t, x, slip.ObjectString(v.(slip.List)[i]), x)
+			}
+		},
+	}).Test(t)
 }
