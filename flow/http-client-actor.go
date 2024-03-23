@@ -195,36 +195,27 @@ func (caller httpClientActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.L
 	obj := s.Get("self").(*flavors.Instance)
 	hcc := obj.Any.(*httpClientCtx)
 
-	var kvs slip.List
-	kvs = append(kvs, slip.List{slip.Symbol(":method"), slip.Tail{Value: hcc.method.raw()}})
-	kvs = append(kvs, slip.List{slip.Symbol(":url"), slip.Tail{Value: hcc.url.raw()}})
-	kvs = append(kvs, slip.List{slip.Symbol(":timeout"), slip.Tail{Value: hcc.timeout.raw()}})
-	switch th := hcc.header.raw().(type) {
-	case slip.List:
-		kvs = append(kvs, append(slip.List{slip.Symbol(":header")}, th...))
-	case *slip.Lambda:
-		kvs = append(kvs, slip.List{slip.Symbol(":header"), slip.Tail{Value: th}})
-	}
-	switch th := hcc.trailer.raw().(type) {
-	case slip.List:
-		kvs = append(kvs, append(slip.List{slip.Symbol(":trailer")}, th...))
-	case *slip.Lambda:
-		kvs = append(kvs, slip.List{slip.Symbol(":trailer"), slip.Tail{Value: th}})
+	kvs := slip.List{
+		slip.Symbol(":method"), hcc.method.raw(),
+		slip.Symbol(":url"), hcc.url.raw(),
+		slip.Symbol(":timeout"), hcc.timeout.raw(),
+		slip.Symbol(":header"), hcc.header.raw(),
+		slip.Symbol(":trailer"), hcc.trailer.raw(),
 	}
 	if body := hcc.body.raw(); body != slip.String("") {
-		kvs = append(kvs, slip.List{slip.Symbol(":body"), slip.Tail{Value: hcc.body.raw()}})
+		kvs = append(kvs, slip.Symbol(":body"), hcc.body.raw())
 	}
 	if lam, ok := hcc.handler.(*slip.Lambda); ok {
-		kvs = append(kvs, slip.List{slip.Symbol(":reply-handler"), slip.Tail{Value: lam}})
+		kvs = append(kvs, slip.Symbol(":reply-handler"), lam)
 	}
 	return kvs
 }
 
 func (caller httpClientActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => ((:method get) (:timeout 1))
+	return `__:init-key-values__ => (:method get :timeout 1)
 
 
-Returns the keywords and values needed to recreate the instance.
+Returns the keywords and values needed to recreate the instance as a property list.
 `
 }
 

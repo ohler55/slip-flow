@@ -34,6 +34,7 @@ all watchers if no _notifiers_ have been identified.
 	)
 	exitActorFlavor.DefMethod(":start", "", exitActorStartCaller{})
 	exitActorFlavor.DefMethod(":perform", "", exitActorPerformCaller{})
+	exitActorFlavor.DefMethod(":init-key-values", "", exitActorInitKeyValuesCaller{})
 }
 
 type exitActorStartCaller struct{}
@@ -81,5 +82,21 @@ func (caller exitActorPerformCaller) Docs() string {
 
 
 Place the _box_ on the box watcher channels.
+`
+}
+
+type exitActorInitKeyValuesCaller struct{}
+
+func (caller exitActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+
+	return slip.List{slip.Symbol(":notifiers"), obj.Get("notifiers")}
+}
+
+func (caller exitActorInitKeyValuesCaller) Docs() string {
+	return `__:init-key-values__ => (:notifiers ("chan1"))
+
+
+Returns the keywords and values needed to recreate the instance as a property list.
 `
 }

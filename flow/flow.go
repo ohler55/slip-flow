@@ -454,10 +454,12 @@ func (f *flow) appendTasks(b []byte, clos bool, s *slip.Scope) []byte {
 func appendInitKeyValues(b []byte, s *slip.Scope, p *slip.Printer, a slip.Instance, indent string) []byte {
 	if a.HasMethod(":init-key-values") {
 		i2 := []byte(indent + "       ")
-		for _, av := range a.Receive(s, ":init-key-values", slip.List{}, 0).(slip.List) {
-			if kv, ok := av.(slip.List); ok {
-				key := kv.Car()
-				switch tv := kv.Cdr().(type) {
+		plist, _ := a.Receive(s, ":init-key-values", slip.List{}, 0).(slip.List)
+		for i := 0; i < len(plist)-1; i += 2 {
+			if key, ok := plist[i].(slip.Symbol); ok {
+				switch tv := plist[i+1].(type) {
+				case nil:
+					// skip
 				case slip.List:
 					b = fmt.Appendf(b, "\n%s %s '%s", indent, key, tv)
 				case *slip.Lambda:
