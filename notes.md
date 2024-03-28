@@ -2,6 +2,14 @@
 
 - next
 
+ - actors
+  - flow-read-file-actor
+  - flow-tail-file-actor
+  - flow-read-directory-actor
+  - flow-watch-directory-actor
+  - flow-write-file-actor
+  - flow-delete-file-actor
+
  - add http server actor
   - http server could keep a reply channel
    - limitation is no external (other process) terminations (not really a restriction)
