@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!DOCTYPE sample PUBLIC "sample.dtd">
+<top id="123">
+  <child>Some text.</child>
+  <!--a comment-->
+  <blank/>
+</top>
+<?xml version="1.0"?>
+<top id="321">
+  <child>More text.</child>
+</top>

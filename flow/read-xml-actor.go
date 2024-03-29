@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"encoding/xml"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 
@@ -196,6 +195,7 @@ func (rxc *readXMLCtx) readXML(s *slip.Scope, r io.Reader, bi *flavors.Instance)
 	var (
 		stack   [][]any
 		element []any
+		count   int64
 	)
 out:
 	for {
@@ -207,7 +207,9 @@ out:
 			}
 			panic(err)
 		case xml.StartElement:
-			stack = append(stack, element)
+			if element != nil {
+				stack = append(stack, element)
+			}
 			attrs := map[string]any{}
 			for _, a := range tt.Attr {
 				attrs[a.Name.Local] = a.Value
@@ -218,21 +220,30 @@ out:
 			element = stack[len(stack)-1]
 			stack[len(stack)-1] = nil
 			stack = stack[:len(stack)-1]
-			fmt.Printf("*** stack: %v\n", stack)
-			// TBD if end then send box
+			if len(stack) == 0 {
+				var bx *box
+				bi, bx = boxDup(bi)
+				setBx(bx, element, jp.Expr(rxc.dest))
+				if rxc.count != nil {
+					setBx(bx, count, jp.Expr(rxc.count))
+				}
+				count++
+				rxc.task.transition(s, "ok", bi)
+				element = nil
+			}
 		case xml.CharData:
 			if rxc.trim {
 				tt = bytes.TrimSpace(tt)
 			}
 			if 0 < len(tt) {
-				element = append(element, tt)
+				element = append(element, string(tt))
 			}
 		case xml.Comment:
-			element = append(element, []any{":comment", tt})
+			element = append(element, []any{":comment", string(tt)})
 		case xml.Directive:
-			element = append(element, []any{":directive", tt})
+			element = append(element, []any{":directive", string(tt)})
 		case xml.ProcInst:
-			element = append(element, []any{":processing-instruction", tt.Target, tt.Inst})
+			element = append(element, []any{":processing-instruction", tt.Target, string(tt.Inst)})
 		}
 	}
 	return slip.List{nil, nil}
