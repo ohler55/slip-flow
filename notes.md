@@ -2,6 +2,13 @@
 
 - next
 
+ - should read-file-actor be split by format? that allows setting parse options
+  - flow-read-file-actor
+  - flow-read-json-actor
+  - flow-read-xml-actor
+  - flow-read-csv-actor
+ -
+
  - actors
   - flow-read-file-actor
   - flow-tail-file-actor

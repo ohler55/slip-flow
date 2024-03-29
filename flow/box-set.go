@@ -94,15 +94,20 @@ func setBox(obj *flavors.Instance, value, path slip.Object) {
 	default:
 		slip.PanicType("path", p, "string")
 	}
-	bx := obj.Any.(*box)
+	setBx(obj.Any.(*box), bag.ObjectToBag(value), x)
+}
+
+func setBx(bx *box, value any, x jp.Expr) {
 	if bx.frozen {
 		bx.content = alt.Dup(bx.content)
 		bx.frozen = false
 	}
-	v := bag.ObjectToBag(value)
 	if x == nil {
-		bx.content = v
+		bx.content = value
 	} else {
-		x.MustSet(bx.content, v)
+		if bx.content == nil {
+			bx.content = map[string]any{}
+		}
+		x.MustSet(bx.content, value)
 	}
 }
