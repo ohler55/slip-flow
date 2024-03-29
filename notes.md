@@ -5,7 +5,7 @@
  - actors
   + flow-read-file-actor
   + flow-read-json-actor
-  - flow-read-csv-actor
+  + flow-read-csv-actor
   - flow-read-directory-actor
   - flow-write-file-actor
   - flow-delete-file-actor

@@ -52,9 +52,9 @@ func (caller readJSONInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
-	var rfc readJSONCtx
-	rfc.parseArgs(s, args)
-	self.Any = &rfc
+	var rjc readJSONCtx
+	rjc.parseArgs(s, args)
+	self.Any = &rjc
 
 	return nil
 }
@@ -92,17 +92,17 @@ type readJSONActorPerformCaller struct{}
 
 func (caller readJSONActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	rfc := obj.Any.(*readJSONCtx)
+	rjc := obj.Any.(*readJSONCtx)
 	bi := args[0].(*flavors.Instance)
 
-	filename := rfc.filename.value(s, bi)
+	filename := rjc.filename.value(s, bi)
 	f, err := os.Open(filename)
 	if err != nil {
 		panic(err)
 	}
 	defer func() { _ = f.Close() }()
 
-	return rfc.readJSON(s, f, bi)
+	return rjc.readJSON(s, f, bi)
 }
 
 func (caller readJSONActorPerformCaller) Docs() string {
@@ -118,19 +118,19 @@ type readJSONActorInitKeyValuesCaller struct{}
 
 func (caller readJSONActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	rfc := obj.Any.(*readJSONCtx)
+	rjc := obj.Any.(*readJSONCtx)
 	var (
 		dest  slip.Object
 		count slip.Object
 	)
-	if rfc.dest != nil {
-		dest = slip.String(jp.Expr(rfc.dest).String())
+	if rjc.dest != nil {
+		dest = slip.String(jp.Expr(rjc.dest).String())
 	}
-	if rfc.count != nil {
-		count = slip.String(jp.Expr(rfc.count).String())
+	if rjc.count != nil {
+		count = slip.String(jp.Expr(rjc.count).String())
 	}
 	return slip.List{
-		slip.Symbol(":filename"), rfc.filename.raw(),
+		slip.Symbol(":filename"), rjc.filename.raw(),
 		slip.Symbol(":destination"), dest,
 		slip.Symbol(":count"), count,
 	}
