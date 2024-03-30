@@ -81,7 +81,7 @@ func (caller readXMLInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 }
 
 func (caller readXMLInitCaller) Docs() string {
-	return `__:init__ &key _target_
+	return `__:init__ &key _filename_ _destination_ _count_ _strict_ _trim_ _html_
    _:filename_ [string|symbol|function] of the file to read.
    _:destination_ [string] the location in the _box_ to place the result.
    _:count_ [string] the location in the _box_ to place the count. If _nil_ then no count is set.

@@ -8,6 +8,8 @@
   + flow-read-csv-actor
   + flow-read-xml-actor
   - flow-read-directory-actor
+   - place all as list at destination
+   - if :with-info then entry will be a map
   - flow-write-file-actor
   - flow-delete-file-actor
 

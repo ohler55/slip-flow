@@ -24,7 +24,7 @@ func (fc *fileCtx) parseArgs(s *slip.Scope, args slip.List) {
 	for pos := 0; pos < len(args)-1; pos += 2 {
 		sym, _ := args[pos].(slip.Symbol)
 		switch string(sym) {
-		case ":filename":
+		case ":filename", ":pattern":
 			fc.filename.extract(s, args[pos+1])
 		case ":destination":
 			switch ta := args[pos+1].(type) {

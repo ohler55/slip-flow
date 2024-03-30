@@ -60,7 +60,7 @@ func (caller readFileInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip
 }
 
 func (caller readFileInitCaller) Docs() string {
-	return `__:init__ &key _target_
+	return `__:init__ &key _filename_ _destination_
    _:filename_ [string|symbol|function] of the file to read.
    _:destination_ [string] the location in the _box_ to place the result.
 
