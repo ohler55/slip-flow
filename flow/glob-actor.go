@@ -3,7 +3,9 @@
 package flow
 
 import (
-	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
 
 	"github.com/ohler55/ojg/jp"
 	"github.com/ohler55/slip"
@@ -16,7 +18,7 @@ var (
 
 func init() {
 	Pkg.Initialize(nil)
-	globActorFlavor = flavors.DefFlavor("flow-read-directory-actor",
+	globActorFlavor = flavors.DefFlavor("flow-glob-actor",
 		map[string]slip.Object{},
 		nil,
 		slip.List{
@@ -103,11 +105,29 @@ func (caller globActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	bi := args[0].(*flavors.Instance)
 
 	pattern := rdc.filename.value(s, bi)
-
-	fmt.Printf("*** pathname: %s\n", pattern)
-
-	// TBD  filepath.Glob(pattern)
-
+	paths, err := filepath.Glob(pattern)
+	if err != nil {
+		panic(err)
+	}
+	list := make([]any, len(paths))
+	if rdc.info {
+		var fi fs.FileInfo
+		for i, p := range paths {
+			m := map[string]any{"name": p}
+			if fi, err = os.Stat(p); err == nil {
+				m["size"] = fi.Size()
+				m["mode"] = fi.Mode().String()
+				m["modified-time"] = fi.ModTime().UTC()
+				m["is-dir"] = fi.IsDir()
+			}
+			list[i] = m
+		}
+	} else {
+		for i, p := range paths {
+			list[i] = p
+		}
+	}
+	setBx(bi.Any.(*box), list, jp.Expr(rdc.dest))
 	return slip.List{slip.String("ok"), bi}
 }
 

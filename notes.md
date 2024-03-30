@@ -7,14 +7,10 @@
   + flow-read-json-actor
   + flow-read-csv-actor
   + flow-read-xml-actor
-  - flow-read-directory-actor
-   - place all as list at destination
-   - if :with-info then entry will be a map
+  + flow-glob-actor
   - flow-write-file-actor
   - flow-delete-file-actor
-
-  - flow-watch-directory-actor
-  - flow-tail-file-actor
+  - flow-foreach-actor
 
  - add http server actor
   - http server could keep a reply channel
@@ -36,6 +32,9 @@
      - multiple flow entry points since nothing in box identifies as a second submission
      - no longer just flow forward so sub-flows need to know about tasks in other flows
     - allows server creation and configuration outside the flow so no need to deal with task/actor configuration restrictions
+  - flow-watch-directory-actor
+  - flow-tail-file-actor
+
 
 
 ---------------
