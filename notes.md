@@ -8,7 +8,7 @@
   + flow-read-csv-actor
   + flow-read-xml-actor
   + flow-glob-actor
-  - flow-write-file-actor
+  + flow-write-file-actor
   - flow-delete-file-actor
   - flow-foreach-actor
 

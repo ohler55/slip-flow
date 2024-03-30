@@ -5,6 +5,7 @@ package flow
 import (
 	"fmt"
 	"io/fs"
+	"os"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -43,12 +44,11 @@ the "ok" link.`),
 }
 
 type writeFileCtx struct {
-	task      *task
-	filename  strCaller
-	content   strCaller
-	overwrite bool
-	append    bool
-	perm      fs.FileMode
+	task     *task
+	filename strCaller
+	content  strCaller
+	flag     int
+	perm     fs.FileMode
 }
 
 type writeFileInitCaller struct{}
@@ -58,7 +58,10 @@ func (caller writeFileInitCaller) Call(s *slip.Scope, args slip.List, _ int) sli
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
-	var wfc writeFileCtx
+	wfc := writeFileCtx{
+		perm: 0664,
+		flag: os.O_CREATE | os.O_WRONLY,
+	}
 	for pos := 0; pos < len(args)-1; pos += 2 {
 		sym, _ := args[pos].(slip.Symbol)
 		switch string(sym) {
@@ -67,9 +70,13 @@ func (caller writeFileInitCaller) Call(s *slip.Scope, args slip.List, _ int) sli
 		case ":content":
 			wfc.content.extract(s, args[pos+1])
 		case ":overwrite":
-			wfc.overwrite = args[pos+1] != nil
+			if args[pos+1] != nil {
+				wfc.flag |= os.O_TRUNC
+			}
 		case ":append":
-			wfc.append = args[pos+1] != nil
+			if args[pos+1] != nil {
+				wfc.flag |= os.O_APPEND
+			}
 		case ":permissions":
 			switch ta := args[pos+1].(type) {
 			case slip.String:
@@ -127,19 +134,15 @@ func (caller writeFileActorPerformCaller) Call(s *slip.Scope, args slip.List, _ 
 	wfc := obj.Any.(*writeFileCtx)
 	bi := args[0].(*flavors.Instance)
 
-	filename := wfc.filename.value(s, bi)
-
-	fmt.Printf("*** filename: %s\n", filename)
-
-	// f, err := os.Open(filename)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer func() { _ = f.Close() }()
-
-	// return wfc.writeText(f, bi)
-
-	return nil
+	f, err := os.OpenFile(wfc.filename.value(s, bi), wfc.flag, wfc.perm)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = f.Close() }()
+	if _, err = f.WriteString(wfc.content.value(s, bi)); err != nil {
+		panic(err)
+	}
+	return slip.List{slip.String("ok"), bi}
 }
 
 func (caller writeFileActorPerformCaller) Docs() string {
@@ -161,12 +164,12 @@ func (caller writeFileActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.Li
 		slip.Symbol(":content"), wfc.content.raw(),
 		slip.Symbol(":permissions"), slip.String(wfc.perm.String()),
 	}
-	if wfc.overwrite {
+	if wfc.flag&os.O_TRUNC != 0 {
 		kvs = append(kvs, slip.Symbol(":overwrite"), slip.True)
 	} else {
 		kvs = append(kvs, slip.Symbol(":overwrite"), nil)
 	}
-	if wfc.append {
+	if wfc.flag&os.O_APPEND != 0 {
 		kvs = append(kvs, slip.Symbol(":append"), slip.True)
 	} else {
 		kvs = append(kvs, slip.Symbol(":append"), nil)
@@ -175,7 +178,7 @@ func (caller writeFileActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.Li
 }
 
 func (caller writeFileActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:target "sub-flow")
+	return `__:init-key-values__ => (:filename "write-me.txt")
 
 
 Returns the keywords and values needed to recreate the instance as a property list.
@@ -195,7 +198,7 @@ func parsePerm(s string) (perm fs.FileMode) {
 	}
 	for i, c := range []byte(s) {
 		if permAllow[i+off] == c {
-			perm |= 1 << (9 - i + off)
+			perm |= 1 << (9 - i - off)
 		} else if c != '-' {
 			panic(fmt.Sprintf("%s is not a valid symbolic permission", s))
 		}
