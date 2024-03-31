@@ -2,16 +2,6 @@
 
 - next
 
- - actors
-  + flow-read-file-actor
-  + flow-read-json-actor
-  + flow-read-csv-actor
-  + flow-read-xml-actor
-  + flow-glob-actor
-  + flow-write-file-actor
-  + flow-delete-file-actor
-  - flow-foreach-actor
-
  - add http server actor
   - http server could keep a reply channel
    - limitation is no external (other process) terminations (not really a restriction)
