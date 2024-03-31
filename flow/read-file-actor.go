@@ -129,7 +129,7 @@ func (caller readFileActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.Lis
 }
 
 func (caller readFileActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:target "sub-flow")
+	return `__:init-key-values__ => (:filename "file.txt")
 
 
 Returns the keywords and values needed to recreate the instance as a property list.
