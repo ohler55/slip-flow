@@ -22,6 +22,9 @@
      - multiple flow entry points since nothing in box identifies as a second submission
      - no longer just flow forward so sub-flows need to know about tasks in other flows
     - allows server creation and configuration outside the flow so no need to deal with task/actor configuration restrictions
+  - flow-watch-directory-actor
+  - flow-tail-file-actor
+
 
 
 ---------------
