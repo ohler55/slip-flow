@@ -13,8 +13,8 @@ var (
 	deleteFileActorFlavor *flavors.Flavor
 )
 
-func init() {
-	Pkg.Initialize(nil)
+func defDeleteFileActor() {
+	// Pkg.Initialize(nil)
 	deleteFileActorFlavor = flavors.DefFlavor("flow-delete-file-actor",
 		map[string]slip.Object{},
 		nil,

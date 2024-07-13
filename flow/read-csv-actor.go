@@ -17,8 +17,8 @@ var (
 	readCSVActorFlavor *flavors.Flavor
 )
 
-func init() {
-	Pkg.Initialize(nil)
+func defReadCsvActor() {
+	// Pkg.Initialize(nil)
 	readCSVActorFlavor = flavors.DefFlavor("flow-read-csv-actor",
 		map[string]slip.Object{},
 		nil,

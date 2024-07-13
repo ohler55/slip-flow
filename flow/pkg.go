@@ -27,20 +27,46 @@ var (
 func init() {
 	Pkg.Initialize(map[string]*slip.VarVal{
 		"*flow-box-time-format*": {
-			Get: getTimeFormat,
-			Set: setTimeFormat,
-			Doc: "is the format for writing time as a string in box-format and the format for parsing time.",
+			Get:    getTimeFormat,
+			Set:    setTimeFormat,
+			Export: true,
+			Doc:    "is the format for writing time as a string in box-format and the format for parsing time.",
 		},
 		"*flow-box-time-wrap*": {
-			Get: getTimeWrap,
-			Set: setTimeWrap,
+			Get:    getTimeWrap,
+			Set:    setTimeWrap,
+			Export: true,
 			Doc: `if non-nil then the writing and parsing of time is as a hash-map with a key of
 the _*flow-box-time_wrap*_ value and the time encoded according to the _*flow-box-time-format*_.`,
 		},
 	})
+	defBox()
+	defCanLog()
+	defDeleteFileActor()
+	defExitActor()
+	defFlow()
+	defForeachActor()
+	defGlobActor()
+	defGroup()
+	defHttpClientActor()
+	defInspectActor()
+	defJumpActor()
+	defLogErrorActor()
+	defMergeActor()
+	defReadCsvActor()
+	defReadFileActor()
+	defReadJsonActor()
+	defReadXmlActor()
+	defSplitActor()
+	defTaskActor()
+	defTask()
+	defTrack()
+	defWriteFileActor()
+
+	Pkg.Set("*flow*", &Pkg)
+	Pkg.Initialize(nil, &event{}) // lock
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-	Pkg.Set("*flow*", &Pkg)
 }
 
 func getTimeFormat() slip.Object {

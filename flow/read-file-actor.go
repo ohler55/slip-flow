@@ -14,8 +14,8 @@ var (
 	readFileActorFlavor *flavors.Flavor
 )
 
-func init() {
-	Pkg.Initialize(nil)
+func defReadFileActor() {
+	// Pkg.Initialize(nil)
 	readFileActorFlavor = flavors.DefFlavor("flow-read-file-actor",
 		map[string]slip.Object{},
 		nil,

@@ -11,8 +11,8 @@ var (
 	splitActorFlavor *flavors.Flavor
 )
 
-func init() {
-	Pkg.Initialize(nil)
+func defSplitActor() {
+	// Pkg.Initialize(nil)
 	splitActorFlavor = flavors.DefFlavor("flow-split-actor",
 		map[string]slip.Object{},
 		nil,

@@ -16,8 +16,8 @@ var (
 	boxFlavor *flavors.Flavor
 )
 
-func init() {
-	Pkg.Initialize(nil)
+func defBox() {
+	// Pkg.Initialize(nil)
 	boxFlavor = flavors.DefFlavor("flow-box",
 		map[string]slip.Object{},
 		nil,

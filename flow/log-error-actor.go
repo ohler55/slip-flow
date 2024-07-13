@@ -15,8 +15,8 @@ var (
 	logErrorActorFlavor *flavors.Flavor
 )
 
-func init() {
-	Pkg.Initialize(nil)
+func defLogErrorActor() {
+	// Pkg.Initialize(nil)
 	logErrorActorFlavor = flavors.DefFlavor("flow-log-error-actor",
 		map[string]slip.Object{ // instance variables
 			"notifiers": nil, // list of strings or symbols

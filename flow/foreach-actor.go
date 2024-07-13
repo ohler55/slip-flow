@@ -13,8 +13,8 @@ var (
 	foreachActorFlavor *flavors.Flavor
 )
 
-func init() {
-	Pkg.Initialize(nil)
+func defForeachActor() {
+	// Pkg.Initialize(nil)
 	foreachActorFlavor = flavors.DefFlavor("flow-foreach-actor",
 		map[string]slip.Object{},
 		nil,

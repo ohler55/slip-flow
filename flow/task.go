@@ -17,8 +17,8 @@ var (
 	taskFlavor *flavors.Flavor
 )
 
-func init() {
-	Pkg.Initialize(nil)
+func defTask() {
+	// Pkg.Initialize(nil)
 	taskFlavor = flavors.DefFlavor("flow-task",
 		map[string]slip.Object{
 			"x":   nil,

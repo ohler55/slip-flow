@@ -15,8 +15,8 @@ var (
 	trackFlavor *flavors.Flavor
 )
 
-func init() {
-	Pkg.Initialize(nil)
+func defTrack() {
+	// Pkg.Initialize(nil)
 	trackFlavor = flavors.DefFlavor("flow-track",
 		map[string]slip.Object{},
 		nil,
