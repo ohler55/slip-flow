@@ -63,7 +63,7 @@ the _*flow-box-time_wrap*_ value and the time encoded according to the _*flow-bo
 	defTrack()
 	defWriteFileActor()
 
-	Pkg.Set("*flow*", &Pkg)
+	slip.DefConstant(slip.Symbol("*flow*"), &Pkg, "")
 	Pkg.Initialize(nil, &event{}) // lock
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)

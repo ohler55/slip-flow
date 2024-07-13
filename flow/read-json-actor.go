@@ -15,7 +15,6 @@ var (
 )
 
 func defReadJsonActor() {
-	// Pkg.Initialize(nil)
 	readJSONActorFlavor = flavors.DefFlavor("flow-read-json-actor",
 		map[string]slip.Object{},
 		nil,

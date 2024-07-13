@@ -19,7 +19,6 @@ var (
 )
 
 func defReadXmlActor() {
-	// Pkg.Initialize(nil)
 	readXMLActorFlavor = flavors.DefFlavor("flow-read-xml-actor",
 		map[string]slip.Object{},
 		nil,

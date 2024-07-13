@@ -21,7 +21,6 @@ var (
 )
 
 func defFlow() {
-	// Pkg.Initialize(nil)
 	flowFlavor = flavors.DefFlavor("flow",
 		map[string]slip.Object{
 			"task-width":  slip.Fixnum(64),

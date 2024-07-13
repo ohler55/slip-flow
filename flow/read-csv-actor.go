@@ -18,7 +18,6 @@ var (
 )
 
 func defReadCsvActor() {
-	// Pkg.Initialize(nil)
 	readCSVActorFlavor = flavors.DefFlavor("flow-read-csv-actor",
 		map[string]slip.Object{},
 		nil,

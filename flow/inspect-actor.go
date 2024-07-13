@@ -15,7 +15,6 @@ var (
 )
 
 func defInspectActor() {
-	// Pkg.Initialize(nil)
 	inspectActorFlavor = flavors.DefFlavor("flow-inspect-actor",
 		map[string]slip.Object{},
 		nil,

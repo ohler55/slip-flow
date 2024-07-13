@@ -19,7 +19,6 @@ var (
 )
 
 func defCanLog() {
-	// Pkg.Initialize(nil)
 	canLogFlavor = flavors.DefFlavor("can-log",
 		map[string]slip.Object{ // instance variables
 			"log-level": slip.Fixnum(1),

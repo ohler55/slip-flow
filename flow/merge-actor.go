@@ -16,7 +16,6 @@ var (
 )
 
 func defMergeActor() {
-	// Pkg.Initialize(nil)
 	mergeActorFlavor = flavors.DefFlavor("flow-merge-actor",
 		map[string]slip.Object{},
 		nil,

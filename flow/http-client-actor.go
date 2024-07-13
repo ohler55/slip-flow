@@ -21,7 +21,6 @@ var (
 )
 
 func defHttpClientActor() {
-	// Pkg.Initialize(nil)
 	httpClientActorFlavor = flavors.DefFlavor("flow-http-client-actor",
 		map[string]slip.Object{},
 		nil,

@@ -17,7 +17,6 @@ var (
 )
 
 func defGlobActor() {
-	// Pkg.Initialize(nil)
 	globActorFlavor = flavors.DefFlavor("flow-glob-actor",
 		map[string]slip.Object{},
 		nil,

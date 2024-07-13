@@ -16,7 +16,6 @@ var (
 )
 
 func defWriteFileActor() {
-	// Pkg.Initialize(nil)
 	writeFileActorFlavor = flavors.DefFlavor("flow-write-file-actor",
 		map[string]slip.Object{},
 		nil,

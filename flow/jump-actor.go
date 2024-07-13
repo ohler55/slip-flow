@@ -12,7 +12,6 @@ var (
 )
 
 func defJumpActor() {
-	// Pkg.Initialize(nil)
 	jumpActorFlavor = flavors.DefFlavor("flow-jump-actor",
 		map[string]slip.Object{},
 		nil,

@@ -14,7 +14,6 @@ var (
 )
 
 func defGroup() {
-	// Pkg.Initialize(nil)
 	groupFlavor = flavors.DefFlavor("flow-group",
 		map[string]slip.Object{},
 		[]string{

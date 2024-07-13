@@ -14,7 +14,6 @@ var (
 )
 
 func defForeachActor() {
-	// Pkg.Initialize(nil)
 	foreachActorFlavor = flavors.DefFlavor("flow-foreach-actor",
 		map[string]slip.Object{},
 		nil,

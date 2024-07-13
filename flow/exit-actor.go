@@ -12,7 +12,6 @@ var (
 )
 
 func defExitActor() {
-	// Pkg.Initialize(nil)
 	exitActorFlavor = flavors.DefFlavor("flow-exit-actor",
 		map[string]slip.Object{ // instance variables
 			"notifiers": nil, // list of strings or symbols

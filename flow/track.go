@@ -16,7 +16,6 @@ var (
 )
 
 func defTrack() {
-	// Pkg.Initialize(nil)
 	trackFlavor = flavors.DefFlavor("flow-track",
 		map[string]slip.Object{},
 		nil,
