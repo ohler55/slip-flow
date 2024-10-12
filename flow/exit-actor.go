@@ -67,7 +67,7 @@ func (caller exitActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	case slip.List:
 		notifiers = tn
 	}
-	if bi, ok := args[0].(*flavors.Instance); ok && bi.Flavor == boxFlavor {
+	if bi, ok := args[0].(*flavors.Instance); ok && bi.Type == boxFlavor {
 		notifyBox(bi, notifiers)
 	}
 	obj.Any.(*flow).exit(args[0])

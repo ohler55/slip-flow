@@ -82,7 +82,7 @@ type trackMergeCaller struct{}
 func (caller trackMergeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	ti, _ := args[0].(*flavors.Instance)
-	if ti == nil || ti.Flavor != trackFlavor {
+	if ti == nil || ti.Type != trackFlavor {
 		slip.PanicType("other", args[0], "track")
 	}
 	self.Any.(*track).merge(ti.Any.(*track))

@@ -41,7 +41,7 @@ type FlowWidth struct {
 func (f *FlowWidth) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != flowFlavor {
+	if !ok || self.Type != flowFlavor {
 		slip.PanicType("flow", args[0], "flow")
 	}
 	return self.Any.(*flow).width()

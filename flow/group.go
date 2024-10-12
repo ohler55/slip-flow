@@ -47,7 +47,7 @@ type group struct {
 func (g *group) add(obj slip.Object) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	if fi, _ := obj.(*flavors.Instance); fi != nil && fi.Flavor == flowFlavor {
+	if fi, _ := obj.(*flavors.Instance); fi != nil && fi.Type == flowFlavor {
 		g.flows[fi.Any.(*flow).name] = fi.Any.(*flow)
 		fi.Any.(*flow).group = g
 	} else {

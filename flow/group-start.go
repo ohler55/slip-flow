@@ -42,7 +42,7 @@ type GroupStart struct {
 func (f *GroupStart) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != groupFlavor {
+	if !ok || self.Type != groupFlavor {
 		slip.PanicType("group", args[0], "group")
 	}
 	self.Any.(*group).start(s)

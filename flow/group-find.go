@@ -47,7 +47,7 @@ type GroupFind struct {
 func (f *GroupFind) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != groupFlavor {
+	if !ok || self.Type != groupFlavor {
 		slip.PanicType("group", args[0], "group")
 	}
 	return self.Any.(*group).find(args[1])

@@ -48,7 +48,7 @@ type FlowRemoveTask struct {
 func (f *FlowRemoveTask) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != flowFlavor {
+	if !ok || self.Type != flowFlavor {
 		slip.PanicType("flow", args[0], "flow")
 	}
 	self.Any.(*flow).removeTask(args[1])

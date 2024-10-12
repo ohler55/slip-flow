@@ -139,7 +139,7 @@ func (caller logErrorActorPerformCaller) Call(s *slip.Scope, args slip.List, _ i
 	case slip.List:
 		notifiers = tn
 	}
-	if bi, ok := args[0].(*flavors.Instance); ok && bi.Flavor == boxFlavor {
+	if bi, ok := args[0].(*flavors.Instance); ok && bi.Type == boxFlavor {
 		notifyBox(bi, notifiers)
 	}
 	tsk.flow.exit(args[0])

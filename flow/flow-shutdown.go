@@ -43,7 +43,7 @@ type FlowShutdown struct {
 func (f *FlowShutdown) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != flowFlavor {
+	if !ok || self.Type != flowFlavor {
 		slip.PanicType("flow", args[0], "flow")
 	}
 	self.Any.(*flow).shutdown(s)

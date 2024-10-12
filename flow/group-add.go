@@ -47,7 +47,7 @@ type GroupAdd struct {
 func (f *GroupAdd) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != groupFlavor {
+	if !ok || self.Type != groupFlavor {
 		slip.PanicType("group", args[0], "group")
 	}
 	self.Any.(*group).add(args[1])

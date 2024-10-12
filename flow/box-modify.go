@@ -138,14 +138,14 @@ func modifyValue(s *slip.Scope, value any, caller slip.Caller, asBag bool, depth
 		bg := bagFlavor.MakeInstance().(*flavors.Instance)
 		bg.Any = value
 		obj := caller.Call(s, slip.List{bg}, depth)
-		if bg, _ := obj.(*flavors.Instance); bg != nil && bg.Flavor == bagFlavor {
+		if bg, _ := obj.(*flavors.Instance); bg != nil && bg.Type == bagFlavor {
 			return bg.Any
 		}
 		return slip.Simplify(obj)
 	}
 	obj := slip.SimpleObject(value)
 	obj = caller.Call(s, slip.List{obj}, depth)
-	if bg, _ := obj.(*flavors.Instance); bg != nil && bg.Flavor == bagFlavor {
+	if bg, _ := obj.(*flavors.Instance); bg != nil && bg.Type == bagFlavor {
 		return bg.Any
 	}
 	return slip.Simplify(obj)

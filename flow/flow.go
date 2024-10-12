@@ -277,9 +277,9 @@ func (f *flow) submit(s *slip.Scope, data, watcher slip.Object) slip.Object {
 	var bi *flavors.Instance // box
 	if inst, _ := data.(*flavors.Instance); inst != nil {
 		switch {
-		case inst.Flavor == boxFlavor:
+		case inst.Type == boxFlavor:
 			bi = inst
-		case inst.Flavor == bag.Flavor():
+		case inst.Type == bag.Flavor():
 			var bx *box
 			bi, bx = MakeBox(gi.NewUUID())
 			bx.content = inst.Any

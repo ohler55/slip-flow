@@ -53,7 +53,7 @@ type FlowSubmit struct {
 func (f *FlowSubmit) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, 3)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != flowFlavor {
+	if !ok || self.Type != flowFlavor {
 		slip.PanicType("flow", args[0], "flow")
 	}
 	var watcher slip.Object

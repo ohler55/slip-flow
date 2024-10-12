@@ -43,7 +43,7 @@ type FlowEntry struct {
 func (f *FlowEntry) Call(s *slip.Scope, args slip.List, depth int) (entry slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != flowFlavor {
+	if !ok || self.Type != flowFlavor {
 		slip.PanicType("flow", args[0], "flow")
 	}
 	if self.Any.(*flow).entry != nil {

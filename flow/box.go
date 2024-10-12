@@ -105,14 +105,14 @@ func (caller boxInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 		case slip.Symbol(":tracking-id"):
 			bx.track.id = args[i+1]
 		case slip.Symbol(":track"):
-			if inst, ok := args[i+1].(*flavors.Instance); ok && inst.Flavor == trackFlavor {
+			if inst, ok := args[i+1].(*flavors.Instance); ok && inst.Type == trackFlavor {
 				bx.track = *inst.Any.(*track)
 			} else {
 				slip.PanicType("box :init :track", args[i+1], "flow-track instance")
 			}
 		case slip.Symbol(":set"):
 			if inst, ok := args[i+1].(*flavors.Instance); ok {
-				if inst.Flavor != bag.Flavor() {
+				if inst.Type != bag.Flavor() {
 					slip.PanicType("box :init :set", args[i+1], "bag-flavor instance")
 				}
 				bx.content = inst.Any

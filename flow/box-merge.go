@@ -61,7 +61,7 @@ type boxMergeCaller struct{}
 func (caller boxMergeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	other, _ := args[0].(*flavors.Instance)
-	if other == nil || other.Flavor != boxFlavor {
+	if other == nil || other.Type != boxFlavor {
 		slip.PanicType("box", args[0], "box")
 	}
 	obj.Any.(*box).merge(other.Any.(*box))

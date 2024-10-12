@@ -46,11 +46,11 @@ type TaskReceive struct {
 func (f *TaskReceive) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != taskFlavor {
+	if !ok || self.Type != taskFlavor {
 		slip.PanicType("task", args[0], "task")
 	}
 	var bi *flavors.Instance
-	if bi, ok = args[1].(*flavors.Instance); !ok || boxFlavor != bi.Flavor {
+	if bi, ok = args[1].(*flavors.Instance); !ok || boxFlavor != bi.Type {
 		slip.PanicType("box", args[1], "box")
 	}
 	self.Any.(*task).receive(s, bi)
@@ -64,7 +64,7 @@ func (caller taskReceiveCaller) Call(s *slip.Scope, args slip.List, _ int) (valu
 	obj := s.Get("self").(*flavors.Instance)
 
 	bi, ok := args[0].(*flavors.Instance)
-	if !ok || boxFlavor != bi.Flavor {
+	if !ok || boxFlavor != bi.Type {
 		slip.PanicType("box", args[0], "box")
 	}
 	obj.Any.(*task).receive(s, bi)

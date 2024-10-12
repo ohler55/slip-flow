@@ -49,7 +49,7 @@ type TaskUnlink struct {
 func (f *TaskUnlink) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != taskFlavor {
+	if !ok || self.Type != taskFlavor {
 		slip.PanicType("task", args[0], "task")
 	}
 	self.Any.(*task).unlink(args[1:])

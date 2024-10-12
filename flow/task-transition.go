@@ -55,14 +55,14 @@ type TaskTransition struct {
 func (f *TaskTransition) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 3, 3)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != taskFlavor {
+	if !ok || self.Type != taskFlavor {
 		slip.PanicType("task", args[0], "task")
 	}
 	var (
 		bi       *flavors.Instance
 		linkName string
 	)
-	if bi, ok = args[1].(*flavors.Instance); !ok || boxFlavor != bi.Flavor {
+	if bi, ok = args[1].(*flavors.Instance); !ok || boxFlavor != bi.Type {
 		slip.PanicType("box", args[1], "box")
 	}
 	switch ta := args[2].(type) {
@@ -86,7 +86,7 @@ func (caller taskTransitionCaller) Call(s *slip.Scope, args slip.List, _ int) (v
 	obj := s.Get("self").(*flavors.Instance)
 
 	bi, ok := args[0].(*flavors.Instance)
-	if !ok || boxFlavor != bi.Flavor {
+	if !ok || boxFlavor != bi.Type {
 		slip.PanicType("box", args[0], "box")
 	}
 	var linkName string

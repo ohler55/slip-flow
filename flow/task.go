@@ -232,7 +232,7 @@ func (t *task) handleResult(s *slip.Scope, result slip.Object) {
 		case slip.Symbol:
 			linkName = string(tr)
 		}
-		if bi, has := list[1].(*flavors.Instance); has && bi != nil && boxFlavor == bi.Flavor {
+		if bi, has := list[1].(*flavors.Instance); has && bi != nil && boxFlavor == bi.Type {
 			t.transition(s, linkName, bi)
 			return
 		}

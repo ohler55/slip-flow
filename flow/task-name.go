@@ -41,7 +41,7 @@ type TaskName struct {
 func (f *TaskName) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != taskFlavor {
+	if !ok || self.Type != taskFlavor {
 		slip.PanicType("task", args[0], "task")
 	}
 	return slip.String(self.Any.(*task).name)
