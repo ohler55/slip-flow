@@ -2,7 +2,7 @@
 all: build
 
 clean:
-	rm *.so
+	rm -f *.so
 
 lint:
 	golangci-lint run
