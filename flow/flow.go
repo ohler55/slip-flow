@@ -16,9 +16,7 @@ import (
 	"github.com/ohler55/slip/pkg/gi"
 )
 
-var (
-	flowFlavor *flavors.Flavor
-)
+var flowFlavor *flavors.Flavor
 
 func defFlow() {
 	flowFlavor = flavors.DefFlavor("flow",
@@ -116,7 +114,7 @@ func (f *flow) start(s *slip.Scope) {
 	f.duration.Store(0)
 	logger := f.self.Get("logger")
 	if logger == nil {
-		logger = slip.ReadString("(make-instance 'logger-flavor)").Eval(s, nil)
+		logger = slip.ReadString("(make-instance 'logger-flavor)", s).Eval(s, nil)
 		f.self.Set("logger", logger)
 	}
 	for _, t := range f.tasks {

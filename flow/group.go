@@ -9,9 +9,7 @@ import (
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-var (
-	groupFlavor *flavors.Flavor
-)
+var groupFlavor *flavors.Flavor
 
 func defGroup() {
 	groupFlavor = flavors.DefFlavor("flow-group",
@@ -106,7 +104,7 @@ func (g *group) start(s *slip.Scope) {
 	defer g.mu.Unlock()
 	logger := g.self.Get("logger")
 	if logger == nil {
-		logger = slip.ReadString("(make-instance 'logger-flavor)").Eval(s, nil)
+		logger = slip.ReadString("(make-instance 'logger-flavor)", s).Eval(s, nil)
 		g.self.Let("logger", logger)
 	}
 	for _, f := range g.flows {
