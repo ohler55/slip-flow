@@ -11,9 +11,9 @@ import (
 
 func TestBoxReadPath(t *testing.T) {
 	scope := slip.NewScope()
-	orig := slip.ReadString(`*flow-box-time-format*`).Eval(scope, nil)
+	orig := slip.ReadString(`*flow-box-time-format*`, scope).Eval(scope, nil)
 	defer scope.Set("*flow-box-time-format*", orig)
-	_ = slip.ReadString(`(setq *flow-box-time-format* *rfc3339nano*)`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq *flow-box-time-format* *rfc3339nano*)`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Source: `(let ((box (make-flow-box :parse "{x:3}")))
                   (flow-box-read box (make-string-input-stream "[7]") "x")

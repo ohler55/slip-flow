@@ -82,7 +82,7 @@ func TestJumpActorDocs(t *testing.T) {
 		":perform",
 		":init-key-values",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-jump-actor %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-jump-actor %s out)`, method), scope).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}

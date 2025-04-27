@@ -67,10 +67,10 @@ func TestMergeActorOk(t *testing.T) {
 	// the time each branch was merged is of interest.
 	history := slip.ReadString(
 		`(sort (mapcar (lambda (ev) (cadr ev))
-                       (send (send merge-test-out :track) :history)))`).Eval(scope, nil)
+                       (send (send merge-test-out :track) :history)))`, scope).Eval(scope, nil)
 	tt.Equal(t, `("exit" "merge" "merge" "split" "x" "y")`, slip.ObjectString(history))
 
-	value := slip.ReadString(`(sort (send merge-test-out :native) nil :key 'car)`).Eval(scope, nil)
+	value := slip.ReadString(`(sort (send merge-test-out :native) nil :key 'car)`, scope).Eval(scope, nil)
 	tt.Equal(t, `(("x" . 1) ("y" . 2) ("z" . 0))`, slip.ObjectString(value))
 }
 
@@ -120,7 +120,7 @@ func TestMergeActorTimeout(t *testing.T) {
 	// Verify all tasks are present in the history along with 2 merges since
 	// the time each branch was merged is of interest.
 	history := slip.ReadString(
-		`(cadar (last (send (send merge-test-out :track) :history)))`).Eval(scope, nil)
+		`(cadar (last (send (send merge-test-out :track) :history)))`, scope).Eval(scope, nil)
 	tt.Equal(t, `"error"`, slip.ObjectString(history))
 }
 
@@ -144,7 +144,7 @@ func TestMergeActorDocs(t *testing.T) {
 		":links",
 		":init-key-values",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-merge-actor %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-merge-actor %s out)`, method), scope).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}

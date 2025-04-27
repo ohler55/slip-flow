@@ -46,10 +46,10 @@ func TestFlowSubmitFunction(t *testing.T) {
 	scope.Let("submit-test-out", tf.Result)
 
 	history := slip.ReadString(
-		`(mapcar (lambda (ev) (cadr ev))(send (send submit-test-out :track) :history))`).Eval(scope, nil)
+		`(mapcar (lambda (ev) (cadr ev))(send (send submit-test-out :track) :history))`, scope).Eval(scope, nil)
 	tt.Equal(t, `("start" "odd-or-even" "odd")`, slip.ObjectString(history))
 
-	value := slip.ReadString(`(send submit-test-out :native)`).Eval(scope, nil)
+	value := slip.ReadString(`(send submit-test-out :native)`, scope).Eval(scope, nil)
 	tt.Equal(t, `(3)`, slip.ObjectString(value))
 }
 
@@ -89,10 +89,10 @@ func TestFlowSubmitBag(t *testing.T) {
 	scope.Let("submit-test-out", tf.Result)
 
 	history := slip.ReadString(
-		`(mapcar (lambda (ev) (cadr ev))(send (send submit-test-out :track) :history))`).Eval(scope, nil)
+		`(mapcar (lambda (ev) (cadr ev))(send (send submit-test-out :track) :history))`, scope).Eval(scope, nil)
 	tt.Equal(t, `("start" "odd-or-even" "odd")`, slip.ObjectString(history))
 
-	value := slip.ReadString(`(send submit-test-out :native)`).Eval(scope, nil)
+	value := slip.ReadString(`(send submit-test-out :native)`, scope).Eval(scope, nil)
 	tt.Equal(t, `(3)`, slip.ObjectString(value))
 }
 
@@ -133,10 +133,10 @@ func TestFlowSubmitSend(t *testing.T) {
 	scope.Let("submit-test-out", tf.Result)
 
 	history := slip.ReadString(
-		`(mapcar (lambda (ev) (cadr ev))(send (send submit-test-out :track) :history))`).Eval(scope, nil)
+		`(mapcar (lambda (ev) (cadr ev))(send (send submit-test-out :track) :history))`, scope).Eval(scope, nil)
 	tt.Equal(t, `("start" "odd-or-even" "odd")`, slip.ObjectString(history))
 
-	value := slip.ReadString(`(send submit-test-out :native)`).Eval(scope, nil)
+	value := slip.ReadString(`(send submit-test-out :native)`, scope).Eval(scope, nil)
 	tt.Equal(t, `(3)`, slip.ObjectString(value))
 }
 

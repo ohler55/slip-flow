@@ -17,10 +17,10 @@ func TestCanLogErrorLevel(t *testing.T) {
 	scope := slip.NewScope()
 	var log bytes.Buffer
 	scope.Let(slip.Symbol("log-out"), &slip.OutputStream{Writer: &log})
-	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor))").Eval(scope, nil)
-	_ = slip.ReadString("(send logger :set-out log-out)").Eval(scope, nil)
+	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor))", scope).Eval(scope, nil)
+	_ = slip.ReadString("(send logger :set-out log-out)", scope).Eval(scope, nil)
 	_ = slip.ReadString(`(unless (find-flavor 'can-log-tester)
-                          (defflavor can-log-tester () (can-log)))`).Eval(scope, nil)
+                          (defflavor can-log-tester () (can-log)))`, scope).Eval(scope, nil)
 
 	_ = slip.ReadString(`(let ((can (make-instance 'can-log-tester :log-level 0 :logger logger)))
                   (send can :error "error ~D" 0)
@@ -70,7 +70,7 @@ func TestCanLogErrorLevel(t *testing.T) {
                   (send can :info "info ~D" 2)
                   (send can :debug "debug ~D" 3)
 
-                  (send logger :shutdown))`).Eval(scope, nil)
+                  (send logger :shutdown))`, scope).Eval(scope, nil)
 	tt.Equal(t, `E error 0
 E ----- -1
 E error 0
@@ -115,7 +115,7 @@ func TestCanLogDocs(t *testing.T) {
 		":debug",
 		":set-level",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method can-log %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method can-log %s out)`, method), scope).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}

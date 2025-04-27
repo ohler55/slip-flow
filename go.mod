@@ -5,8 +5,8 @@ go 1.24
 toolchain go1.24.1
 
 require (
-	github.com/ohler55/ojg v1.26.2
-	github.com/ohler55/slip v0.9.8
+	github.com/ohler55/ojg v1.26.3
+	github.com/ohler55/slip v1.0.0
 )
 
 require (

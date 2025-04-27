@@ -48,7 +48,7 @@ func TestBoxDocs(t *testing.T) {
 		":watch",
 		":write",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-box %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-box %s out)`, method), scope).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}

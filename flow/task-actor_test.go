@@ -17,7 +17,7 @@ func TestTaskActor(t *testing.T) {
 	_ = slip.ReadString(`
 (defflavor task-actor-test () (flow-task-actor))
 (defmethod (task-actor-test :perform) (box) (list 'ok box))
-`).Eval(scope, nil)
+`, scope).Eval(scope, nil)
 
 	(&sliptest.Function{
 		Scope:  scope,
@@ -42,7 +42,7 @@ func TestTaskActorDocs(t *testing.T) {
 	for _, method := range []string{
 		":start",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-task-actor %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-task-actor %s out)`, method), scope).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}

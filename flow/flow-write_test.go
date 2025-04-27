@@ -98,7 +98,7 @@ func TestFlowWriteFunction(t *testing.T) {
 	scope.Set("*standard-output*", &slip.OutputStream{Writer: &b})
 	scope.Let("*print-right-margin*", slip.Fixnum(80))
 
-	_ = slip.ReadString("(defun flow-write-test-perform (b) (list 'ok b))").Eval(scope, nil)
+	_ = slip.ReadString("(defun flow-write-test-perform (b) (list 'ok b))", scope).Eval(scope, nil)
 
 	(&sliptest.Function{
 		Scope: scope,

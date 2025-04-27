@@ -51,13 +51,13 @@ func TestLogErrorActorExit(t *testing.T) {
 	scope.Let("log-error-test-out", tf.Result)
 
 	history := slip.ReadString(
-		`(mapcar (lambda (ev) (cadr ev))(send (send log-error-test-out :track) :history))`).Eval(scope, nil)
+		`(mapcar (lambda (ev) (cadr ev))(send (send log-error-test-out :track) :history))`, scope).Eval(scope, nil)
 	tt.Equal(t, `("start" "fail" "error")`, slip.ObjectString(history))
 
-	content := slip.ReadString(`(cdr (assoc "content" (send log-error-test-out :native)))`).Eval(scope, nil)
+	content := slip.ReadString(`(cdr (assoc "content" (send log-error-test-out :native)))`, scope).Eval(scope, nil)
 	tt.Equal(t, `(3)`, slip.ObjectString(content))
 
-	err := slip.ReadString(`(cdr (assoc "error" (send log-error-test-out :native)))`).Eval(scope, nil)
+	err := slip.ReadString(`(cdr (assoc "error" (send log-error-test-out :native)))`, scope).Eval(scope, nil)
 	tt.Equal(t, `"Actor did not return a list of link name and box instance."`, slip.ObjectString(err))
 
 	tt.Equal(t,
@@ -103,13 +103,13 @@ func TestLogErrorActorExitNotify(t *testing.T) {
 	scope.Let("log-error-test-out", tf.Result)
 
 	history := slip.ReadString(
-		`(mapcar (lambda (ev) (cadr ev))(send (send log-error-test-out :track) :history))`).Eval(scope, nil)
+		`(mapcar (lambda (ev) (cadr ev))(send (send log-error-test-out :track) :history))`, scope).Eval(scope, nil)
 	tt.Equal(t, `("start" "fail" "error")`, slip.ObjectString(history))
 
-	content := slip.ReadString(`(cdr (assoc "content" (send log-error-test-out :native)))`).Eval(scope, nil)
+	content := slip.ReadString(`(cdr (assoc "content" (send log-error-test-out :native)))`, scope).Eval(scope, nil)
 	tt.Equal(t, `(3)`, slip.ObjectString(content))
 
-	err := slip.ReadString(`(cdr (assoc "error" (send log-error-test-out :native)))`).Eval(scope, nil)
+	err := slip.ReadString(`(cdr (assoc "error" (send log-error-test-out :native)))`, scope).Eval(scope, nil)
 	tt.Equal(t, `"Actor did not return a list of link name and box instance."`, slip.ObjectString(err))
 
 	tt.Equal(t,
@@ -160,7 +160,7 @@ func TestLogErrorActorLink(t *testing.T) {
 	scope.Let("log-error-test-out", tf.Result)
 
 	history := slip.ReadString(
-		`(mapcar (lambda (ev) (cadr ev))(send (send log-error-test-out :track) :history))`).Eval(scope, nil)
+		`(mapcar (lambda (ev) (cadr ev))(send (send log-error-test-out :track) :history))`, scope).Eval(scope, nil)
 	tt.Equal(t, `("start" "fail" "error" "error2")`, slip.ObjectString(history))
 
 	tt.Equal(t, "E [3]\n", b.String())
@@ -177,7 +177,7 @@ func TestLogErrorActorDocs(t *testing.T) {
 		":perform",
 		":init-key-values",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-log-error-actor %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-log-error-actor %s out)`, method), scope).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}

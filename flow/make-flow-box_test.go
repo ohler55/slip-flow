@@ -21,7 +21,7 @@ func TestMakeFlowBoxParse(t *testing.T) {
 	}
 	tf.Test(t)
 	scope.Let("box", tf.Result)
-	out := slip.ReadString(`(send box :write nil)`).Eval(scope, nil).(slip.String)
+	out := slip.ReadString(`(send box :write nil)`, scope).Eval(scope, nil).(slip.String)
 	tt.Equal(t, "{x: 7}", string(out))
 
 	(&sliptest.Function{
@@ -39,7 +39,7 @@ func TestMakeFlowBoxSet(t *testing.T) {
 	}
 	tf.Test(t)
 	scope.Let("box", tf.Result)
-	out := slip.ReadString(`(send box :write nil)`).Eval(scope, nil).(slip.String)
+	out := slip.ReadString(`(send box :write nil)`, scope).Eval(scope, nil).(slip.String)
 	tt.Equal(t, "{x: 7}", string(out))
 
 	(&sliptest.Function{
@@ -62,7 +62,7 @@ func TestMakeFlowBoxRead(t *testing.T) {
 	}
 	tf.Test(t)
 	scope.Let("box", tf.Result)
-	out := slip.ReadString(`(send box :write nil)`).Eval(scope, nil).(slip.String)
+	out := slip.ReadString(`(send box :write nil)`, scope).Eval(scope, nil).(slip.String)
 	tt.Equal(t, "{x: 7}", string(out))
 
 	(&sliptest.Function{

@@ -107,7 +107,7 @@ func testHTTPClientActorOk(t *testing.T, actor string, checkAll bool) {
 	defer server.Close()
 
 	scope.Let("test-url", slip.String(server.URL))
-	scope.Let("actor", slip.ReadString(actor).Eval(scope, nil))
+	scope.Let("actor", slip.ReadString(actor, scope).Eval(scope, nil))
 
 	tf := sliptest.Function{
 		Scope: scope,
@@ -132,20 +132,20 @@ func testHTTPClientActorOk(t *testing.T, actor string, checkAll bool) {
 	tf.Test(t)
 	scope.Let("http-client-out", tf.Result)
 
-	value := slip.ReadString(`(send http-client-out :get "response.body")`).Eval(scope, nil)
+	value := slip.ReadString(`(send http-client-out :get "response.body")`, scope).Eval(scope, nil)
 	tt.Equal(t, `"Hello
 "`, slip.ObjectString(value))
 
 	if !checkAll {
 		return
 	}
-	value = slip.ReadString(`(send http-client-out :get "response.status")`).Eval(scope, nil)
+	value = slip.ReadString(`(send http-client-out :get "response.status")`, scope).Eval(scope, nil)
 	tt.Equal(t, "200", slip.ObjectString(value))
 
-	value = slip.ReadString(`(send http-client-out :get "response.contentLength")`).Eval(scope, nil)
+	value = slip.ReadString(`(send http-client-out :get "response.contentLength")`, scope).Eval(scope, nil)
 	tt.Equal(t, "6", slip.ObjectString(value))
 
-	value = slip.ReadString(`(send http-client-out :get "['response']['header']['Content-Type'][0]")`).Eval(scope, nil)
+	value = slip.ReadString(`(send http-client-out :get "['response']['header']['Content-Type'][0]")`, scope).Eval(scope, nil)
 	tt.Equal(t, `"text/plain; charset=utf-8"`, slip.ObjectString(value))
 }
 
@@ -223,7 +223,7 @@ func TestHTTPClientActorDocs(t *testing.T) {
 		":perform",
 		":init-key-values",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-http-client-actor %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-http-client-actor %s out)`, method), scope).Eval(scope, nil)
 		// fmt.Printf("*** %s\n", out.String())
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()

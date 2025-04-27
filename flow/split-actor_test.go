@@ -39,12 +39,12 @@ func TestSplitActor(t *testing.T) {
 	tf.Test(t)
 	scope.Let("split-out", tf.Result.(slip.List)[0])
 	history := slip.ReadString(
-		`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`).Eval(scope, nil).(slip.List)
+		`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`, scope).Eval(scope, nil).(slip.List)
 
 	scope.Let("split-out", tf.Result.(slip.List)[1])
 	history = append(history,
 		slip.ReadString(
-			`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`).Eval(scope, nil).(slip.List)...,
+			`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`, scope).Eval(scope, nil).(slip.List)...,
 	)
 	hstr := slip.ObjectString(history)
 	tt.Equal(t, true, strings.Contains(hstr, "branch-one"))
@@ -60,7 +60,7 @@ func TestSplitActorDocs(t *testing.T) {
 		":start",
 		":perform",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-split-actor %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow-split-actor %s out)`, method), scope).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}

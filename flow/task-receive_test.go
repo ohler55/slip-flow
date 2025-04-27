@@ -18,7 +18,7 @@ import (
 func TestTaskReceiveSync(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(
-		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
+		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((task (make-instance 'flow-task
@@ -32,7 +32,7 @@ func TestTaskReceiveSync(t *testing.T) {
 		Expect: `/\("c" \. 3\)/`,
 	}).Test(t)
 	_ = slip.ReadString(
-		`(setq task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
+		`(setq task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((task (make-instance 'flow-task
@@ -50,7 +50,7 @@ func TestTaskReceiveSync(t *testing.T) {
 func TestTaskReceiveAsync(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(
-		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
+		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((task (make-instance 'flow-task
@@ -68,7 +68,7 @@ func TestTaskReceiveAsync(t *testing.T) {
 		Expect: `/\("c" \. 3\)/`,
 	}).Test(t)
 	_ = slip.ReadString(
-		`(setq task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
+		`(setq task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((task (make-instance 'flow-task
@@ -90,11 +90,11 @@ func TestTaskReceiveAsync(t *testing.T) {
 func TestTaskReceiveFunction(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(
-		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
+		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`, scope).Eval(scope, nil)
 	_ = slip.ReadString(`(defun task-receive-func (b)
                           (flow-box-set b 3 "c")
                           (setq task-receive-test-box b)
-                          (list 'ok b))`).Eval(scope, nil)
+                          (list 'ok b))`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((task (make-instance 'flow-task
@@ -105,7 +105,7 @@ func TestTaskReceiveFunction(t *testing.T) {
 		Expect: `/\("c" \. 3\)/`,
 	}).Test(t)
 	_ = slip.ReadString(
-		`(setq task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
+		`(setq task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((task (make-instance 'flow-task
@@ -120,7 +120,7 @@ func TestTaskReceiveFunction(t *testing.T) {
 func TestTaskReceiveInstanceSync(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(
-		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
+		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`, scope).Eval(scope, nil)
 	assureTaskRecieveTestActor(scope)
 	(&sliptest.Function{
 		Scope: scope,
@@ -138,7 +138,7 @@ func TestTaskReceiveInstanceSync(t *testing.T) {
 func TestTaskReceiveInstanceAsync(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(
-		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
+		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`, scope).Eval(scope, nil)
 	assureTaskRecieveTestActor(scope)
 
 	(&sliptest.Function{
@@ -163,15 +163,15 @@ func assureTaskRecieveTestActor(scope *slip.Scope) {
 		_ = slip.ReadString(`(defflavor task-receiver-test-actor (task)
                                                              ()
                                                              :gettable-instance-variables
-                                                             :settable-instance-variables)`).Eval(scope, nil)
-		_ = slip.ReadString(`(defmethod (task-receiver-test-actor :start) (tsk) (setq task tsk))`).Eval(scope, nil)
+                                                             :settable-instance-variables)`, scope).Eval(scope, nil)
+		_ = slip.ReadString(`(defmethod (task-receiver-test-actor :start) (tsk) (setq task tsk))`, scope).Eval(scope, nil)
 		_ = slip.ReadString(`(defmethod (task-receiver-test-actor :shutdown) ()
                           (unless (string= "flow-task" (send (send task :flavor) :name))
-                                  (panic "task not set")))`).Eval(scope, nil)
+                                  (panic "task not set")))`, scope).Eval(scope, nil)
 		_ = slip.ReadString(`(defmethod (task-receiver-test-actor :perform) (b)
                                      (flow-box-set b 3 "c")
                                      (setq task-receive-test-box b)
-                                     (list 'ok b))`).Eval(scope, nil)
+                                     (list 'ok b))`, scope).Eval(scope, nil)
 	}
 }
 
@@ -206,7 +206,7 @@ func TestTaskReceiveNotBox(t *testing.T) {
 func TestTaskReceiveInstanceNoPerform(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(
-		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`).Eval(scope, nil)
+		`(defvar task-receive-test-box (make-flow-box :tracking-id 123 :set '((a . 1)(b . 2))))`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(make-instance 'flow-task

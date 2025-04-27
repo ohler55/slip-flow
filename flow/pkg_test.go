@@ -12,11 +12,11 @@ import (
 
 func TestPkgTimeFormat(t *testing.T) {
 	scope := slip.NewScope()
-	orig := slip.ReadString(`*flow-box-time-format*`).Eval(scope, nil)
+	orig := slip.ReadString(`*flow-box-time-format*`, scope).Eval(scope, nil)
 	defer scope.Set("*flow-box-time-format*", orig)
 
-	_ = slip.ReadString(`(setq *flow-box-time-format* "2006-01-02")`).Eval(scope, nil)
-	v := slip.ReadString(`*flow-box-time-format*`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq *flow-box-time-format* "2006-01-02")`, scope).Eval(scope, nil)
+	v := slip.ReadString(`*flow-box-time-format*`, scope).Eval(scope, nil)
 	tt.Equal(t, `"2006-01-02"`, slip.ObjectString(v))
 	(&sliptest.Function{
 		Source: `(send (make-flow-box :parse "[\"2023-12-13\"]") :native)`,
@@ -27,22 +27,22 @@ func TestPkgTimeFormat(t *testing.T) {
 		Expect: `("2023-abcdef")`,
 	}).Test(t)
 
-	_ = slip.ReadString(`(setq *flow-box-time-format* *rfc3339nano*)`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq *flow-box-time-format* *rfc3339nano*)`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Source: `(send (make-flow-box :parse "[\"2022-09-19T01:02:03.000Z\"]") :native)`,
 		Expect: `(@2022-09-19T01:02:03Z)`,
 	}).Test(t)
 
-	_ = slip.ReadString(`(setq *flow-box-time-format* nil)`).Eval(scope, nil)
-	v = slip.ReadString(`*flow-box-time-format*`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq *flow-box-time-format* nil)`, scope).Eval(scope, nil)
+	v = slip.ReadString(`*flow-box-time-format*`, scope).Eval(scope, nil)
 	tt.Equal(t, `nil`, slip.ObjectString(v))
 
-	_ = slip.ReadString(`(setq *flow-box-time-format* 'nano)`).Eval(scope, nil)
-	v = slip.ReadString(`*flow-box-time-format*`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq *flow-box-time-format* 'nano)`, scope).Eval(scope, nil)
+	v = slip.ReadString(`*flow-box-time-format*`, scope).Eval(scope, nil)
 	tt.Equal(t, `"nano"`, slip.ObjectString(v))
 
-	_ = slip.ReadString(`(setq *flow-box-time-format* 'second)`).Eval(scope, nil)
-	v = slip.ReadString(`*flow-box-time-format*`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq *flow-box-time-format* 'second)`, scope).Eval(scope, nil)
+	v = slip.ReadString(`*flow-box-time-format*`, scope).Eval(scope, nil)
 	tt.Equal(t, `"second"`, slip.ObjectString(v))
 	(&sliptest.Function{
 		Source: `(send (make-flow-box :parse "[1663549323.000000000]") :native)`,
@@ -61,11 +61,11 @@ func TestPkgTimeFormat(t *testing.T) {
 
 func TestPkgTimeWrap(t *testing.T) {
 	scope := slip.NewScope()
-	orig := slip.ReadString(`*flow-box-time-wrap*`).Eval(scope, nil)
+	orig := slip.ReadString(`*flow-box-time-wrap*`, scope).Eval(scope, nil)
 	defer scope.Set("*flow-box-time-wrap*", orig)
 
-	_ = slip.ReadString(`(setq *flow-box-time-wrap* "time")`).Eval(scope, nil)
-	v := slip.ReadString(`*flow-box-time-wrap*`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq *flow-box-time-wrap* "time")`, scope).Eval(scope, nil)
+	v := slip.ReadString(`*flow-box-time-wrap*`, scope).Eval(scope, nil)
 	tt.Equal(t, `"time"`, slip.ObjectString(v))
 	(&sliptest.Function{
 		Source: `(send (make-flow-box :parse "{time:\"2023-12-13\"}") :native)`,
@@ -80,12 +80,12 @@ func TestPkgTimeWrap(t *testing.T) {
 		Expect: `(("time" . 1.25))`,
 	}).Test(t)
 
-	_ = slip.ReadString(`(setq *flow-box-time-wrap* nil)`).Eval(scope, nil)
-	v = slip.ReadString(`*flow-box-time-wrap*`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq *flow-box-time-wrap* nil)`, scope).Eval(scope, nil)
+	v = slip.ReadString(`*flow-box-time-wrap*`, scope).Eval(scope, nil)
 	tt.Equal(t, `nil`, slip.ObjectString(v))
 
-	_ = slip.ReadString(`(setq *flow-box-time-wrap* 'time)`).Eval(scope, nil)
-	v = slip.ReadString(`*flow-box-time-wrap*`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq *flow-box-time-wrap* 'time)`, scope).Eval(scope, nil)
+	v = slip.ReadString(`*flow-box-time-wrap*`, scope).Eval(scope, nil)
 	tt.Equal(t, `"time"`, slip.ObjectString(v))
 
 	(&sliptest.Function{

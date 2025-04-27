@@ -19,7 +19,7 @@ func TestTaskTransitionFunction(t *testing.T) {
  (flow-task-transition task box 'one)
  (flow-task-transition task box "two")
  (list nil nil))
-`).Eval(scope, nil)
+`, scope).Eval(scope, nil)
 
 	tf := sliptest.Function{
 		Scope: scope,
@@ -46,12 +46,12 @@ func TestTaskTransitionFunction(t *testing.T) {
 	tf.Test(t)
 	scope.Let("split-out", tf.Result.(slip.List)[0])
 	history := slip.ReadString(
-		`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`).Eval(scope, nil).(slip.List)
+		`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`, scope).Eval(scope, nil).(slip.List)
 
 	scope.Let("split-out", tf.Result.(slip.List)[1])
 	history = append(history,
 		slip.ReadString(
-			`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`).Eval(scope, nil).(slip.List)...,
+			`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`, scope).Eval(scope, nil).(slip.List)...,
 	)
 	hstr := slip.ObjectString(history)
 	tt.Equal(t, true, strings.Contains(hstr, "branch-one"))
@@ -66,7 +66,7 @@ func TestTaskTransitionSend(t *testing.T) {
  (send task :transition box 'one)
  (send task :transition box "two")
  (list nil nil))
-`).Eval(scope, nil)
+`, scope).Eval(scope, nil)
 
 	tf := sliptest.Function{
 		Scope: scope,
@@ -93,12 +93,12 @@ func TestTaskTransitionSend(t *testing.T) {
 	tf.Test(t)
 	scope.Let("split-out", tf.Result.(slip.List)[0])
 	history := slip.ReadString(
-		`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`).Eval(scope, nil).(slip.List)
+		`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`, scope).Eval(scope, nil).(slip.List)
 
 	scope.Let("split-out", tf.Result.(slip.List)[1])
 	history = append(history,
 		slip.ReadString(
-			`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`).Eval(scope, nil).(slip.List)...,
+			`(mapcar (lambda (ev) (cadr ev))(send (send split-out :track) :history))`, scope).Eval(scope, nil).(slip.List)...,
 	)
 	hstr := slip.ObjectString(history)
 	tt.Equal(t, true, strings.Contains(hstr, "branch-one"))

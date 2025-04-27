@@ -38,7 +38,7 @@ func TestFlowDocs(t *testing.T) {
 		":width",
 		":write",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method flow %s out)`, method), scope).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}
