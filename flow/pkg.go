@@ -39,6 +39,12 @@ func init() {
 			Doc: `if non-nil then the writing and parsing of time is as a hash-map with a key of
 the _*flow-box-time_wrap*_ value and the time encoded according to the _*flow-box-time-format*_.`,
 		},
+		"*flow*": {
+			Val:    &Pkg,
+			Const:  true,
+			Export: true,
+			Doc:    `The flow package.`,
+		},
 	})
 	defBox()
 	defCanLog()
@@ -63,7 +69,6 @@ the _*flow-box-time_wrap*_ value and the time encoded according to the _*flow-bo
 	defTrack()
 	defWriteFileActor()
 
-	slip.DefConstant(slip.Symbol("*flow*"), &Pkg, "")
 	Pkg.Initialize(nil, &event{}) // lock
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
