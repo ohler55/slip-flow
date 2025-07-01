@@ -68,7 +68,7 @@ func (caller boxUnwatchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	case 1:
 		unwatchBox(obj, args[0])
 	default:
-		flavors.PanicMethodArgChoice(obj, ":unwatch", len(args), "0 or 1")
+		slip.PanicMethodArgChoice(obj, ":unwatch", len(args), "0 or 1")
 	}
 	return nil
 }

@@ -67,7 +67,7 @@ func (caller boxWatchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	if len(args) == 2 {
 		watchBox(obj, args[0], args[1])
 	} else {
-		flavors.PanicMethodArgChoice(obj, ":watch", len(args), "2")
+		slip.PanicMethodArgChoice(obj, ":watch", len(args), "2")
 	}
 	return nil
 }

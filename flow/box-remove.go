@@ -64,7 +64,7 @@ func (caller boxRemoveCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 	if len(args) == 1 {
 		removeBox(obj, args[0])
 	} else {
-		flavors.PanicMethodArgChoice(obj, ":remove", len(args), "1")
+		slip.PanicMethodArgChoice(obj, ":remove", len(args), "1")
 	}
 	return obj
 }

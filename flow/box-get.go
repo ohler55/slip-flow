@@ -74,7 +74,7 @@ func (caller boxGetCaller) Call(s *slip.Scope, args slip.List, _ int) (value sli
 	case 2:
 		value = getBox(obj, args[0], args[1] != nil)
 	default:
-		flavors.PanicMethodArgCount(obj, ":get", len(args), 0, 2)
+		slip.PanicMethodArgCount(obj, ":get", len(args), 0, 2)
 	}
 	return
 }

@@ -78,7 +78,7 @@ func (caller boxReadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 	case 2:
 		readBox(obj, args[0], args[1])
 	default:
-		flavors.PanicMethodArgChoice(obj, ":read", len(args), "1 or 2")
+		slip.PanicMethodArgChoice(obj, ":read", len(args), "1 or 2")
 	}
 	return obj
 }

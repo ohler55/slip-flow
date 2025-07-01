@@ -62,7 +62,7 @@ func (caller boxHasCaller) Call(s *slip.Scope, args slip.List, _ int) (value sli
 	if len(args) == 1 {
 		value = hasBox(obj, args[0])
 	} else {
-		flavors.PanicMethodArgChoice(obj, ":has", len(args), "1")
+		slip.PanicMethodArgChoice(obj, ":has", len(args), "1")
 	}
 	return
 }
