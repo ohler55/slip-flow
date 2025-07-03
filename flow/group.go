@@ -132,13 +132,19 @@ func (caller groupInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 	return nil
 }
 
-func (caller groupInitCaller) Docs() string {
-	return `__:init__ &key _logger_
-   _:logger_ [instance] an instance that has the _:log_ method.
-
-
-Sets the initial value when _make-instance_ is called.
-`
+func (caller groupInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Sets the initial value when _make-instance_ is called.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":logger",
+				Type: "instance",
+				Text: "An instance that has the _:log_ method.",
+			},
+		},
+	}
 }
 
 type groupSetLevelCaller struct{}
@@ -151,12 +157,4 @@ func (caller groupSetLevelCaller) Call(s *slip.Scope, args slip.List, _ int) sli
 		_ = f.self.Receive(s, ":set-level", slip.List{level}, 0)
 	}
 	return nil
-}
-
-func (caller groupSetLevelCaller) Docs() string {
-	return `__:after :setLevel__
-
-
-Sets the _log-level_ of all the flows in the group.
-`
 }

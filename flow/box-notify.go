@@ -33,7 +33,7 @@ func init() {
 			Text: `__flow-box-notify__ pushes the box onto the channels named by _names_
 if no _names_ then to all. The number of channels pushed to is returned`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}")) => #<flow-box-flavor 12345>`,
+				`(setq box (make-instance 'flow-box :parse "{a:7}")) => #<flow-box 12345>`,
 				`(setq chan (make-channel 5) => #<channel 12345>`,
 				`(flow-box-watch box "done" chan) => nil`,
 				`(flow-box-notify box "done") => 1`,
@@ -65,8 +65,8 @@ func (caller boxNotifyCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 	return notifyBox(obj, args)
 }
 
-func (caller boxNotifyCaller) Docs() string {
-	return methodDocFromFunc(":notify", "flow-box-notify", "flow-box-flavor", "box")
+func (caller boxNotifyCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":notify", "flow-box-notify", "flow-box", "box")
 }
 
 func notifyBox(obj *flavors.Instance, args slip.List) slip.Object {

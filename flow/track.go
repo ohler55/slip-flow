@@ -30,7 +30,7 @@ _flow-box_ is traverses a flow.`),
 	)
 	trackFlavor.Final = true
 	trackFlavor.GoMakeOnly = true
-	trackFlavor.DefMethod(":id", "", trackIDCaller{})
+	trackFlavor.DefMethod(":id", "", trackIDCaller{}) // TBD change id to something else, conflict with vanilla
 	trackFlavor.DefMethod(":history", "", trackHistoryCaller{})
 	trackFlavor.DefMethod(":merge", "", trackMergeCaller{})
 }
@@ -53,12 +53,12 @@ func (caller trackIDCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 	return self.Any.(*track).id
 }
 
-func (caller trackIDCaller) Docs() string {
-	return `__:id__ => _string_|_fixnum_
-
-
-Returns the id of the track.
-`
+func (caller trackIDCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":id",
+		Text:   `Returns the id of the track.`,
+		Return: "fixnum", // TBD or string|fixnum
+	}
 }
 
 type trackHistoryCaller struct{}
@@ -68,13 +68,13 @@ func (caller trackHistoryCaller) Call(s *slip.Scope, args slip.List, _ int) slip
 	return self.Any.(*track).historyList()
 }
 
-func (caller trackHistoryCaller) Docs() string {
-	return `__:history__ => _list_
-
-
-Returns the history of the track as a list of triples where each triple is a list of
-the time, the task name, and the flow name.
-`
+func (caller trackHistoryCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":history",
+		Text: `Returns the history of the track as a list of triples where each
+triple is a list of the time, the task name, and the flow name.`,
+		Return: "list",
+	}
 }
 
 type trackMergeCaller struct{}
@@ -90,12 +90,19 @@ func (caller trackMergeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	return self
 }
 
-func (caller trackMergeCaller) Docs() string {
-	return `__:merge__ _other_ => _track_
-
-
-Merge one track into this track and return the updated track.
-`
+func (caller trackMergeCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":merge",
+		Text: `Merge one track into this track and return the updated track.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "other",
+				Type: "track",
+				Text: "The other track to merge with this track.",
+			},
+		},
+		Return: "track",
+	}
 }
 
 func (t *track) idString() (id string) {

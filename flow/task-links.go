@@ -26,11 +26,11 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-task-links__ returns the links the _task_.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :link "flo"))`,
+				`(setq flow (make-instance 'flow :link "flo"))`,
 				`(setq tick (flow-add-task flow :name 'tick :actor (lambda (b) (list 'ok b))))`,
 				`(setq tock (flow-add-task flow :name 'tock :actor (lambda (b) (list 'ok b))))`,
 				`(flow-link flow "ok" 'tick 'tock) => nil`,
-				`(flow-task-links tick) => (("tock" . #<flow-task-flavor 12345>))`,
+				`(flow-task-links tick) => (("tock" . #<flow-task 12345>))`,
 			},
 		}, &Pkg)
 }
@@ -58,6 +58,6 @@ func (caller taskLinksCaller) Call(s *slip.Scope, args slip.List, _ int) (value 
 	return obj.Any.(*task).linkList()
 }
 
-func (caller taskLinksCaller) Docs() string {
-	return methodDocFromFunc(":links", "flow-task-links", "flow-task-flavor", "task")
+func (caller taskLinksCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":links", "flow-task-links", "flow-task", "task")
 }

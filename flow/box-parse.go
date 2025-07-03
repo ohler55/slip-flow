@@ -43,8 +43,8 @@ The path must follow the JSONPath format.`,
 			Text: `__flow-box-parse__ parses the _string_ and sets the result at the location
 described by _path_. If no _path_ is provided the entire contents of the box is replaced.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}")) => #<flow-box-flavor 12345>`,
-				`(flow-box-parse box 3 "[a]") => #<flow-box-flavor 12345> ;; content is now {a:[3]}`,
+				`(setq box (make-instance 'flow-box :parse "{a:7}")) => #<flow-box 12345>`,
+				`(flow-box-parse box 3 "[a]") => #<flow-box 12345> ;; content is now {a:[3]}`,
 			},
 		}, &Pkg)
 }
@@ -80,8 +80,8 @@ func (caller boxParseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	return obj
 }
 
-func (caller boxParseCaller) Docs() string {
-	return methodDocFromFunc(":parse", "flow-box-parse", "flow-box-flavor", "box")
+func (caller boxParseCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":parse", "flow-box-parse", "flow-box", "box")
 }
 
 func parseBox(obj *flavors.Instance, value, path slip.Object) {

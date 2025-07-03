@@ -27,7 +27,7 @@ func init() {
 			},
 			Return: "object",
 			Text: `__flow-box-bag__ converts the content of an instance of the
-_flow-box-flavor_ to an instance of the _bag-flavor_ with the contents of the box.`,
+_flow-box_ to an instance of the _bag-flavor_ with the contents of the box.`,
 			Examples: []string{
 				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}"))`,
 				`(flow-box-bag box) => #<bag-flavor 12345> ;; with content {a:7}`,
@@ -64,6 +64,6 @@ func (caller boxBagCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	return bg
 }
 
-func (caller boxBagCaller) Docs() string {
-	return methodDocFromFunc(":bag", "flow-box-bag", "flow-box-flavor", "box")
+func (caller boxBagCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":bag", "flow-box-bag", "flow-box", "box")
 }

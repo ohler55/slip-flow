@@ -58,14 +58,24 @@ func (caller readFileInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip
 	return nil
 }
 
-func (caller readFileInitCaller) Docs() string {
-	return `__:init__ &key _filename_ _destination_
-   _:filename_ [string|symbol|function] of the file to read.
-   _:destination_ [string] the location in the _box_ to place the result.
-
-
-Sets the initial value when _make-instance_ is called.
-`
+func (caller readFileInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Sets the initial value when _make-instance_ is called.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":filename",
+				Type: "string|symbol|function",
+				Text: "Filename of the file to read.",
+			},
+			{
+				Name: ":destination",
+				Type: "string",
+				Text: "Location in the _box_ to place the result.",
+			},
+		},
+	}
 }
 
 type readFileActorStartCaller struct{}
@@ -77,13 +87,18 @@ func (caller readFileActorStartCaller) Call(s *slip.Scope, args slip.List, _ int
 	return nil
 }
 
-func (caller readFileActorStartCaller) Docs() string {
-	return `__:start__ _task_
-   _:task_ [instance] the task that contains the actor.
-
-
-Sets the context for the actor.
-`
+func (caller readFileActorStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Sets the context for the actor.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "task",
+				Type: "task",
+				Text: "The task that contains the actor.",
+			},
+		},
+	}
 }
 
 type readFileActorPerformCaller struct{}
@@ -103,13 +118,18 @@ func (caller readFileActorPerformCaller) Call(s *slip.Scope, args slip.List, _ i
 	return rfc.readText(f, bi)
 }
 
-func (caller readFileActorPerformCaller) Docs() string {
-	return `__:perform__ _box_
-   _:box_ [instance] the data to submit to the target flow.
-
-
-Submits a box to the target flow.
-`
+func (caller readFileActorPerformCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":perform",
+		Text: `Submits a box to the target flow.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "box",
+				Type: "box",
+				Text: "The data to submit to the target flow.",
+			},
+		},
+	}
 }
 
 type readFileActorInitKeyValuesCaller struct{}
@@ -127,10 +147,11 @@ func (caller readFileActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.Lis
 	}
 }
 
-func (caller readFileActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:filename "file.txt")
-
-
-Returns the keywords and values needed to recreate the instance as a property list.
-`
+func (caller readFileActorInitKeyValuesCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init-key-values",
+		Text: `Returns the keywords and values needed to recreate the instance
+as a property list. (e.g., (:filename "file.txt"))`,
+		Return: "list",
+	}
 }

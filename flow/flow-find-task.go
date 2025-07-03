@@ -31,7 +31,7 @@ func init() {
 			Return: "instance",
 			Text:   `__flow-find-task__ finds and returns the task with a name matching _task-name_.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :find-task "flo"))`,
+				`(setq flow (make-instance 'flow :find-task "flo"))`,
 				`(flow-find-task flow :name 'tisk :actor (lambda (b) (list 'ok b)))`,
 				`(flow-find-task flow "tisk") => #<flow-task-flavor 12345>`,
 			},
@@ -61,6 +61,6 @@ func (caller flowFindTaskCaller) Call(s *slip.Scope, args slip.List, _ int) slip
 	return obj.Any.(*flow).findTask(args[0])
 }
 
-func (caller flowFindTaskCaller) Docs() string {
-	return methodDocFromFunc(":find-task", "flow-find-task", "flow-flavor", "flow")
+func (caller flowFindTaskCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":find-task", "flow-find-task", "flow", "flow")
 }

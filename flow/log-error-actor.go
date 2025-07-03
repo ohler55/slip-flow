@@ -74,23 +74,62 @@ func (caller logErrorInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip
 	return nil
 }
 
-func (caller logErrorInitCaller) Docs() string {
-	return `__:init__ &key _pretty_ _depth_ _right-margin_ _indent_ _time-format_ _time-wrap_ _json_ _color_ _full_
-   _:pretty_ [boolean] value to use in place of the _*print-pretty*_ value.
-If _t_ then the JSON or SEN output is indented according to the other keyword options.
-   _:depth [fixnum] maximum number of nested elements on a line in the output.
-A value of zero outputs a tight single line output. Default: 4.
-   _:right-margin_ [fixnum] value to use in place of the _*print-right-margin*_ value.
-   _:indent_ [fixnum] is the number of spaces to indent JSON or SEN output if :pretty is not non-nil.
-   _:time-format_ [string] value to use in place of the _*flow-box-time-format*_ value.
-   _:time-wrap_ [string] value to use in place of the _*flow-box-time-wrap*_ value.
-   _:json_ [boolean] if true the output is JSON formatted otherwise output is SEN format.
-   _:color_ [boolean] if true the output is colorized.
-   _:full_ [boolean] if true the output includes the box track and the content is nested on level down.
-
-
-Sets the initial value when _make-instance_ is called.
-`
+func (caller logErrorInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Sets the initial value when _make-instance_ is called.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":pretty",
+				Type: "boolean",
+				Text: `Value to use in place of the _*print-pretty*_ value.
+If _t_ then the JSON or SEN output is indented according to the other keyword options.`,
+			},
+			{
+				Name: ":depth",
+				Type: "fixnum",
+				Text: `The maximum number of nested elements on a line in the output.
+A value of zero outputs a tight single line output.`,
+				Default: slip.Fixnum(4),
+			},
+			{
+				Name: ":right-margin",
+				Type: "fixnum",
+				Text: "The value to use in place of the _*print-right-margin*_ value.",
+			},
+			{
+				Name: ":indent",
+				Type: "fixnum",
+				Text: "The number of spaces to indent JSON or SEN output if :pretty is not non-nil.",
+			},
+			{
+				Name: ":time-format",
+				Type: "string",
+				Text: "The value to use in place of the _*flow-box-time-format*_ value.",
+			},
+			{
+				Name: ":time-wrap",
+				Type: "string",
+				Text: "The value to use in place of the _*flow-box-time-wrap*_ value.",
+			},
+			{
+				Name: ":json",
+				Type: "boolean",
+				Text: "If true the output is JSON formatted otherwise output is SEN format.",
+			},
+			{
+				Name: ":color",
+				Type: "boolean",
+				Text: "If true the output is colorized.",
+			},
+			{
+				Name: ":full",
+				Type: "boolean",
+				Text: "If true the output includes the box track and the content is nested on level down.",
+			},
+		},
+	}
 }
 
 type logErrorActorStartCaller struct{}
@@ -102,13 +141,18 @@ func (caller logErrorActorStartCaller) Call(s *slip.Scope, args slip.List, _ int
 	return nil
 }
 
-func (caller logErrorActorStartCaller) Docs() string {
-	return `__:start__ _task_
-   _:task_ [instance] the task that contains the actor.
-
-
-Sets the context for the actor.
-`
+func (caller logErrorActorStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Sets the context for the actor.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "task",
+				Type: "task",
+				Text: "The task that contains the actor.",
+			},
+		},
+	}
 }
 
 type logErrorActorPerformCaller struct{}
@@ -147,13 +191,18 @@ func (caller logErrorActorPerformCaller) Call(s *slip.Scope, args slip.List, _ i
 	return slip.List{nil, nil}
 }
 
-func (caller logErrorActorPerformCaller) Docs() string {
-	return `__:perform__ _box_
-   _:box_ [instance] the data to log and then place on any watcher channels.
-
-
-Log the box error message or the content and then place the _box_ on the watcher channels.
-`
+func (caller logErrorActorPerformCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":perform",
+		Text: `Log the box error message or the content and then place the _box_ on the watcher channels.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "box",
+				Type: "box",
+				Text: "The data to log and then place on any watcher channels.",
+			},
+		},
+	}
 }
 
 type logErrorActorInitKeyValuesCaller struct{}
@@ -193,10 +242,11 @@ func (caller logErrorActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.Lis
 	return kvs
 }
 
-func (caller logErrorActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:full t)
-
-
-Returns the keywords and values needed to recreate the instance as a property list.
-`
+func (caller logErrorActorInitKeyValuesCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init-key-values",
+		Text: `Returns the keywords and values needed to recreate the instance
+as a property list. (e.g., (:full t))`,
+		Return: "list",
+	}
 }

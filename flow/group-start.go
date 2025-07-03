@@ -26,8 +26,8 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-group-start__ starts all the _flows_ in the _group_.`,
 			Examples: []string{
-				`(setq group (make-instance 'flow-group-flavor))`,
-				`(flow-group-add group (make-instance 'flow-flavor)) => nil`,
+				`(setq group (make-instance 'flow-group))`,
+				`(flow-group-add group (make-instance 'flow)) => nil`,
 				`(flow-group-start group) => nil`,
 			},
 		}, &Pkg)
@@ -60,6 +60,6 @@ func (caller groupStartCaller) Call(s *slip.Scope, args slip.List, _ int) (value
 	return nil
 }
 
-func (caller groupStartCaller) Docs() string {
-	return methodDocFromFunc(":start", "flow-group-start", "flow-group-flavor", "group")
+func (caller groupStartCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":start", "flow-group-start", "flow-group", "group")
 }

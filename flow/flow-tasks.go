@@ -26,7 +26,7 @@ func init() {
 			Return: "list",
 			Text:   `__flow-tasks__ returns a list of all the _tasks_ in the _flow_.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :tasks "flo"))`,
+				`(setq flow (make-instance 'flow :tasks "flo"))`,
 				`(flow-add-task flow :name 'tisk :actor (lambda (b) (list 'ok b)))`,
 				`(flow-tasks flow) => (#<flow-task-flavor 12345>)`,
 			},
@@ -56,6 +56,6 @@ func (caller flowTasksCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 	return obj.Any.(*flow).taskList()
 }
 
-func (caller flowTasksCaller) Docs() string {
-	return methodDocFromFunc(":tasks", "flow-tasks", "flow-flavor", "flow")
+func (caller flowTasksCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":tasks", "flow-tasks", "flow", "flow")
 }

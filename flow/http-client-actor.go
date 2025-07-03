@@ -94,21 +94,52 @@ func (caller httpClientInitCaller) Call(s *slip.Scope, args slip.List, depth int
 	return nil
 }
 
-func (caller httpClientInitCaller) Docs() string {
-	return `__:init__ &key _method_ _url_ _header_ _trailer_ _body_ _timeout_ _reply-handler_
-   _:method_ [string|symbol|function] of the request.
-   _:url_ [string|function] for the query including the host, port, and path.
-   _:header_ [assoc|function] headers for the request.
-   _:trailer_ [assoc|function] trailers for the request.
-   _:body_ [string|output-stream] for of the request for PUT and POST requests as well as other that have content.
-   _:timeout_ [fixnum|function] seconds before timing out waiting for a reply from the HTTP request.
-   _:reply-handler_ [function] to call with the response from a request and the box received. If _nil_ then
-place the content in a "response" element of the box.
-
-
-Each argument can be a function that takes a single argument that is the box
-of the _:perform_. Is should return the expected type for the argument.
-`
+func (caller httpClientInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Each argument can be a function that takes a single argument that is the box
+of the _:perform_. Is should return the expected type for the argument.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":method",
+				Type: "string|symbol|function",
+				Text: "Method of the request.",
+			},
+			{
+				Name: ":url",
+				Type: "string|function",
+				Text: "URL for the query including the host, port, and path.",
+			},
+			{
+				Name: ":header",
+				Type: "assoc|function",
+				Text: "Headers for the request.",
+			},
+			{
+				Name: ":trailer",
+				Type: "assoc|function",
+				Text: "Trailers for the request.",
+			},
+			{
+				Name: ":body",
+				Type: "string|input-stream",
+				Text: `Content for of the request for PUT and POST requests as well
+as other that have content.`,
+			},
+			{
+				Name: ":timeout",
+				Type: "real|function",
+				Text: "The number seconds before timing out waiting for a reply from the HTTP request.",
+			},
+			{
+				Name: ":reply-handler",
+				Type: "function",
+				Text: `Function to call with the response from a request and the box received.
+If _nil_ then place the content in a "response" element of the box.`,
+			},
+		},
+	}
 }
 
 type httpClientActorStartCaller struct{}
@@ -121,13 +152,18 @@ func (caller httpClientActorStartCaller) Call(s *slip.Scope, args slip.List, _ i
 	return nil
 }
 
-func (caller httpClientActorStartCaller) Docs() string {
-	return `__:start__ _task_
-   _:task_ [instance] the task that contains the actor.
-
-
-Sets the context for the actor.
-`
+func (caller httpClientActorStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Sets the context for the actor.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "task",
+				Type: "task",
+				Text: "The task that contains the actor.",
+			},
+		},
+	}
 }
 
 type httpClientActorPerformCaller struct{}
@@ -176,16 +212,21 @@ func (caller httpClientActorPerformCaller) Call(s *slip.Scope, args slip.List, _
 	return slip.List{slip.String(strconv.Itoa(resp.StatusCode)), bi}
 }
 
-func (caller httpClientActorPerformCaller) Docs() string {
-	return `__:perform__ _box_
-   _:box_ [instance] box to extract request parameter from.
-
-
-Makes an HTTP request and passes the response to the _reply-handler_ or if no
-_reply-handler_ the response is set as the "reponse" element of the
+func (caller httpClientActorPerformCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":perform",
+		Text: `Makes an HTTP request and passes the response to the _reply-handler_
+or if no _reply-handler_ the response is set as the "reponse" element of the
 box. Transition is either on a link matching the response status. If there is
-no match then the error link is followed.
-`
+no match then the error link is followed.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "box",
+				Type: "box",
+				Text: "The box to extract request parameter from.",
+			},
+		},
+	}
 }
 
 type httpClientActorInitKeyValuesCaller struct{}
@@ -210,12 +251,13 @@ func (caller httpClientActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.L
 	return kvs
 }
 
-func (caller httpClientActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:method get :timeout 1)
-
-
-Returns the keywords and values needed to recreate the instance as a property list.
-`
+func (caller httpClientActorInitKeyValuesCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init-key-values",
+		Text: `Returns the keywords and values needed to recreate the instance
+as a property list. (e.g., (:method get :timeout 1))`,
+		Return: "list",
+	}
 }
 
 func simplifyHTTPResponse(resp *http.Response) any {

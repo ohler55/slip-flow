@@ -48,7 +48,7 @@ of x and y pairs are expected. e.g., ((100 100) (100 200))`,
 			Return: "nil",
 			Text:   `__flow-link__ creates a named link between the _from_ task to the _to_ task in a flow.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :name "flo"))`,
+				`(setq flow (make-instance 'flow :name "flo"))`,
 				`(flow-add-task flow :name 'tick :actor (lambda (b) (list 'ok b)))`,
 				`(flow-add-task flow :name 'tock :actor (lambda (b) (list 'ok b)))`,
 				`(flow-link flow "ok" 'tick 'tock) => nil`,
@@ -83,6 +83,6 @@ func (caller flowLinkCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	return nil
 }
 
-func (caller flowLinkCaller) Docs() string {
-	return methodDocFromFunc(":link", "flow-link", "flow-flavor", "flow")
+func (caller flowLinkCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":link", "flow-link", "flow", "flow")
 }

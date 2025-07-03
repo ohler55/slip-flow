@@ -26,7 +26,7 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-task-shutdown__ shutdowns the _task_ if workers is greater than zero.`,
 			Examples: []string{
-				`(setq task (make-instance 'flow-task-flavor :name "tisk" :shutdown 3))`,
+				`(setq task (make-instance 'flow-task :name "tisk" :shutdown 3))`,
 				`(flow-task-start task) => nil`,
 				`(flow-task-shutdown task) => nil`,
 			},
@@ -60,6 +60,6 @@ func (caller taskShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) (val
 	return nil
 }
 
-func (caller taskShutdownCaller) Docs() string {
-	return methodDocFromFunc(":shutdown", "flow-task-shutdown", "flow-task-flavor", "task")
+func (caller taskShutdownCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":shutdown", "flow-task-shutdown", "flow-task", "task")
 }

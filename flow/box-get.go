@@ -42,7 +42,7 @@ The path must follow the JSONPath format.`,
 			Text: `__flow-box-get__ gets the value at the location
 described by _path_. If no _path_ is provided the entire contents of the box is returned.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :get "{a:7}"))`,
+				`(setq box (make-instance 'flow-box :get "{a:7}"))`,
 				`(flow-box-get box "a") => 7`,
 			},
 		}, &Pkg)
@@ -79,8 +79,8 @@ func (caller boxGetCaller) Call(s *slip.Scope, args slip.List, _ int) (value sli
 	return
 }
 
-func (caller boxGetCaller) Docs() string {
-	return methodDocFromFunc(":get", "flow-box-get", "flow-box-flavor", "box")
+func (caller boxGetCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":get", "flow-box-get", "flow-box", "box")
 }
 
 func getBox(obj *flavors.Instance, path slip.Object, asBag bool) slip.Object {

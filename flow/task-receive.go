@@ -31,7 +31,7 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-task-receive__ receives a _box_ to be processed by a _task_.`,
 			Examples: []string{
-				`(setq task (make-instance 'flow-task-flavor :name "tisk"))`,
+				`(setq task (make-instance 'flow-task :name "tisk"))`,
 				`(flow-task-receive task (make-flow-box :parse "[1 2]") => nil`,
 			},
 		}, &Pkg)
@@ -72,6 +72,6 @@ func (caller taskReceiveCaller) Call(s *slip.Scope, args slip.List, _ int) (valu
 	return nil
 }
 
-func (caller taskReceiveCaller) Docs() string {
-	return methodDocFromFunc(":receive", "flow-task-receive", "flow-task-flavor", "task")
+func (caller taskReceiveCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":receive", "flow-task-receive", "flow-task", "task")
 }

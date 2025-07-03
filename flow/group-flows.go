@@ -26,7 +26,7 @@ func init() {
 			Return: "list",
 			Text:   `__flow-group-flows__ returns a list of all _flows_ in the _group_.`,
 			Examples: []string{
-				`(setq group (make-instance 'flow-group-flavor))`,
+				`(setq group (make-instance 'flow-group))`,
 				`(flow-group-add group (make-instance 'flow-flavor :name "flo")) => nil`,
 				`(flow-group-flows group) => (#<flow-flavor 12345>)`,
 			},
@@ -56,6 +56,6 @@ func (caller groupFlowsCaller) Call(s *slip.Scope, args slip.List, _ int) (value
 	return obj.Any.(*group).flowList()
 }
 
-func (caller groupFlowsCaller) Docs() string {
-	return methodDocFromFunc(":flows", "flow-group-flows", "flow-group-flavor", "group")
+func (caller groupFlowsCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":flows", "flow-group-flows", "flow-group", "group")
 }

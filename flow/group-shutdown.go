@@ -26,7 +26,7 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-group-shutdown__ shutdown all the _flows_ in the _group_.`,
 			Examples: []string{
-				`(setq group (make-instance 'flow-group-flavor))`,
+				`(setq group (make-instance 'flow-group))`,
 				`(flow-group-add group (make-instance 'flow-flavor)) => nil`,
 				`(flow-group-shutdown group) => nil`,
 			},
@@ -60,6 +60,6 @@ func (caller groupShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) (va
 	return nil
 }
 
-func (caller groupShutdownCaller) Docs() string {
-	return methodDocFromFunc(":shutdown", "flow-group-shutdown", "flow-group-flavor", "group")
+func (caller groupShutdownCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":shutdown", "flow-group-shutdown", "flow-group", "group")
 }

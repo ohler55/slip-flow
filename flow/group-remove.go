@@ -31,7 +31,7 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-group-remove__ removes a _flow_ from the _group_.`,
 			Examples: []string{
-				`(setq group (make-instance 'flow-group-flavor))`,
+				`(setq group (make-instance 'flow-group))`,
 				`(flow-group-add group (make-instance 'flow-flavor :name "flo")) => nil`,
 				`(flow-group-remove group 'flo) => nil`,
 			},
@@ -65,6 +65,6 @@ func (caller groupRemoveCaller) Call(s *slip.Scope, args slip.List, _ int) (valu
 	return nil
 }
 
-func (caller groupRemoveCaller) Docs() string {
-	return methodDocFromFunc(":remove", "flow-group-remove", "flow-group-flavor", "group")
+func (caller groupRemoveCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":remove", "flow-group-remove", "flow-group", "group")
 }

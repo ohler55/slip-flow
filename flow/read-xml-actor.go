@@ -79,18 +79,44 @@ func (caller readXMLInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 	return nil
 }
 
-func (caller readXMLInitCaller) Docs() string {
-	return `__:init__ &key _filename_ _destination_ _count_ _strict_ _trim_ _html_
-   _:filename_ [string|symbol|function] of the file to read.
-   _:destination_ [string] the location in the _box_ to place the result.
-   _:count_ [string] the location in the _box_ to place the count. If _nil_ then no count is set.
-   _:strict_ [boolean] if true, the default, strict XML parsing is used.
-   _:trim_ [boolean] if true white space is removed and empty fields are removed.
-   _:html_ [boolean] if true parsing will handle HTML. The default is _nil.
-
-
-Sets the initial value when _make-instance_ is called.
-`
+func (caller readXMLInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Sets the initial value when _make-instance_ is called.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":filename",
+				Type: "string|symbol|function",
+				Text: "Filename of the file to read.",
+			},
+			{
+				Name: ":destination",
+				Type: "string",
+				Text: "Location in the _box_ to place the result.",
+			},
+			{
+				Name: ":count",
+				Type: "string",
+				Text: "The location in the _box_ to place the count. If _nil_ then no count is set.",
+			},
+			{
+				Name: ":strict",
+				Type: "boolean",
+				Text: "If true, the default, strict XML parsing is used.",
+			},
+			{
+				Name: ":trim",
+				Type: "boolean",
+				Text: "If true white space is removed and empty fields are removed.",
+			},
+			{
+				Name: ":html",
+				Type: "boolean",
+				Text: "If true parsing will handle HTML. The default is _nil.",
+			},
+		},
+	}
 }
 
 type readXMLActorStartCaller struct{}
@@ -102,13 +128,18 @@ func (caller readXMLActorStartCaller) Call(s *slip.Scope, args slip.List, _ int)
 	return nil
 }
 
-func (caller readXMLActorStartCaller) Docs() string {
-	return `__:start__ _task_
-   _:task_ [instance] the task that contains the actor.
-
-
-Sets the context for the actor.
-`
+func (caller readXMLActorStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Sets the context for the actor.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "task",
+				Type: "task",
+				Text: "The task that contains the actor.",
+			},
+		},
+	}
 }
 
 type readXMLActorPerformCaller struct{}
@@ -128,13 +159,18 @@ func (caller readXMLActorPerformCaller) Call(s *slip.Scope, args slip.List, _ in
 	return rxc.readXML(s, f, bi)
 }
 
-func (caller readXMLActorPerformCaller) Docs() string {
-	return `__:perform__ _box_
-   _:box_ [instance] the data to submit to the target flow.
-
-
-Submits a box to the target flow.
-`
+func (caller readXMLActorPerformCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":perform",
+		Text: `Submits a box to the target flow.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "box",
+				Type: "box",
+				Text: "The data to submit to the target flow.",
+			},
+		},
+	}
 }
 
 type readXMLActorInitKeyValuesCaller struct{}
@@ -175,12 +211,13 @@ func (caller readXMLActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.List
 	return kvs
 }
 
-func (caller readXMLActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:target "sub-flow")
-
-
-Returns the keywords and values needed to recreate the instance as a property list.
-`
+func (caller readXMLActorInitKeyValuesCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init-key-values",
+		Text: `Returns the keywords and values needed to recreate the instance
+as a property list. (e.g., (:target "sub-flow"))`,
+		Return: "list",
+	}
 }
 
 func (rxc *readXMLCtx) readXML(s *slip.Scope, r io.Reader, bi *flavors.Instance) slip.List {

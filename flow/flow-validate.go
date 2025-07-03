@@ -26,7 +26,7 @@ func init() {
 			Return: "list",
 			Text:   `__flow-validate__ returns a list of validation failure messages if any.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :name "flo"))`,
+				`(setq flow (make-instance 'flow :name "flo"))`,
 				`(flow-validate flow) => ("no entry task")`,
 			},
 		}, &Pkg)
@@ -55,6 +55,6 @@ func (caller flowValidateCaller) Call(s *slip.Scope, args slip.List, _ int) (val
 	return obj.Any.(*flow).validate(s)
 }
 
-func (caller flowValidateCaller) Docs() string {
-	return methodDocFromFunc(":validate", "flow-validate", "flow-flavor", "flow")
+func (caller flowValidateCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":validate", "flow-validate", "flow", "flow")
 }

@@ -37,7 +37,7 @@ func init() {
 			Text: `__flow-box-scan__ adds an event consisting of the current time,
 task name, and flow name to the history of the box.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :tracking-id 123))`,
+				`(setq box (make-instance 'flow-box :tracking-id 123))`,
 				`(send box :scan "flo" "tisk")`,
 				`(flow-box-history box) => ((@2023-12-15T19:23:17Z "tisk" "flo"))`,
 			},
@@ -81,6 +81,6 @@ func (caller boxScanCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 	return nil
 }
 
-func (caller boxScanCaller) Docs() string {
-	return methodDocFromFunc(":scan", "flow-box-scan", "flow-box-flavor", "box")
+func (caller boxScanCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":scan", "flow-box-scan", "flow-box", "box")
 }

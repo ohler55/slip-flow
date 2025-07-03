@@ -26,7 +26,7 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-task-running__ runnings the _task_ if workers is greater than zero.`,
 			Examples: []string{
-				`(setq task (make-instance 'flow-task-flavor :name "tisk" :running 3))`,
+				`(setq task (make-instance 'flow-task :name "tisk" :running 3))`,
 				`(flow-task-running task) => nil`,
 			},
 		}, &Pkg)
@@ -61,6 +61,6 @@ func (caller taskRunningCaller) Call(s *slip.Scope, args slip.List, _ int) (valu
 	return nil
 }
 
-func (caller taskRunningCaller) Docs() string {
-	return methodDocFromFunc(":running", "flow-task-running", "flow-task-flavor", "task")
+func (caller taskRunningCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":running", "flow-task-running", "flow-task", "task")
 }

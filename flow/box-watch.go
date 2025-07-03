@@ -37,7 +37,7 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-box-watch__ adds a watcher _channel_ associated with the _name_.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}")) => #<flow-box-flavor 12345>`,
+				`(setq box (make-instance 'flow-box :parse "{a:7}")) => #<flow-box 12345>`,
 				`(setq chan (make-channel 5) => #<channel 12345>`,
 				`(flow-box-watch box "done" chan) => nil`,
 			},
@@ -72,8 +72,8 @@ func (caller boxWatchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	return nil
 }
 
-func (caller boxWatchCaller) Docs() string {
-	return methodDocFromFunc(":watch", "flow-box-watch", "flow-box-flavor", "box")
+func (caller boxWatchCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":watch", "flow-box-watch", "flow-box", "box")
 }
 
 func watchBox(obj *flavors.Instance, name, channel slip.Object) {

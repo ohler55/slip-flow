@@ -68,25 +68,68 @@ func (caller inspectInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 	return nil
 }
 
-func (caller inspectInitCaller) Docs() string {
-	return `__:init__ &key _pretty_ _depth_ _right-margin_ _indent_ _time-format_ _time-wrap_ _json_ _color_ _full_
-   _:pretty_ [boolean] value to use in place of the _*print-pretty*_ value.
-If _t_ then the JSON or SEN output is indented according to the other keyword options.
-   _:depth_ [fixnum] maximum number of nested elements on a line in the output.
-A value of zero outputs a tight single line output. Default: 4.
-   _:right-margin_ [fixnum] value to use in place of the _*print-right-margin*_ value.
-   _:indent_ [fixnum] is the number of spaces to indent JSON or SEN output if :pretty is not non-nil.
-   _:time-format_ [string] value to use in place of the _*flow-box-time-format*_ value.
-   _:time-wrap_ [string] value to use in place of the _*flow-box-time-wrap*_ value.
-   _:json_ [boolean] if true the output is JSON formatted otherwise output is SEN format.
-   _:color_ [boolean] if true the output is colorized.
-   _:full_ [boolean] if true the output includes the box track and the content is nested on level down.
-   _:output_ [nil|symbol] if nil the box is written to _*standard-output*_ otherwise the _output_ must be
-_:error_, _:warn_, _:info_, or _:debug_ matching the logger methods and filtered accordingly.
-
-
-Sets the initial value when _make-instance_ is called.
-`
+func (caller inspectInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Sets the initial value when _make-instance_ is called.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":pretty",
+				Type: "boolean",
+				Text: `Value to use in place of the _*print-pretty*_ value.
+If _t_ then the JSON or SEN output is indented according to the other keyword options.`,
+			},
+			{
+				Name: ":depth",
+				Type: "fixnum",
+				Text: `The maximum number of nested elements on a line in the output.
+A value of zero outputs a tight single line output.`,
+				Default: slip.Fixnum(4),
+			},
+			{
+				Name: ":right-margin",
+				Type: "fixnum",
+				Text: "The value to use in place of the _*print-right-margin*_ value.",
+			},
+			{
+				Name: ":indent",
+				Type: "fixnum",
+				Text: "The number of spaces to indent JSON or SEN output if :pretty is not non-nil.",
+			},
+			{
+				Name: ":time-format",
+				Type: "string",
+				Text: "The value to use in place of the _*flow-box-time-format*_ value.",
+			},
+			{
+				Name: ":time-wrap",
+				Type: "string",
+				Text: "The value to use in place of the _*flow-box-time-wrap*_ value.",
+			},
+			{
+				Name: ":json",
+				Type: "boolean",
+				Text: "If true the output is JSON formatted otherwise output is SEN format.",
+			},
+			{
+				Name: ":color",
+				Type: "boolean",
+				Text: "If true the output is colorized.",
+			},
+			{
+				Name: ":full",
+				Type: "boolean",
+				Text: "If true the output includes the box track and the content is nested on level down.",
+			},
+			{
+				Name: ":output",
+				Type: "symbol|nil",
+				Text: `If nil the box is written to _*standard-output*_ otherwise the _output_ must be
+_:error_, _:warn_, _:info_, or _:debug_ matching the logger methods and filtered accordingly.`,
+			},
+		},
+	}
 }
 
 type inspectActorStartCaller struct{}
@@ -98,13 +141,18 @@ func (caller inspectActorStartCaller) Call(s *slip.Scope, args slip.List, _ int)
 	return nil
 }
 
-func (caller inspectActorStartCaller) Docs() string {
-	return `__:start__ _task_
-   _:task_ [instance] the task that contains the actor.
-
-
-Sets the context for the actor.
-`
+func (caller inspectActorStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Sets the context for the actor.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "task",
+				Type: "task",
+				Text: "The task that contains the actor.",
+			},
+		},
+	}
 }
 
 type inspectActorPerformCaller struct{}
@@ -126,13 +174,18 @@ func (caller inspectActorPerformCaller) Call(s *slip.Scope, args slip.List, _ in
 	return slip.List{slip.String("ok"), args[0]}
 }
 
-func (caller inspectActorPerformCaller) Docs() string {
-	return `__:perform__ _box_
-   _:box_ [instance] the data to log.
-
-
-Write the box to either _*standard-output*_ or to the logger.
-`
+func (caller inspectActorPerformCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":perform",
+		Text: `Write the box to either _*standard-output*_ or to the logger.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "box",
+				Type: "box",
+				Text: "The data to log.",
+			},
+		},
+	}
 }
 
 type inspectActorLinksCaller struct{}
@@ -141,12 +194,12 @@ func (caller inspectActorLinksCaller) Call(s *slip.Scope, args slip.List, _ int)
 	return slip.List{slip.String("ok")}
 }
 
-func (caller inspectActorLinksCaller) Docs() string {
-	return `__:links__ => _list_
-
-
-Returns a list of transitions that can be followed.
-`
+func (caller inspectActorLinksCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":links",
+		Text:   `Returns a list of transitions that can be followed.`,
+		Return: "list",
+	}
 }
 
 type inspectActorInitKeyValuesCaller struct{}
@@ -186,10 +239,11 @@ func (caller inspectActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.List
 	return kvs
 }
 
-func (caller inspectActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:full t)
-
-
-Returns the keywords and values needed to recreate the instance as a property list.
-`
+func (caller inspectActorInitKeyValuesCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init-key-values",
+		Text: `Returns the keywords and values needed to recreate the instance
+as a property list. (e.g., (:full t))`,
+		Return: "list",
+	}
 }

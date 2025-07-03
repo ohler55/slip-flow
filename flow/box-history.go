@@ -27,7 +27,7 @@ func init() {
 			Text: `__flow-box-history__ returns the history of the box track as a
 list of triples where each triple is a list of the time, the task name, and the flow name.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :tracking-id 123))`,
+				`(setq box (make-instance 'flow-box :tracking-id 123))`,
 				`(send box :scan "flo" "tisk")`,
 				`(flow-box-history box) => ((@2023-12-15T19:23:17Z "tisk" "flo"))`,
 			},
@@ -56,6 +56,6 @@ func (caller boxHistoryCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 	return obj.Any.(*box).track.historyList()
 }
 
-func (caller boxHistoryCaller) Docs() string {
-	return methodDocFromFunc(":history", "flow-box-history", "flow-box-flavor", "box")
+func (caller boxHistoryCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":history", "flow-box-history", "flow-box", "box")
 }

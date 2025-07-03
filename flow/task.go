@@ -535,19 +535,41 @@ func (caller taskInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	return nil
 }
 
-func (caller taskInitCaller) Docs() string {
-	return `__:init__ &key _name_ _workers_ _actor_ _logger_
-   _:name_ [string] sets the name of the task.
-   _:workers_ [fixnum] the number of workers for concurrent processing. Zero indicates no concurrent processing.
-   _:depth_ [fixnum] of the work queue.
-   _:logger_ [instance] an instance that has the _:log_ method.
-   _:actor_ [instance|function|list] if an instance that instance is used for processing and must have the
+func (caller taskInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Sets the initial value when _make-instance_ is called.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":name",
+				Type: "string",
+				Text: "Sets the name of the task.",
+			},
+			{
+				Name: ":workers",
+				Type: "fixnum",
+				Text: "The number of workers for concurrent processing. Zero indicates no concurrent processing.",
+			},
+			{
+				Name: ":depth",
+				Type: "fixnum",
+				Text: "Depth of the work queue.",
+			},
+			{
+				Name: ":logger",
+				Type: "instance",
+				Text: "An instance that has the _:log_ method.",
+			},
+			{
+				Name: ":actor",
+				Type: "instance|function|list",
+				Text: `If an instance that instance is used for processing and must have the
 _perform_ method that expectes an instance of the _flow-box_. If the instance has a _start_ or _shutdown_
 those will be called when starting or stoping a flow. If the value of _:actor_ is a function is must expect one
 box argument just as the _:perform_ method does. If the actor is a list of instances those will be used as
-workers.
-
-
-Sets the initial value when _make-instance_ is called.
-`
+workers.`,
+			},
+		},
+	}
 }

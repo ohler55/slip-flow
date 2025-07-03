@@ -25,9 +25,9 @@ func init() {
 			},
 			Return: "object",
 			Text: `__flow-box-native__ converts the content of an instance of the
-_flow-box-flavor_ to a native LISP s-expression.`,
+_flow-box_ to a native LISP s-expression.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}"))`,
+				`(setq box (make-instance 'flow-box :parse "{a:7}"))`,
 				`(flow-box-native box) => (("a" . 7))`,
 			},
 		}, &Pkg)
@@ -59,6 +59,6 @@ func (caller boxNativeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 	return slip.SimpleObject(obj.Any.(*box).content)
 }
 
-func (caller boxNativeCaller) Docs() string {
-	return methodDocFromFunc(":native", "flow-box-native", "flow-box-flavor", "box")
+func (caller boxNativeCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":native", "flow-box-native", "flow-box", "box")
 }

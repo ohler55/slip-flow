@@ -33,9 +33,9 @@ func init() {
 			Return: "box",
 			Text:   `__flow-box-merge__ merges an _other_ with _box_. Arrays in the _box_ are not expanded.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}")) => #<flow-box-flavor 12345>`,
-				`(setq other (make-instance 'flow-box-flavor :parse "{b:8}")) => #<flow-box-flavor 12346>`,
-				`(flow-box-merge box other) => #<flow-box-flavor 12345> ;; content is now {a:7 b:8}`,
+				`(setq box (make-instance 'flow-box :parse "{a:7}")) => #<flow-box 12345>`,
+				`(setq other (make-instance 'flow-box :parse "{b:8}")) => #<flow-box 12346>`,
+				`(flow-box-merge box other) => #<flow-box 12345> ;; content is now {a:7 b:8}`,
 			},
 		}, &Pkg)
 }
@@ -69,8 +69,8 @@ func (caller boxMergeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	return obj
 }
 
-func (caller boxMergeCaller) Docs() string {
-	return methodDocFromFunc(":merge", "flow-box-merge", "flow-box-flavor", "box")
+func (caller boxMergeCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":merge", "flow-box-merge", "flow-box", "box")
 }
 
 func (bx *box) merge(other *box) {

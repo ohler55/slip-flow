@@ -34,7 +34,7 @@ func init() {
 			Text: `__flow-box-unwatch__ removed a watcher _channel_ associated with the _name_
 of if not _name_ is provided all watchers are removed.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}")) => #<flow-box-flavor 12345>`,
+				`(setq box (make-instance 'flow-box :parse "{a:7}")) => #<flow-box 12345>`,
 				`(setq chan (make-channel 5) => #<channel 12345>`,
 				`(flow-box-watch box "done" chan) => nil`,
 				`(flow-box-unwatch box "done") => nil`,
@@ -73,8 +73,8 @@ func (caller boxUnwatchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	return nil
 }
 
-func (caller boxUnwatchCaller) Docs() string {
-	return methodDocFromFunc(":unwatch", "flow-box-unwatch", "flow-box-flavor", "box")
+func (caller boxUnwatchCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":unwatch", "flow-box-unwatch", "flow-box", "box")
 }
 
 func unwatchBox(obj *flavors.Instance, name slip.Object) {

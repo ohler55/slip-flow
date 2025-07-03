@@ -94,18 +94,40 @@ func (caller writeFileInitCaller) Call(s *slip.Scope, args slip.List, _ int) sli
 	return nil
 }
 
-func (caller writeFileInitCaller) Docs() string {
-	return `__:init__ &key _filename_ _content_ _overwrite_ _append_ _permissions_
-   _:filename_ [string|symbol|function] of the file to write.
-   _:content_ [string|function] the content to write.
-   _:overwrite_ [boolean] if true the file is replaced or overwritten.
-   _:append_ [boolean] if true the content is appended to the file.
-   _:permissions_ [fixnum|string] if the file is to be created then this is used as the permission.
-The format is the unix permission format such as "-rw-rw-r--" or number.
-
-
-Sets the initial value when _make-instance_ is called.
-`
+func (caller writeFileInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Sets the initial value when _make-instance_ is called.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":filename",
+				Type: "string|symbol|function",
+				Text: "Fileame of the file to write.",
+			},
+			{
+				Name: ":content",
+				Type: "string|function",
+				Text: "The content to write.",
+			},
+			{
+				Name: ":overwrite",
+				Type: "boolean",
+				Text: "If true the file is replaced or overwritten.",
+			},
+			{
+				Name: ":append",
+				Type: "boolean",
+				Text: "If true the content is appended to the file.",
+			},
+			{
+				Name: ":permissions",
+				Type: "fixnum|string",
+				Text: `If the file is to be created then this is used as the permission.
+The format is the unix permission format such as "-rw-rw-r--" or number.`,
+			},
+		},
+	}
 }
 
 type writeFileActorStartCaller struct{}
@@ -117,13 +139,18 @@ func (caller writeFileActorStartCaller) Call(s *slip.Scope, args slip.List, _ in
 	return nil
 }
 
-func (caller writeFileActorStartCaller) Docs() string {
-	return `__:start__ _task_
-   _:task_ [instance] the task that contains the actor.
-
-
-Sets the context for the actor.
-`
+func (caller writeFileActorStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Sets the context for the actor.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "task",
+				Type: "task",
+				Text: "The task that contains the actor.",
+			},
+		},
+	}
 }
 
 type writeFileActorPerformCaller struct{}
@@ -144,13 +171,18 @@ func (caller writeFileActorPerformCaller) Call(s *slip.Scope, args slip.List, _ 
 	return slip.List{slip.String("ok"), bi}
 }
 
-func (caller writeFileActorPerformCaller) Docs() string {
-	return `__:perform__ _box_
-   _:box_ [instance] the data to submit to the target flow.
-
-
-Submits a box to the target flow.
-`
+func (caller writeFileActorPerformCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":perform",
+		Text: `Submits a box to the target flow.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "box",
+				Type: "box",
+				Text: "The data to submit to the target flow.",
+			},
+		},
+	}
 }
 
 type writeFileActorInitKeyValuesCaller struct{}
@@ -176,12 +208,13 @@ func (caller writeFileActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.Li
 	return kvs
 }
 
-func (caller writeFileActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:filename "write-me.txt")
-
-
-Returns the keywords and values needed to recreate the instance as a property list.
-`
+func (caller writeFileActorInitKeyValuesCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init-key-values",
+		Text: `Returns the keywords and values needed to recreate the instance
+as a property list. (e.g., (:filename "write-me.txt"))`,
+		Return: "list",
+	}
 }
 
 const permAllow = "drwxrwxrwx"

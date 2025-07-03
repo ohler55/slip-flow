@@ -53,13 +53,19 @@ func (caller deleteFileInitCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 	return nil
 }
 
-func (caller deleteFileInitCaller) Docs() string {
-	return `__:init__ &key _filename_
-   _:filename_ [string|symbol|function] of the file to delete.
-
-
-Sets the initial value when _make-instance_ is called.
-`
+func (caller deleteFileInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Sets the initial value when _make-instance_ is called.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":filename",
+				Type: "string",
+				Text: "Filename of the file to delete.",
+			},
+		},
+	}
 }
 
 type deleteFileActorStartCaller struct{}
@@ -71,13 +77,18 @@ func (caller deleteFileActorStartCaller) Call(s *slip.Scope, args slip.List, _ i
 	return nil
 }
 
-func (caller deleteFileActorStartCaller) Docs() string {
-	return `__:start__ _task_
-   _:task_ [instance] the task that contains the actor.
-
-
-Sets the context for the actor.
-`
+func (caller deleteFileActorStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Sets the context for the actor.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "task",
+				Type: "task",
+				Text: "The task that contains the actor.",
+			},
+		},
+	}
 }
 
 type deleteFileActorPerformCaller struct{}
@@ -92,13 +103,18 @@ func (caller deleteFileActorPerformCaller) Call(s *slip.Scope, args slip.List, _
 	return slip.List{slip.String("ok"), bi}
 }
 
-func (caller deleteFileActorPerformCaller) Docs() string {
-	return `__:perform__ _box_
-   _:box_ [instance] the data to submit to the target flow.
-
-
-Submits a box to the target flow.
-`
+func (caller deleteFileActorPerformCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":perform",
+		Text: `Submits a box to the target flow.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "box",
+				Type: "box",
+				Text: "The data to submit to the target flow.",
+			},
+		},
+	}
 }
 
 type deleteFileActorInitKeyValuesCaller struct{}
@@ -111,10 +127,11 @@ func (caller deleteFileActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.L
 	}
 }
 
-func (caller deleteFileActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:filename "file.txt")
-
-
-Returns the keywords and values needed to recreate the instance as a property list.
-`
+func (caller deleteFileActorInitKeyValuesCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init-key-values",
+		Text: `Returns the keywords and values needed to recreate the instance as a property
+list. (e.g., (:filename "file.txt"))`,
+		Return: "list",
+	}
 }

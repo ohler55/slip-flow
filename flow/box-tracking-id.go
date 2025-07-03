@@ -26,7 +26,7 @@ func init() {
 			Return: "object",
 			Text:   `__flow-box-tracking-id__ returns the tracking identifier of the box.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :tracking-id "abc"))`,
+				`(setq box (make-instance 'flow-box :tracking-id "abc"))`,
 				`(flow-box-tracking-id box) => "abc"`,
 			},
 		}, &Pkg)
@@ -54,6 +54,6 @@ func (caller boxTrackingIDCaller) Call(s *slip.Scope, args slip.List, depth int)
 	return obj.Any.(*box).track.id
 }
 
-func (caller boxTrackingIDCaller) Docs() string {
-	return methodDocFromFunc(":tracking-id", "flow-box-tracking-id", "flow-box-flavor", "box")
+func (caller boxTrackingIDCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":tracking-id", "flow-box-tracking-id", "flow-box", "box")
 }

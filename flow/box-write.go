@@ -89,7 +89,7 @@ _stream_ is _nil_ then output is a returned string. Any other _stream_ value mus
 stream which is where output is written to. Output can be either JSON or SEN format as defined
 in the OjG package.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:[1 2 3]}"))`,
+				`(setq box (make-instance 'flow-box :parse "{a:[1 2 3]}"))`,
 				`(flow-box-write box nil) => "{a: [1 2 3]}"`,
 			},
 		}, &Pkg)
@@ -116,8 +116,8 @@ func (caller boxWriteCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	return writeBox(s, obj, args)
 }
 
-func (caller boxWriteCaller) Docs() string {
-	return methodDocFromFunc(":write", "flow-box-write", "flow-box-flavor", "box")
+func (caller boxWriteCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":write", "flow-box-write", "flow-box", "box")
 }
 
 func writeBox(s *slip.Scope, obj *flavors.Instance, args slip.List) (result slip.Object) {

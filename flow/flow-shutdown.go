@@ -26,7 +26,7 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-shutdown__ shutdowns all the _tasks_ in the _flow_.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :shutdown "flo"))`,
+				`(setq flow (make-instance 'flow :shutdown "flo"))`,
 				`(flow-add-task flow :name 'tisk :actor (lambda (b) (list 'ok b)))`,
 				`(flow-start flow) => nil`,
 				`(flow-shutdown flow) => nil`,
@@ -61,6 +61,6 @@ func (caller flowShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) slip
 	return nil
 }
 
-func (caller flowShutdownCaller) Docs() string {
-	return methodDocFromFunc(":shutdown", "flow-shutdown", "flow-flavor", "flow")
+func (caller flowShutdownCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":shutdown", "flow-shutdown", "flow", "flow")
 }

@@ -65,13 +65,19 @@ func (caller jumpInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	return nil
 }
 
-func (caller jumpInitCaller) Docs() string {
-	return `__:init__ &key _target_
-   _:target_ [string|symbol] name of the target flow to jump to
-
-
-Sets the initial value when _make-instance_ is called.
-`
+func (caller jumpInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Sets the initial value when _make-instance_ is called.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":target",
+				Type: "string|symbol",
+				Text: "The name of the target flow to jump to.",
+			},
+		},
+	}
 }
 
 type jumpActorStartCaller struct{}
@@ -83,13 +89,18 @@ func (caller jumpActorStartCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 	return nil
 }
 
-func (caller jumpActorStartCaller) Docs() string {
-	return `__:start__ _task_
-   _:task_ [instance] the task that contains the actor.
-
-
-Sets the context for the actor.
-`
+func (caller jumpActorStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Sets the context for the actor.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "task",
+				Type: "task",
+				Text: "The task that contains the actor.",
+			},
+		},
+	}
 }
 
 type jumpActorPerformCaller struct{}
@@ -109,13 +120,18 @@ func (caller jumpActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	return slip.List{nil, nil}
 }
 
-func (caller jumpActorPerformCaller) Docs() string {
-	return `__:perform__ _box_
-   _:box_ [instance] the data to submit to the target flow.
-
-
-Submits a box to the target flow.
-`
+func (caller jumpActorPerformCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":perform",
+		Text: `Submits a box to the target flow.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "box",
+				Type: "box",
+				Text: "The data to submit to the target flow.",
+			},
+		},
+	}
 }
 
 type jumpActorInitKeyValuesCaller struct{}
@@ -127,10 +143,11 @@ func (caller jumpActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.List, _
 	return slip.List{slip.Symbol(":target"), slip.String(jc.target)}
 }
 
-func (caller jumpActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:target "sub-flow")
-
-
-Returns the keywords and values needed to recreate the instance as a property list.
-`
+func (caller jumpActorInitKeyValuesCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init-key-values",
+		Text: `Returns the keywords and values needed to recreate the instance
+as a property list. (e.g., (:target "sub-flow"))`,
+		Return: "list",
+	}
 }

@@ -45,8 +45,8 @@ The path must follow the JSONPath format.`,
 			Text: `__flow-box-read__ reads from the _stream_ and sets the result at the location
 described by _path_. If no _path_ is provided the entire contents of the box is replaced.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :read "{a:7}"))`,
-				`(flow-box-read box (make-string-input-steam "[3]") "a") => #<flow-box-flavor 12345>`,
+				`(setq box (make-instance 'flow-box :read "{a:7}"))`,
+				`(flow-box-read box (make-string-input-steam "[3]") "a") => #<flow-box 12345>`,
 				` ;; content is now {a:[3]}`,
 			},
 		}, &Pkg)
@@ -83,8 +83,8 @@ func (caller boxReadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 	return obj
 }
 
-func (caller boxReadCaller) Docs() string {
-	return methodDocFromFunc(":parse", "flow-box-parse", "flow-box-flavor", "box")
+func (caller boxReadCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":parse", "flow-box-parse", "flow-box", "box")
 }
 
 func readBox(obj *flavors.Instance, value, path slip.Object) {
