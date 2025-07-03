@@ -24,9 +24,9 @@ func init() {
 				},
 			},
 			Return: "string",
-			Text:   `__flow-height__ returns the height of a _flow-flavor_ instance.`,
+			Text:   `__flow-height__ returns the height of a _flow_ instance.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :name "flo" :height 300))`,
+				`(setq flow (make-instance 'flow :name "flo" :height 300))`,
 				`(flow-height flow) => 300`,
 			},
 		}, &Pkg)
@@ -55,6 +55,6 @@ func (caller flowHeightCaller) Call(s *slip.Scope, args slip.List, _ int) (value
 	return obj.Any.(*flow).height()
 }
 
-func (caller flowHeightCaller) Docs() string {
-	return methodDocFromFunc(":height", "flow-height", "flow-flavor", "flow")
+func (caller flowHeightCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":height", "flow-height", "flow", "flow")
 }

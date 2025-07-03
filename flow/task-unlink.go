@@ -31,7 +31,7 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-task-unlink__ removes a link from the _task_.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :submit "flo"))`,
+				`(setq flow (make-instance 'flow :submit "flo"))`,
 				`(setq tick (flow-add-task flow :name 'tick :actor (lambda (b) (list 'ok b))))`,
 				`(flow-add-task flow :name 'tock :actor (lambda (b) (list 'ok b)))`,
 				`(flow-link flow 'ok 'tick 'tock) => nil`,
@@ -67,6 +67,6 @@ func (caller taskUnlinkCaller) Call(s *slip.Scope, args slip.List, _ int) (value
 	return nil
 }
 
-func (caller taskUnlinkCaller) Docs() string {
-	return methodDocFromFunc(":unlink", "flow-task-unlink", "flow-task-flavor", "task")
+func (caller taskUnlinkCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":unlink", "flow-task-unlink", "flow-task", "task")
 }

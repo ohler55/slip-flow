@@ -64,6 +64,6 @@ func (caller flowWriteCaller) Call(s *slip.Scope, args slip.List, _ int) (value 
 	return obj.Any.(*flow).write(s, args)
 }
 
-func (caller flowWriteCaller) Docs() string {
-	return methodDocFromFunc(":write", "flow-write", "flow-flavor", "flow")
+func (caller flowWriteCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":write", "flow-write", "flow", "flow")
 }

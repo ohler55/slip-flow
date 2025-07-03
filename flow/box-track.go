@@ -26,7 +26,7 @@ func init() {
 			Return: "flow-track",
 			Text:   `__flow-box-track__ returns the _flow-track-flavor_ instance of the box.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :tracking-id 123))`,
+				`(setq box (make-instance 'flow-box :tracking-id 123))`,
 				`(flow-box-track box) => #<flow-track-flavor 12345>`,
 			},
 		}, &Pkg)
@@ -56,6 +56,6 @@ func (caller boxTrackCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 	return trk
 }
 
-func (caller boxTrackCaller) Docs() string {
-	return methodDocFromFunc(":track", "flow-box-track", "flow-box-flavor", "box")
+func (caller boxTrackCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":track", "flow-box-track", "flow-box", "box")
 }

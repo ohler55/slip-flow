@@ -27,8 +27,8 @@ func init() {
 			Text: `__flow-box-copy__ makes a copy of the box with shared content.
 Both the box and the copy are frozen.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}"))`,
-				`(flow-box-copy box) => #<flow-box-flavor 12346> ;; with the same content as box`,
+				`(setq box (make-instance 'flow-box :parse "{a:7}"))`,
+				`(flow-box-copy box) => #<flow-box 12346> ;; with the same content as box`,
 			},
 		}, &Pkg)
 }
@@ -65,6 +65,6 @@ func (caller boxCopyCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 	return inst
 }
 
-func (caller boxCopyCaller) Docs() string {
-	return methodDocFromFunc(":copy", "flow-box-copy", "flow-box-flavor", "box")
+func (caller boxCopyCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":copy", "flow-box-copy", "flow-box", "box")
 }

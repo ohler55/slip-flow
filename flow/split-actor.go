@@ -37,13 +37,18 @@ func (caller splitActorStartCaller) Call(s *slip.Scope, args slip.List, _ int) s
 	return nil
 }
 
-func (caller splitActorStartCaller) Docs() string {
-	return `__:start__ _task_
-   _:task_ [instance] the task that contains the actor.
-
-
-Sets the context for the actor.
-`
+func (caller splitActorStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Sets the context for the actor.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "task",
+				Type: "task",
+				Text: "The task that contains the actor.",
+			},
+		},
+	}
 }
 
 type splitActorPerformCaller struct{}
@@ -61,11 +66,16 @@ func (caller splitActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int)
 	return slip.List{nil, nil}
 }
 
-func (caller splitActorPerformCaller) Docs() string {
-	return `__:perform__ _box_
-   _:box_ [instance] the data to send on the configured links.
-
-
-Send a _box_ on one or more links.
-`
+func (caller splitActorPerformCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":perform",
+		Text: `Send a _box_ on one or more links.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "box",
+				Type: "box",
+				Text: "the data to send on the configured links.",
+			},
+		},
+	}
 }

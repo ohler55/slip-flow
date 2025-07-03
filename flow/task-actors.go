@@ -24,9 +24,9 @@ func init() {
 				},
 			},
 			Return: "string",
-			Text:   `__flow-task-actors__ returns the actors of a _flow-task-flavor_ instance.`,
+			Text:   `__flow-task-actors__ returns the actors of a _flow-task_ instance.`,
 			Examples: []string{
-				`(setq task (make-instance 'flow-task-flavor :actors "tisk"))`,
+				`(setq task (make-instance 'flow-task :actors "tisk"))`,
 				`(flow-task-actors task) => ("tisk")`,
 			},
 		}, &Pkg)
@@ -55,6 +55,6 @@ func (caller taskActorsCaller) Call(s *slip.Scope, args slip.List, _ int) (value
 	return obj.Any.(*task).actorList()
 }
 
-func (caller taskActorsCaller) Docs() string {
-	return methodDocFromFunc(":actors", "flow-task-actors", "flow-task-flavor", "task")
+func (caller taskActorsCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":actors", "flow-task-actors", "flow-task", "task")
 }

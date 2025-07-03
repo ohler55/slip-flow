@@ -52,12 +52,24 @@ func (caller canLogErrorCaller) Call(s *slip.Scope, args slip.List, depth int) s
 	return nil
 }
 
-func (caller canLogErrorCaller) Docs() string {
-	return `__:error__ _format_ &rest _args_
-
-
-Log a error message.
-`
+func (caller canLogErrorCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":error",
+		Text: `Log a error message.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "format",
+				Type: "string",
+				Text: "A format control string.",
+			},
+			{Name: "&rest"},
+			{
+				Name: "args",
+				Type: "object",
+				Text: "Arguments to the format.",
+			},
+		},
+	}
 }
 
 type canLogWarnCaller struct{}
@@ -72,12 +84,24 @@ func (caller canLogWarnCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 	return nil
 }
 
-func (caller canLogWarnCaller) Docs() string {
-	return `__:warn__ _format_ &rest _args_
-
-
-Log a warn message if the _log-level_ is at or above 1.
-`
+func (caller canLogWarnCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":warn",
+		Text: `Log a warn message if the _log-level_ is at or above 1.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "format",
+				Type: "string",
+				Text: "A format control string.",
+			},
+			{Name: "&rest"},
+			{
+				Name: "args",
+				Type: "object",
+				Text: "Arguments to the format.",
+			},
+		},
+	}
 }
 
 type canLogInfoCaller struct{}
@@ -92,12 +116,24 @@ func (caller canLogInfoCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 	return nil
 }
 
-func (caller canLogInfoCaller) Docs() string {
-	return `__:info__ _format_ &rest _args_
-
-
-Log a info message if the _log-level_ is at or above 2.
-`
+func (caller canLogInfoCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":info",
+		Text: `Log a info message if the _log-level_ is at or above 2.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "format",
+				Type: "string",
+				Text: "A format control string.",
+			},
+			{Name: "&rest"},
+			{
+				Name: "args",
+				Type: "object",
+				Text: "Arguments to the format.",
+			},
+		},
+	}
 }
 
 type canLogDebugCaller struct{}
@@ -112,12 +148,24 @@ func (caller canLogDebugCaller) Call(s *slip.Scope, args slip.List, depth int) s
 	return nil
 }
 
-func (caller canLogDebugCaller) Docs() string {
-	return `__:debug__ _format_ &rest _args_
-
-
-Log a debug message if the _log-level_ is at or above 3.
-`
+func (caller canLogDebugCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":debug",
+		Text: `Log a debug message if the _log-level_ is at or above 3.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "format",
+				Type: "string",
+				Text: "A format control string.",
+			},
+			{Name: "&rest"},
+			{
+				Name: "args",
+				Type: "object",
+				Text: "Arguments to the format.",
+			},
+		},
+	}
 }
 
 type canLogSetLogLevelCaller struct{}
@@ -152,12 +200,18 @@ func (caller canLogSetLogLevelCaller) Call(s *slip.Scope, args slip.List, depth 
 	return slip.Fixnum(level)
 }
 
-func (caller canLogSetLogLevelCaller) Docs() string {
-	return `__:set-log-level__ _level_ => _fixnum_
-   _level_ [fixnum] to set the _log-level_ to. Can be a fixnum between 0 and 3
-inclusive or :error, :warn, :info, or :debug.
-
-
-Set the log-level and returns the _log-level_ as a _fixnum_.
-`
+func (caller canLogSetLogLevelCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":set-log-level",
+		Text: `Set the log-level and returns the _log-level_ as a _fixnum_.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "level",
+				Type: "keyword|fixnum",
+				Text: `The level to set the _log-level_ to. Can be a fixnum between 0 and 3
+inclusive or :error, :warn, :info, or :debug.`,
+			},
+		},
+		Return: "fixnum",
+	}
 }

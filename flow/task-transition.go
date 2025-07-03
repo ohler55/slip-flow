@@ -36,7 +36,7 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-task-transition__ sends a _box_ to on _link_.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :link "flo"))`,
+				`(setq flow (make-instance 'flow :link "flo"))`,
 				`(setq tick (flow-add-task flow :name 'tick :actor (lambda (b) (list 'ok b))))`,
 				`(setq tock (flow-add-task flow :name 'tock :actor (lambda (b) (list 'ok b))))`,
 				`(flow-link flow "ok" 'tick 'tock) => nil`,
@@ -105,6 +105,6 @@ func (caller taskTransitionCaller) Call(s *slip.Scope, args slip.List, _ int) (v
 	return nil
 }
 
-func (caller taskTransitionCaller) Docs() string {
-	return methodDocFromFunc(":transition", "flow-task-transition", "flow-task-flavor", "task")
+func (caller taskTransitionCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":transition", "flow-task-transition", "flow-task", "task")
 }

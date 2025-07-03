@@ -36,7 +36,7 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-task-update-link__ updates the _mid-points_ of a link.`,
 			Examples: []string{
-				`(setq task (make-instance 'flow-task-flavor :name "tisk"))`,
+				`(setq task (make-instance 'flow-task :name "tisk"))`,
 				`(flow-task-update-link task "ok" '((10 20))) => nil`,
 			},
 		}, &Pkg)
@@ -68,6 +68,6 @@ func (caller taskUpdateLinkCaller) Call(s *slip.Scope, args slip.List, _ int) (v
 	return nil
 }
 
-func (caller taskUpdateLinkCaller) Docs() string {
-	return methodDocFromFunc(":update-link", "flow-task-update-link", "flow-task-flavor", "task")
+func (caller taskUpdateLinkCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":update-link", "flow-task-update-link", "flow-task", "task")
 }

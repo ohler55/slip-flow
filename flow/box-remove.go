@@ -35,8 +35,8 @@ The path must follow the JSONPath format.`,
 			Return: "box",
 			Text:   `__flow-box-remove__ returns _box_ after removing all values that match the provided _path_.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}")) => #<flow-box-flavor 12345>`,
-				`(flow-box-remove box "a") => #<flow-box-flavor 12345> ;; content is now {}`,
+				`(setq box (make-instance 'flow-box :parse "{a:7}")) => #<flow-box 12345>`,
+				`(flow-box-remove box "a") => #<flow-box 12345> ;; content is now {}`,
 			},
 		}, &Pkg)
 }
@@ -64,13 +64,13 @@ func (caller boxRemoveCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 	if len(args) == 1 {
 		removeBox(obj, args[0])
 	} else {
-		flavors.PanicMethodArgChoice(obj, ":remove", len(args), "1")
+		slip.PanicMethodArgChoice(obj, ":remove", len(args), "1")
 	}
 	return obj
 }
 
-func (caller boxRemoveCaller) Docs() string {
-	return methodDocFromFunc(":remove", "flow-box-remove", "flow-box-flavor", "box")
+func (caller boxRemoveCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":remove", "flow-box-remove", "flow-box", "box")
 }
 
 func removeBox(obj *flavors.Instance, path slip.Object) {

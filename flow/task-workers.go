@@ -24,9 +24,9 @@ func init() {
 				},
 			},
 			Return: "fixnum",
-			Text:   `__flow-task-workers__ returns the number of workers for a _flow-task-flavor_ instance.`,
+			Text:   `__flow-task-workers__ returns the number of workers for a _flow-task_ instance.`,
 			Examples: []string{
-				`(setq task (make-instance 'flow-task-flavor :name "tisk" :workers 3))`,
+				`(setq task (make-instance 'flow-task :name "tisk" :workers 3))`,
 				`(flow-task-workers task) => 3`,
 			},
 		}, &Pkg)
@@ -55,6 +55,6 @@ func (caller taskWorkersCaller) Call(s *slip.Scope, args slip.List, _ int) (valu
 	return slip.Fixnum(obj.Any.(*task).workers)
 }
 
-func (caller taskWorkersCaller) Docs() string {
-	return methodDocFromFunc(":workers", "flow-task-workers", "flow-task-flavor", "task")
+func (caller taskWorkersCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":workers", "flow-task-workers", "flow-task", "task")
 }

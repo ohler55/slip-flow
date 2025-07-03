@@ -593,15 +593,29 @@ func (caller flowInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	return nil
 }
 
-func (caller flowInitCaller) Docs() string {
-	return `__:init__ &key _name_ _exit-channel_ _logger_
-   _:name_ [string] sets the name of the flow.
-   _:exit-channel_ [gi:channel] if provided the exit tasks of a flow place the _flow-box_ being processed on this channel.
-   _:logger_ [instance] an instance that has the _:log_ method.
-
-
-Sets the initial value when _make-instance_ is called.
-`
+func (caller flowInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: "Sets the initial value when _make-instance_ is called.",
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":name",
+				Type: "string",
+				Text: "Sets the name of the flow.",
+			},
+			{
+				Name: ":exit-channel",
+				Type: "channel",
+				Text: "if provided the exit tasks of a flow place the _flow-box_ being processed on this channel.",
+			},
+			{
+				Name: ":logger",
+				Type: "instance",
+				Text: "An instance that has the _:log_ method.",
+			},
+		},
+	}
 }
 
 type flowSetLevelCaller struct{}
@@ -614,12 +628,4 @@ func (caller flowSetLevelCaller) Call(s *slip.Scope, args slip.List, _ int) slip
 		_ = t.self.Receive(s, ":set-level", slip.List{level}, 0)
 	}
 	return nil
-}
-
-func (caller flowSetLevelCaller) Docs() string {
-	return `__:after :setLevel__
-
-
-Sets the _log-level_ of all the tasks in the flow.
-`
 }

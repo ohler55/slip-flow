@@ -31,8 +31,8 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-group-add__ adds a _flow_ to the _group_.`,
 			Examples: []string{
-				`(setq group (make-instance 'flow-group-flavor))`,
-				`(flow-group-add group (make-instance 'flow-flavor :name "flo")) => nil`,
+				`(setq group (make-instance 'flow-group))`,
+				`(flow-group-add group (make-instance 'flow :name "flo")) => nil`,
 				`(flow-group-add group) => nil`,
 			},
 		}, &Pkg)
@@ -65,6 +65,6 @@ func (caller groupAddCaller) Call(s *slip.Scope, args slip.List, _ int) (value s
 	return nil
 }
 
-func (caller groupAddCaller) Docs() string {
-	return methodDocFromFunc(":add", "flow-group-add", "flow-group-flavor", "group")
+func (caller groupAddCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":add", "flow-group-add", "flow-group", "group")
 }

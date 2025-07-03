@@ -24,9 +24,9 @@ func init() {
 				},
 			},
 			Return: "fixnum",
-			Text:   `__flow-task-depth__ returns the number of depth for a _flow-task-flavor_ instance.`,
+			Text:   `__flow-task-depth__ returns the number of depth for a _flow-task_ instance.`,
 			Examples: []string{
-				`(setq task (make-instance 'flow-task-flavor :name "tisk" :depth 3))`,
+				`(setq task (make-instance 'flow-task :name "tisk" :depth 3))`,
 				`(flow-task-depth task) => 3`,
 			},
 		}, &Pkg)
@@ -55,6 +55,6 @@ func (caller taskDepthCaller) Call(s *slip.Scope, args slip.List, _ int) (value 
 	return slip.Fixnum(obj.Any.(*task).depth)
 }
 
-func (caller taskDepthCaller) Docs() string {
-	return methodDocFromFunc(":depth", "flow-task-depth", "flow-task-flavor", "task")
+func (caller taskDepthCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":depth", "flow-task-depth", "flow-task", "task")
 }

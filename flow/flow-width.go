@@ -24,9 +24,9 @@ func init() {
 				},
 			},
 			Return: "string",
-			Text:   `__flow-width__ returns the width of a _flow-flavor_ instance.`,
+			Text:   `__flow-width__ returns the width of a _flow_ instance.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :name "flo" :width 300))`,
+				`(setq flow (make-instance 'flow :name "flo" :width 300))`,
 				`(flow-width flow) => 300`,
 			},
 		}, &Pkg)
@@ -55,6 +55,6 @@ func (caller flowWidthCaller) Call(s *slip.Scope, args slip.List, _ int) (value 
 	return obj.Any.(*flow).width()
 }
 
-func (caller flowWidthCaller) Docs() string {
-	return methodDocFromFunc(":width", "flow-width", "flow-flavor", "flow")
+func (caller flowWidthCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":width", "flow-width", "flow", "flow")
 }

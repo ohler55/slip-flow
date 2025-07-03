@@ -26,7 +26,7 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-task-reset-metrics__ resets the metrics of the _task_.`,
 			Examples: []string{
-				`(setq task (make-instance 'flow-task-flavor :name "tisk"))`,
+				`(setq task (make-instance 'flow-task :name "tisk"))`,
 				`(flow-task-reset-metrics task) => nil`,
 				`(flow-task-metrics task) => ((received . 0) (processed . 0) (errors . 0))`,
 			},
@@ -60,6 +60,6 @@ func (caller taskResetMetricsCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	return nil
 }
 
-func (caller taskResetMetricsCaller) Docs() string {
-	return methodDocFromFunc(":reset-metrics", "flow-task-reset-metrics", "flow-task-flavor", "task")
+func (caller taskResetMetricsCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":reset-metrics", "flow-task-reset-metrics", "flow-task", "task")
 }

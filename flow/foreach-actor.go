@@ -72,14 +72,24 @@ func (caller foreachInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 	return nil
 }
 
-func (caller foreachInitCaller) Docs() string {
-	return `__:init__ &key _list_ _destination_
-   _:list_ [list|function] lit to iterate over.
-   _:destination_ [string] the location in the _box_ to place the each list member.
-
-
-Sets the initial value when _make-instance_ is called.
-`
+func (caller foreachInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Sets the initial value when _make-instance_ is called.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":list",
+				Type: "list|function",
+				Text: "List to iterate over.",
+			},
+			{
+				Name: ":destination",
+				Type: "string",
+				Text: "Location in the _box_ to place the each list member.",
+			},
+		},
+	}
 }
 
 type foreachActorStartCaller struct{}
@@ -91,13 +101,18 @@ func (caller foreachActorStartCaller) Call(s *slip.Scope, args slip.List, _ int)
 	return nil
 }
 
-func (caller foreachActorStartCaller) Docs() string {
-	return `__:start__ _task_
-   _:task_ [instance] the task that contains the actor.
-
-
-Sets the context for the actor.
-`
+func (caller foreachActorStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Sets the context for the actor.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "task",
+				Type: "task",
+				Text: "The task that contains the actor.",
+			},
+		},
+	}
 }
 
 type foreachActorPerformCaller struct{}
@@ -117,13 +132,18 @@ func (caller foreachActorPerformCaller) Call(s *slip.Scope, args slip.List, _ in
 	return slip.List{nil, nil}
 }
 
-func (caller foreachActorPerformCaller) Docs() string {
-	return `__:perform__ _box_
-   _:box_ [instance] the data to submit to the target flow.
-
-
-Submits a box to the target flow.
-`
+func (caller foreachActorPerformCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":perform",
+		Text: `Submits a box to the target flow.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "box",
+				Type: "box",
+				Text: "The data to submit to the target flow.",
+			},
+		},
+	}
 }
 
 type foreachActorInitKeyValuesCaller struct{}
@@ -141,10 +161,11 @@ func (caller foreachActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.List
 	}
 }
 
-func (caller foreachActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:list (1 3 5))
-
-
-Returns the keywords and values needed to recreate the instance as a property list.
-`
+func (caller foreachActorInitKeyValuesCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init-key-values",
+		Text: `Returns the keywords and values needed to recreate the instance
+as a property list. (e.g., (:list (1 3 5)))`,
+		Return: "list",
+	}
 }

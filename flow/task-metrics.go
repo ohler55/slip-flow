@@ -26,7 +26,7 @@ func init() {
 			Return: "list",
 			Text:   `__flow-task-metrics__ returns the metrics the _task_.`,
 			Examples: []string{
-				`(setq task (make-instance 'flow-task-flavor :name "tisk"))`,
+				`(setq task (make-instance 'flow-task :name "tisk"))`,
 				`(flow-task-metrics task) => ((received . 0) (processed . 0) (errors . 0))`,
 			},
 		}, &Pkg)
@@ -55,6 +55,6 @@ func (caller taskMetricsCaller) Call(s *slip.Scope, args slip.List, _ int) (valu
 	return obj.Any.(*task).metrics()
 }
 
-func (caller taskMetricsCaller) Docs() string {
-	return methodDocFromFunc(":metrics", "flow-task-metrics", "flow-task-flavor", "task")
+func (caller taskMetricsCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":metrics", "flow-task-metrics", "flow-task", "task")
 }

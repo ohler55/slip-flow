@@ -24,9 +24,9 @@ func init() {
 				},
 			},
 			Return: "string",
-			Text:   `__flow-task-name__ returns the name of a _flow-task-flavor_ instance.`,
+			Text:   `__flow-task-name__ returns the name of a _flow-task_ instance.`,
 			Examples: []string{
-				`(setq task (make-instance 'flow-task-flavor :name "tisk"))`,
+				`(setq task (make-instance 'flow-task :name "tisk"))`,
 				`(flow-task-name task) => "tisk"`,
 			},
 		}, &Pkg)
@@ -55,6 +55,6 @@ func (caller taskNameCaller) Call(s *slip.Scope, args slip.List, _ int) (value s
 	return slip.String(obj.Any.(*task).name)
 }
 
-func (caller taskNameCaller) Docs() string {
-	return methodDocFromFunc(":name", "flow-task-name", "flow-task-flavor", "task")
+func (caller taskNameCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":name", "flow-task-name", "flow-task", "task")
 }

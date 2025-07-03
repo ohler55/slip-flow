@@ -51,8 +51,8 @@ The path must follow the JSONPath format.`,
 			Text: `__flow-box-modify__ modifies a _value_ at the location described by _path_
 using the _function_ specified. If no _path_ is provided the entire contents is passed to the _function_.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:[1 2 3]}")) => #<flow-box-flavor 12345>`,
-				`(flow-box-modify box 'reverse "a") => #<flow-box-flavor 12345> ;; content is now {a:[3 2 1]}`,
+				`(setq box (make-instance 'flow-box :parse "{a:[1 2 3]}")) => #<flow-box 12345>`,
+				`(flow-box-modify box 'reverse "a") => #<flow-box 12345> ;; content is now {a:[3 2 1]}`,
 			},
 		}, &Pkg)
 }
@@ -81,8 +81,8 @@ func (caller boxModifyCaller) Call(s *slip.Scope, args slip.List, depth int) sli
 	return obj
 }
 
-func (caller boxModifyCaller) Docs() string {
-	return methodDocFromFunc(":modify", "flow-box-modify", "flow-box-flavor", "box")
+func (caller boxModifyCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":modify", "flow-box-modify", "flow-box", "box")
 }
 
 func modifyBox(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) {

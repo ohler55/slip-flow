@@ -31,9 +31,9 @@ func init() {
 			Return: "instance",
 			Text:   `__flow-group-find__ finds a _flow_ in the _group_.`,
 			Examples: []string{
-				`(setq group (make-instance 'flow-group-flavor))`,
-				`(flow-group-add group (make-instance 'flow-flavor :name "flo")) => nil`,
-				`(flow-group-find group 'flo) => #<flow-flavor 12345>`,
+				`(setq group (make-instance 'flow-group))`,
+				`(flow-group-add group (make-instance 'flow :name "flo")) => nil`,
+				`(flow-group-find group 'flo) => #<flow 12345>`,
 			},
 		}, &Pkg)
 }
@@ -61,6 +61,6 @@ func (caller groupFindCaller) Call(s *slip.Scope, args slip.List, _ int) (value 
 	return obj.Any.(*group).find(args[0])
 }
 
-func (caller groupFindCaller) Docs() string {
-	return methodDocFromFunc(":find", "flow-group-find", "flow-group-flavor", "group")
+func (caller groupFindCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":find", "flow-group-find", "flow-group", "group")
 }

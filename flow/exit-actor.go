@@ -44,13 +44,18 @@ func (caller exitActorStartCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 	return nil
 }
 
-func (caller exitActorStartCaller) Docs() string {
-	return `__:start__ _task_
-   _:task_ [instance] the task that contains the actor.
-
-
-Sets the context for the actor.
-`
+func (caller exitActorStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Sets the context for the actor.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "task",
+				Type: "task",
+				Text: "The task that contains the actor.",
+			},
+		},
+	}
 }
 
 type exitActorPerformCaller struct{}
@@ -75,13 +80,18 @@ func (caller exitActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	return slip.List{nil, nil}
 }
 
-func (caller exitActorPerformCaller) Docs() string {
-	return `__:perform__ _box_
-   _:box_ [instance] the data to place on the watcher channels.
-
-
-Place the _box_ on the box watcher channels.
-`
+func (caller exitActorPerformCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":perform",
+		Text: `Place the _box_ on the box watcher channels.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "box",
+				Type: "box",
+				Text: "The data to place on the watcher channels.",
+			},
+		},
+	}
 }
 
 type exitActorInitKeyValuesCaller struct{}
@@ -92,10 +102,11 @@ func (caller exitActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.List, _
 	return slip.List{slip.Symbol(":notifiers"), obj.Get("notifiers")}
 }
 
-func (caller exitActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:notifiers ("chan1"))
-
-
-Returns the keywords and values needed to recreate the instance as a property list.
-`
+func (caller exitActorInitKeyValuesCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init-key-values",
+		Text: `Returns the keywords and values needed to recreate the instance as a property
+list. (e.g., (:filename "file.txt"))`,
+		Return: "list",
+	}
 }

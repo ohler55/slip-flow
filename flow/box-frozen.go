@@ -24,9 +24,9 @@ func init() {
 				},
 			},
 			Return: "boolean",
-			Text:   `__flow-box-frozen__ returns the frozen state of an instance of the _flow-box-flavor_.`,
+			Text:   `__flow-box-frozen__ returns the frozen state of an instance of the _flow-box_.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}"))`,
+				`(setq box (make-instance 'flow-box :parse "{a:7}"))`,
 				`(flow-box-freeze box)`,
 				`(flow-box-frozen box) => t`,
 			},
@@ -57,6 +57,6 @@ func (caller boxFrozenCaller) Call(s *slip.Scope, args slip.List, depth int) (va
 	return
 }
 
-func (caller boxFrozenCaller) Docs() string {
-	return methodDocFromFunc(":frozen", "flow-box-frozen", "flow-box-flavor", "box")
+func (caller boxFrozenCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":frozen", "flow-box-frozen", "flow-box", "box")
 }

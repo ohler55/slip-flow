@@ -37,7 +37,7 @@ func init() {
 			Return: "box",
 			Text:   `__flow-submit__ submits an instance of the _flow-box-flavor_ for processing by the _flow_.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :submit "flo"))`,
+				`(setq flow (make-instance 'flow :submit "flo"))`,
 				`(flow-add-task flow :name 'tisk :actor (lambda (b) (list 'ok b)))`,
 				`(flow-submit flow "tisk") => nil`,
 			},
@@ -74,6 +74,6 @@ func (caller flowSubmitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	return obj.Any.(*flow).submit(s, args[0], watcher)
 }
 
-func (caller flowSubmitCaller) Docs() string {
-	return methodDocFromFunc(":submit", "flow-submit", "flow-flavor", "flow")
+func (caller flowSubmitCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":submit", "flow-submit", "flow", "flow")
 }

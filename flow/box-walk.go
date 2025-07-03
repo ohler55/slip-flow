@@ -46,8 +46,8 @@ The path must follow the JSONPath format.`,
 			Return: "box",
 			Text:   `__flow-box-walk__ walks the values at the location described by _path_.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:[1 2 3]}")) => #<flow-box-flavor 12345>`,
-				`(flow-box-walk box 'reverse "a") => #<flow-box-flavor 12345> ;; content is now {a:[3 2 1]}`,
+				`(setq box (make-instance 'flow-box :parse "{a:[1 2 3]}")) => #<flow-box 12345>`,
+				`(flow-box-walk box 'reverse "a") => #<flow-box 12345> ;; content is now {a:[3 2 1]}`,
 			},
 		}, &Pkg)
 }
@@ -76,8 +76,8 @@ func (caller boxWalkCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 	return nil
 }
 
-func (caller boxWalkCaller) Docs() string {
-	return methodDocFromFunc(":walk", "flow-box-walk", "flow-box-flavor", "box")
+func (caller boxWalkCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":walk", "flow-box-walk", "flow-box", "box")
 }
 
 func walkBox(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) {

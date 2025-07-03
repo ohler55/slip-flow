@@ -139,14 +139,25 @@ func (caller mergeInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 	return nil
 }
 
-func (caller mergeInitCaller) Docs() string {
-	return `__:init__ &key _timeout_ _number_
-   _:timeout_ [fixnum] seconds before timing out waiting for _number_ of boxes.
-   _:number_ [fixnum] number of boxes expected before transitioning.
-
-
-Waits for _number_ of boxes with the same track-id before transitioning on the "ok" link.
-`
+func (caller mergeInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Sets the initial value when _make-instance_ is called.
+Waits for _number_ of boxes with the same track-id before transitioning on the "ok" link.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":timeout",
+				Type: "real",
+				Text: "The number of seconds before timing out waiting for _number_ of boxes.",
+			},
+			{
+				Name: ":number",
+				Type: "fixnum",
+				Text: "The number of boxes expected before transitioning.",
+			},
+		},
+	}
 }
 
 type mergeActorStartCaller struct{}
@@ -163,13 +174,18 @@ func (caller mergeActorStartCaller) Call(s *slip.Scope, args slip.List, _ int) s
 	return nil
 }
 
-func (caller mergeActorStartCaller) Docs() string {
-	return `__:start__ _task_
-   _:task_ [instance] the task that contains the actor.
-
-
-Sets the context for the actor.
-`
+func (caller mergeActorStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Sets the context for the actor.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "task",
+				Type: "task",
+				Text: "The task that contains the actor.",
+			},
+		},
+	}
 }
 
 type mergeActorPerformCaller struct{}
@@ -188,15 +204,20 @@ func (caller mergeActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int)
 	return slip.List{nil, nil}
 }
 
-func (caller mergeActorPerformCaller) Docs() string {
-	return `__:perform__ _box_
-   _:box_ [instance] box to merge with other boxes received.
-
-
-Merges all the boxes received with matching track IDs. When the expected
-number of boxes is received and merged a transition is made on the "ok"
-link. If a timeout occurs it is handled like any other error.
-`
+func (caller mergeActorPerformCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":perform",
+		Text: `Merges all the boxes received with matching track IDs. When
+the expected number of boxes is received and merged a transition is made on
+the "ok" link. If a timeout occurs it is handled like any other error.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "box",
+				Type: "box",
+				Text: "The box to merge with other boxes received.",
+			},
+		},
+	}
 }
 
 type mergeActorShutdownCaller struct{}
@@ -211,12 +232,11 @@ func (caller mergeActorShutdownCaller) Call(s *slip.Scope, args slip.List, _ int
 	return nil
 }
 
-func (caller mergeActorShutdownCaller) Docs() string {
-	return `__:shutdown__
-
-
-Shuts down the actor by exiting the timeout checking loop.
-`
+func (caller mergeActorShutdownCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":shutdown",
+		Text: `Shuts down the actor by exiting the timeout checking loop.`,
+	}
 }
 
 type mergeActorLinksCaller struct{}
@@ -225,12 +245,12 @@ func (caller mergeActorLinksCaller) Call(s *slip.Scope, args slip.List, _ int) s
 	return slip.List{slip.String("ok")}
 }
 
-func (caller mergeActorLinksCaller) Docs() string {
-	return `__:links__ => _list_
-
-
-Returns a list of transitions that can be followed.
-`
+func (caller mergeActorLinksCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":links",
+		Text:   `Returns a list of transitions that can be followed.`,
+		Return: "list",
+	}
 }
 
 type mergeActorInitKeyValuesCaller struct{}
@@ -245,10 +265,11 @@ func (caller mergeActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.List, 
 	}
 }
 
-func (caller mergeActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:number 2 :timeout 10)
-
-
-Returns the keywords and values needed to recreate the instance as a property list.
-`
+func (caller mergeActorInitKeyValuesCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init-key-values",
+		Text: `Returns the keywords and values needed to recreate the instance
+as a property list. (e.g., (:number 2 :timeout 10))`,
+		Return: "list",
+	}
 }

@@ -26,7 +26,7 @@ func init() {
 			Return: "instance",
 			Text:   `__flow-entry__ returns the entry task in the _flow_.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :entry "flo"))`,
+				`(setq flow (make-instance 'flow :entry "flo"))`,
 				`(flow-add-task flow :name 'tisk :actor (lambda (b) (list 'ok b)))`,
 				`(flow-set-entry flow "tisk") => (#<flow-task-flavor 12345>)`,
 				`(flow-entry flow) => (#<flow-task-flavor 12345>)`,
@@ -63,6 +63,6 @@ func (caller flowEntryCaller) Call(s *slip.Scope, args slip.List, _ int) (entry 
 	return
 }
 
-func (caller flowEntryCaller) Docs() string {
-	return methodDocFromFunc(":entry", "flow-entry", "flow-flavor", "flow")
+func (caller flowEntryCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":entry", "flow-entry", "flow", "flow")
 }

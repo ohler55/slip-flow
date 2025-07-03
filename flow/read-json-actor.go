@@ -58,15 +58,29 @@ func (caller readJSONInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip
 	return nil
 }
 
-func (caller readJSONInitCaller) Docs() string {
-	return `__:init__ &key _filename_ _destination_ _count_
-   _:filename_ [string|symbol|function] of the file to read.
-   _:destination_ [string] the location in the _box_ to place the result.
-   _:count_ [string] the location in the _box_ to place the count. If _nil_ then no count is set.
-
-
-Sets the initial value when _make-instance_ is called.
-`
+func (caller readJSONInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Sets the initial value when _make-instance_ is called.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":filename",
+				Type: "string|symbol|function",
+				Text: "Filename of the file to read.",
+			},
+			{
+				Name: ":destination",
+				Type: "string",
+				Text: "Location in the _box_ to place the result.",
+			},
+			{
+				Name: ":count",
+				Type: "string",
+				Text: "The location in the _box_ to place the count. If _nil_ then no count is set.",
+			},
+		},
+	}
 }
 
 type readJSONActorStartCaller struct{}
@@ -78,13 +92,18 @@ func (caller readJSONActorStartCaller) Call(s *slip.Scope, args slip.List, _ int
 	return nil
 }
 
-func (caller readJSONActorStartCaller) Docs() string {
-	return `__:start__ _task_
-   _:task_ [instance] the task that contains the actor.
-
-
-Sets the context for the actor.
-`
+func (caller readJSONActorStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Sets the context for the actor.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "task",
+				Type: "task",
+				Text: "The task that contains the actor.",
+			},
+		},
+	}
 }
 
 type readJSONActorPerformCaller struct{}
@@ -104,13 +123,18 @@ func (caller readJSONActorPerformCaller) Call(s *slip.Scope, args slip.List, _ i
 	return rjc.readJSON(s, f, bi)
 }
 
-func (caller readJSONActorPerformCaller) Docs() string {
-	return `__:perform__ _box_
-   _:box_ [instance] the data to submit to the target flow.
-
-
-Submits a box to the target flow.
-`
+func (caller readJSONActorPerformCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":perform",
+		Text: `Submits a box to the target flow.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "box",
+				Type: "box",
+				Text: "The data to submit to the target flow.",
+			},
+		},
+	}
 }
 
 type readJSONActorInitKeyValuesCaller struct{}
@@ -135,10 +159,11 @@ func (caller readJSONActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.Lis
 	}
 }
 
-func (caller readJSONActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:target "sub-flow")
-
-
-Returns the keywords and values needed to recreate the instance as a property list.
-`
+func (caller readJSONActorInitKeyValuesCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init-key-values",
+		Text: `Returns the keywords and values needed to recreate the instance
+as a property list. (e.g., (:target "sub-flow"))`,
+		Return: "list",
+	}
 }

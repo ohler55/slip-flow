@@ -24,9 +24,9 @@ func init() {
 				},
 			},
 			Return: "",
-			Text:   `__flow-box-thaw__ thaws an instance of the _flow-box-flavor_.`,
+			Text:   `__flow-box-thaw__ thaws an instance of the _flow-box_.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}"))`,
+				`(setq box (make-instance 'flow-box :parse "{a:7}"))`,
 				`(flow-box-thaw box)`,
 				`(send box :frozen) => nil`,
 			},
@@ -56,6 +56,6 @@ func (caller boxThawCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 	return nil
 }
 
-func (caller boxThawCaller) Docs() string {
-	return methodDocFromFunc(":thaw", "flow-box-thaw", "flow-box-flavor", "box")
+func (caller boxThawCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":thaw", "flow-box-thaw", "flow-box", "box")
 }

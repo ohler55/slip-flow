@@ -159,20 +159,42 @@ func (caller boxInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 	return nil
 }
 
-func (caller boxInitCaller) Docs() string {
-	return `__:init__ &key _set_ _tracking-id_ _track_ _parse_ _read_
-   _:tracking-id_ sets the tracking id of the box to the provided value which can be a string, fixnum, or gi:uuid.
-   _:track_ sets the tracking id and events of the box to the provided values.
-   _:set_ the contents with the LISP or _bag-flavor_ instance.
-   _:parse_ a JSON or SEN string to form the content of the box.
-   _:read_ from an _input-stream_ and parses read JSON or SEN to form the content.
+func (caller boxInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Sets the initial value when _make-instance_ is called.
 
 
-Sets the initial value when _make-instance_ is called.
-
-
-See also: __make-flow-box__
-`
+See also: __make-flow-box__`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":tracking-id",
+				Type: "string|fixnum|gi:uuid",
+				Text: "Sets the tracking id of the box to the provided value.",
+			},
+			{
+				Name: ":track",
+				Type: "track",
+				Text: "Sets the tracking id and events of the box to the provided values.",
+			},
+			{
+				Name: ":set",
+				Type: "object|bag",
+				Text: "The contents with the LISP or _bag-flavor_ instance.",
+			},
+			{
+				Name: ":parse",
+				Type: "string",
+				Text: "A JSON or SEN string to form the content of the box.",
+			},
+			{
+				Name: ":read",
+				Type: "input-stream",
+				Text: "Read from an _input-stream_ and parses read JSON or SEN to form the content.",
+			},
+		},
+	}
 }
 
 // MakeBox is only public for testing purposes.

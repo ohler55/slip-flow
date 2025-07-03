@@ -34,7 +34,7 @@ The path must follow the JSONPath format.`,
 			Return: "boolean",
 			Text:   `__flow-box-has__ returns true if a value at the location described by _path_ exists.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :has "{a:7}"))`,
+				`(setq box (make-instance 'flow-box :has "{a:7}"))`,
 				`(flow-box-has box "a") => t`,
 				`(flow-box-has box "b") => nil`,
 			},
@@ -62,13 +62,13 @@ func (caller boxHasCaller) Call(s *slip.Scope, args slip.List, _ int) (value sli
 	if len(args) == 1 {
 		value = hasBox(obj, args[0])
 	} else {
-		flavors.PanicMethodArgChoice(obj, ":has", len(args), "1")
+		slip.PanicMethodArgChoice(obj, ":has", len(args), "1")
 	}
 	return
 }
 
-func (caller boxHasCaller) Docs() string {
-	return methodDocFromFunc(":has", "flow-box-has", "flow-box-flavor", "box")
+func (caller boxHasCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":has", "flow-box-has", "flow-box", "box")
 }
 
 func hasBox(obj *flavors.Instance, path slip.Object) slip.Object {

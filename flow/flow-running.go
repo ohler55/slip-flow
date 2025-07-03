@@ -26,7 +26,7 @@ func init() {
 			Return: "boolean",
 			Text:   `__flow-running__ runnings all the _tasks_ in the _flow_.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :running "flo"))`,
+				`(setq flow (make-instance 'flow :running "flo"))`,
 				`(flow-add-task flow :name 'tisk :actor (lambda (b) (list 'ok b)))`,
 				`(flow-start flow) => nil`,
 				`(flow-running flow) => nil`,
@@ -63,6 +63,6 @@ func (caller flowRunningCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 	return nil
 }
 
-func (caller flowRunningCaller) Docs() string {
-	return methodDocFromFunc(":running", "flow-running", "flow-flavor", "flow")
+func (caller flowRunningCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":running", "flow-running", "flow", "flow")
 }

@@ -67,15 +67,29 @@ func (caller globInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	return nil
 }
 
-func (caller globInitCaller) Docs() string {
-	return `__:init__ &key _pattern_ _destination_ _with-info_
-   _:pattern_ [string|symbol|function] glob pattern to find the files of.
-   _:destination_ [string] the location in the _box_ to place the result.
-   _:with-info_ [boolean] if true each entry is a map of information about the file.
-
-
-Sets the initial value when _make-instance_ is called.
-`
+func (caller globInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Sets the initial value when _make-instance_ is called.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":pattern",
+				Type: "string|symbol|function",
+				Text: "Glob pattern to find the files of.",
+			},
+			{
+				Name: ":destination",
+				Type: "string",
+				Text: "Location in the _box_ to place the result.",
+			},
+			{
+				Name: ":with-info",
+				Type: "boolean",
+				Text: "If true each entry is a map of information about the file.",
+			},
+		},
+	}
 }
 
 type globActorStartCaller struct{}
@@ -87,13 +101,18 @@ func (caller globActorStartCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 	return nil
 }
 
-func (caller globActorStartCaller) Docs() string {
-	return `__:start__ _task_
-   _:task_ [instance] the task that contains the actor.
-
-
-Sets the context for the actor.
-`
+func (caller globActorStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Sets the context for the actor.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "task",
+				Type: "task",
+				Text: "The task that contains the actor.",
+			},
+		},
+	}
 }
 
 type globActorPerformCaller struct{}
@@ -130,13 +149,18 @@ func (caller globActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	return slip.List{slip.String("ok"), bi}
 }
 
-func (caller globActorPerformCaller) Docs() string {
-	return `__:perform__ _box_
-   _:box_ [instance] the data to submit to the target flow.
-
-
-Submits a box to the target flow.
-`
+func (caller globActorPerformCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":perform",
+		Text: `Submits a box to the target flow.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "box",
+				Type: "box",
+				Text: "The data to submit to the target flow.",
+			},
+		},
+	}
 }
 
 type globActorInitKeyValuesCaller struct{}
@@ -162,10 +186,11 @@ func (caller globActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.List, _
 	return kvs
 }
 
-func (caller globActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:pattern "dir/*")
-
-
-Returns the keywords and values needed to recreate the instance as a property list.
-`
+func (caller globActorInitKeyValuesCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init-key-values",
+		Text: `Returns the keywords and values needed to recreate the instance
+as a property list. (e.g., (:pattern "dir/*"))`,
+		Return: "list",
+	}
 }

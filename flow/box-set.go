@@ -42,8 +42,8 @@ The path must follow the JSONPath format.`,
 			Text: `__flow-box-set__ sets a _value_ at the location described by _path_.
 If no _path_ is provided the entire contents of the box is replaced.`,
 			Examples: []string{
-				`(setq box (make-instance 'flow-box-flavor :parse "{a:7}")) => #<flow-box-flavor 12345>`,
-				`(flow-box-set box 3 "a") => #<flow-box-flavor 12345> ;; content is now {a:3}`,
+				`(setq box (make-instance 'flow-box :parse "{a:7}")) => #<flow-box 12345>`,
+				`(flow-box-set box 3 "a") => #<flow-box 12345> ;; content is now {a:3}`,
 			},
 		}, &Pkg)
 }
@@ -74,13 +74,13 @@ func (caller boxSetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Objec
 	case 2:
 		setBox(obj, args[0], args[1])
 	default:
-		flavors.PanicMethodArgChoice(obj, ":set", len(args), "1 or 2")
+		slip.PanicMethodArgChoice(obj, ":set", len(args), "1 or 2")
 	}
 	return obj
 }
 
-func (caller boxSetCaller) Docs() string {
-	return methodDocFromFunc(":set", "flow-box-set", "flow-box-flavor", "box")
+func (caller boxSetCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":set", "flow-box-set", "flow-box", "box")
 }
 
 func setBox(obj *flavors.Instance, value, path slip.Object) {

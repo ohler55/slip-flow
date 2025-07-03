@@ -91,19 +91,50 @@ func (caller readCSVInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 	return nil
 }
 
-func (caller readCSVInitCaller) Docs() string {
-	return `__:init__ &key _filename_ _destination_ _count_ _separator_ _comment_ _trim_ _as-map_
-   _:filename_ [string|symbol|function] of the file to read.
-   _:destination_ [string] the location in the _box_ to place the result.
-   _:count_ [string] the location in the _box_ to place the count. If _nil_ then no count is set.
-   _:separator_ [character] the field separator character, Default is comma.
-   _:comment_ [character] the line comment character.
-   _:trim_ [boolean] if true leading spaces are trimmed from each field.
-   _:as-map_ [boolean] if true use the first line as the header and add each row as a map instead of a list.
-
-
-Sets the initial value when _make-instance_ is called.
-`
+func (caller readCSVInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Sets the initial value when _make-instance_ is called.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":filename",
+				Type: "string|symbol|function",
+				Text: "Filename of the file to read.",
+			},
+			{
+				Name: ":destination",
+				Type: "string",
+				Text: "Location in the _box_ to place the result.",
+			},
+			{
+				Name: ":count",
+				Type: "string",
+				Text: "the location in the _box_ to place the count. If _nil_ then no count is set.",
+			},
+			{
+				Name:    ":separator",
+				Type:    "character",
+				Text:    "The field separator character.",
+				Default: slip.Character(','),
+			},
+			{
+				Name: ":comment",
+				Type: "character",
+				Text: "The line comment character.",
+			},
+			{
+				Name: ":trim",
+				Type: "boolean",
+				Text: "If true leading spaces are trimmed from each field.",
+			},
+			{
+				Name: ":as-map",
+				Type: "boolean",
+				Text: "If true use the first line as the header and add each row as a map instead of a list.",
+			},
+		},
+	}
 }
 
 type readCSVActorStartCaller struct{}
@@ -115,13 +146,18 @@ func (caller readCSVActorStartCaller) Call(s *slip.Scope, args slip.List, _ int)
 	return nil
 }
 
-func (caller readCSVActorStartCaller) Docs() string {
-	return `__:start__ _task_
-   _:task_ [instance] the task that contains the actor.
-
-
-Sets the context for the actor.
-`
+func (caller readCSVActorStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Sets the context for the actor.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "task",
+				Type: "task",
+				Text: "The task that contains the actor.",
+			},
+		},
+	}
 }
 
 type readCSVActorPerformCaller struct{}
@@ -141,13 +177,18 @@ func (caller readCSVActorPerformCaller) Call(s *slip.Scope, args slip.List, _ in
 	return rcc.readCSV(s, f, bi)
 }
 
-func (caller readCSVActorPerformCaller) Docs() string {
-	return `__:perform__ _box_
-   _:box_ [instance] the data to submit to the target flow.
-
-
-Submits a box to the target flow.
-`
+func (caller readCSVActorPerformCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":perform",
+		Text: `Submits a box to the target flow.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "box",
+				Type: "box",
+				Text: "The data to submit to the target flow.",
+			},
+		},
+	}
 }
 
 type readCSVActorInitKeyValuesCaller struct{}
@@ -187,12 +228,13 @@ func (caller readCSVActorInitKeyValuesCaller) Call(s *slip.Scope, args slip.List
 	return kvs
 }
 
-func (caller readCSVActorInitKeyValuesCaller) Docs() string {
-	return `__:init-key-values__ => (:target "sub-flow")
-
-
-Returns the keywords and values needed to recreate the instance as a property list.
-`
+func (caller readCSVActorInitKeyValuesCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init-key-values",
+		Text: `Returns the keywords and values needed to recreate the instance
+as a property list. (e.g., (:target "sub-flow"))`,
+		Return: "list",
+	}
 }
 
 func (rcc *readCSVCtx) readCSV(s *slip.Scope, r io.Reader, bi *flavors.Instance) slip.List {

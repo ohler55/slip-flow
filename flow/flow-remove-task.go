@@ -31,7 +31,7 @@ func init() {
 			Return: "nil",
 			Text:   `__flow-remove-task__ remove a task from the tasks in the _flow_.`,
 			Examples: []string{
-				`(setq flow (make-instance 'flow-flavor :remove-task "flo"))`,
+				`(setq flow (make-instance 'flow :remove-task "flo"))`,
 				`(flow-add-task flow :name 'tisk :actor (lambda (b) (list 'ok b)))`,
 				`(flow-remove-task flow "tisk") => nil`,
 				`(flow-tasks flow) => ()`,
@@ -66,6 +66,6 @@ func (caller flowRemoveTaskCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 	return nil
 }
 
-func (caller flowRemoveTaskCaller) Docs() string {
-	return methodDocFromFunc(":remove-task", "flow-remove-task", "flow-flavor", "flow")
+func (caller flowRemoveTaskCaller) FuncDocs() *slip.FuncDoc {
+	return methodDocsFromFunc(":remove-task", "flow-remove-task", "flow", "flow")
 }
