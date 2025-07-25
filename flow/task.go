@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
+	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
@@ -84,7 +86,7 @@ type task struct {
 	self      *flavors.Instance
 	flow      *flow
 	links     map[string]*link
-	actors    []slip.Instance
+	actors    []*flavors.Instance
 	caller    slip.Caller
 	funcName  string
 	queue     chan *flavors.Instance // must be box instances
@@ -276,8 +278,13 @@ func (t *task) handleError(s *slip.Scope, bi *flavors.Instance, err any) {
 	t.duration.Add(uint64(time.Since(ev.when)))
 	nb, bx := boxDup(bi)
 	msg := fmt.Sprintf("%v", err)
-	if se, _ := err.(slip.Error); se != nil {
-		msg = se.Error()
+	switch te := err.(type) {
+	case *slip.Panic:
+		msg = te.Error()
+	case *clos.StandardObject:
+		if te.IsA("condition") {
+			msg = cl.SimpleCondMsg(s, te)
+		}
 	}
 	bx.content = map[string]any{
 		"content": bx.content,
@@ -454,16 +461,16 @@ func makeTaskStruct(self *flavors.Instance, args slip.List) (tsk *task) {
 			val := args[i+1]
 		Actor:
 			switch tv := val.(type) {
-			case slip.Instance:
+			case *flavors.Instance:
 				if tv.HasMethod(":perform") {
-					tsk.actors = []slip.Instance{tv}
+					tsk.actors = []*flavors.Instance{tv}
 				} else {
 					slip.PanicType("task :init :actor", val, "instance with :perform method", "function", "list")
 				}
 			case slip.List:
-				tsk.actors = make([]slip.Instance, len(tv))
+				tsk.actors = make([]*flavors.Instance, len(tv))
 				for j, sv := range tv {
-					if a, ok := sv.(slip.Instance); ok && a.HasMethod(":perform") {
+					if a, ok := sv.(*flavors.Instance); ok && a.HasMethod(":perform") {
 						tsk.actors[j] = a
 					} else {
 						slip.PanicType("task :init :actor", val, "instance with :perform method", "function", "list")

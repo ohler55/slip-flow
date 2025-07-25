@@ -448,7 +448,7 @@ func (f *flow) appendTasks(b []byte, clos bool, s *slip.Scope) []byte {
 	return b
 }
 
-func appendInitKeyValues(b []byte, s *slip.Scope, p *slip.Printer, a slip.Instance, indent string) []byte {
+func appendInitKeyValues(b []byte, s *slip.Scope, p *slip.Printer, a *flavors.Instance, indent string) []byte {
 	if a.HasMethod(":init-key-values") {
 		i2 := []byte(indent + "       ")
 		plist, _ := a.Receive(s, ":init-key-values", slip.List{}, 0).(slip.List)
