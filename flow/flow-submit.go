@@ -51,7 +51,7 @@ type FlowSubmit struct {
 
 // Call the function with the arguments provided.
 func (f *FlowSubmit) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 3)
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Type != flowFlavor {
 		slip.TypePanic(s, depth, "flow", args[0], "flow")

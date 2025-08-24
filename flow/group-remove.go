@@ -45,7 +45,7 @@ type GroupRemove struct {
 
 // Call the function with the arguments provided.
 func (f *GroupRemove) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Type != groupFlavor {
 		slip.TypePanic(s, depth, "group", args[0], "group")

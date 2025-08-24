@@ -39,7 +39,7 @@ type TaskWorkers struct {
 
 // Call the function with the arguments provided.
 func (f *TaskWorkers) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Type != taskFlavor {
 		slip.TypePanic(s, depth, "task", args[0], "task")
