@@ -52,7 +52,7 @@ type boxNativeCaller struct{}
 func (caller boxNativeCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		slip.PanicMethodArgChoice(obj, ":native", len(args), "0")
+		slip.MethodArgChoicePanic(s, depth, obj, ":native", len(args), "0")
 	}
 	// fmt.Printf("*** any: %T\n", obj.Any)
 	// fmt.Printf("*** content: %T\n", obj.Any.(*box).content)

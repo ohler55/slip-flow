@@ -75,7 +75,7 @@ func (caller boxParseCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 	case 2:
 		parseBox(s, obj, args[0], args[1], depth)
 	default:
-		slip.PanicMethodArgChoice(obj, ":parse", len(args), "1 or 2")
+		slip.MethodArgChoicePanic(s, depth, obj, ":parse", len(args), "1 or 2")
 	}
 	return obj
 }

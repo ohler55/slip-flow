@@ -64,7 +64,7 @@ func (caller boxRemoveCaller) Call(s *slip.Scope, args slip.List, depth int) sli
 	if len(args) == 1 {
 		removeBox(s, obj, args[0], depth)
 	} else {
-		slip.PanicMethodArgChoice(obj, ":remove", len(args), "1")
+		slip.MethodArgChoicePanic(s, depth, obj, ":remove", len(args), "1")
 	}
 	return obj
 }

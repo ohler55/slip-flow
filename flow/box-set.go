@@ -74,7 +74,7 @@ func (caller boxSetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	case 2:
 		setBox(s, obj, args[0], args[1], depth)
 	default:
-		slip.PanicMethodArgChoice(obj, ":set", len(args), "1 or 2")
+		slip.MethodArgChoicePanic(s, depth, obj, ":set", len(args), "1 or 2")
 	}
 	return obj
 }
