@@ -42,14 +42,14 @@ type BoxNative struct {
 func (f *BoxNative) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	return self.Receive(s, ":native", args[1:], depth)
 }
 
 type boxNativeCaller struct{}
 
-func (caller boxNativeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller boxNativeCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		slip.PanicMethodArgChoice(obj, ":native", len(args), "0")

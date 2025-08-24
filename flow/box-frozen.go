@@ -42,7 +42,7 @@ type BoxFrozen struct {
 func (f *BoxFrozen) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	return self.Receive(s, ":frozen", args[1:], depth)
 }

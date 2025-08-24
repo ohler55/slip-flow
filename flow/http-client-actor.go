@@ -78,9 +78,9 @@ func (caller httpClientInitCaller) Call(s *slip.Scope, args slip.List, depth int
 		case ":url":
 			hcc.url.extract(s, args[pos+1])
 		case ":header":
-			hcc.header.extract(s, args[pos+1])
+			hcc.header.extract(s, args[pos+1], depth)
 		case ":trailer":
-			hcc.trailer.extract(s, args[pos+1])
+			hcc.trailer.extract(s, args[pos+1], depth)
 		case ":body":
 			hcc.body.extract(s, args[pos+1])
 		case ":timeout":
@@ -168,15 +168,15 @@ func (caller httpClientActorStartCaller) FuncDocs() *slip.FuncDoc {
 
 type httpClientActorPerformCaller struct{}
 
-func (caller httpClientActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller httpClientActorPerformCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	bi := args[0].(*flavors.Instance)
 
 	hcc := obj.Any.(*httpClientCtx)
-	method := hcc.method.value(s, bi)
-	url := hcc.url.value(s, bi)
+	method := hcc.method.value(s, bi, depth)
+	url := hcc.url.value(s, bi, depth)
 	body := hcc.body.value(s, bi)
-	timeout := hcc.timeout.value(s, bi)
+	timeout := hcc.timeout.value(s, bi, depth)
 	ctx := context.Background()
 	if 0 < timeout {
 		var cf context.CancelFunc
@@ -187,8 +187,8 @@ func (caller httpClientActorPerformCaller) Call(s *slip.Scope, args slip.List, _
 	if err != nil {
 		panic(err)
 	}
-	req.Header = hcc.header.value(s, bi)
-	req.Trailer = hcc.trailer.value(s, bi)
+	req.Header = hcc.header.value(s, bi, depth)
+	req.Trailer = hcc.trailer.value(s, bi, depth)
 
 	var (
 		client http.Client

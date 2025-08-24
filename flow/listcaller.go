@@ -21,13 +21,13 @@ func (lc *listCaller) extract(s *slip.Scope, arg slip.Object) {
 	}
 }
 
-func (lc *listCaller) value(s *slip.Scope, bi slip.Object) (val slip.List) {
+func (lc *listCaller) value(s *slip.Scope, bi slip.Object, depth int) (val slip.List) {
 	val = lc.list
 	if lc.caller != nil {
 		v := lc.caller.Call(s, slip.List{bi}, 0)
 		var ok bool
 		if val, ok = v.(slip.List); !ok {
-			slip.PanicType("list", v, "list")
+			slip.TypePanic(s, depth, "list", v, "list")
 		}
 	}
 	return

@@ -61,7 +61,7 @@ type BoxWalk struct {
 func (f *BoxWalk) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	_ = self.Receive(s, ":walk", args[1:], depth)
 
@@ -92,7 +92,7 @@ func walkBox(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) {
 		case bag.Path:
 			path = jp.Expr(p)
 		default:
-			slip.PanicType("path", p, "string", "bag-path")
+			slip.TypePanic(s, depth, "path", p, "string", "bag-path")
 		}
 		asBag = 2 < len(args) && args[2] != nil
 	}
@@ -132,6 +132,6 @@ CallFunc:
 		fn = s.Eval(tf, d2)
 		goto CallFunc
 	default:
-		slip.PanicType("function", tf, "function")
+		slip.TypePanic(s, depth, "function", tf, "function")
 	}
 }

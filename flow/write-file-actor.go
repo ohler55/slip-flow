@@ -155,17 +155,17 @@ func (caller writeFileActorStartCaller) FuncDocs() *slip.FuncDoc {
 
 type writeFileActorPerformCaller struct{}
 
-func (caller writeFileActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller writeFileActorPerformCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	wfc := obj.Any.(*writeFileCtx)
 	bi := args[0].(*flavors.Instance)
 
-	f, err := os.OpenFile(wfc.filename.value(s, bi), wfc.flag, wfc.perm)
+	f, err := os.OpenFile(wfc.filename.value(s, bi, depth), wfc.flag, wfc.perm)
 	if err != nil {
 		panic(err)
 	}
 	defer func() { _ = f.Close() }()
-	if _, err = f.WriteString(wfc.content.value(s, bi)); err != nil {
+	if _, err = f.WriteString(wfc.content.value(s, bi, depth)); err != nil {
 		panic(err)
 	}
 	return slip.List{slip.String("ok"), bi}

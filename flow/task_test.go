@@ -14,10 +14,11 @@ import (
 )
 
 func TestMakeTask(t *testing.T) {
-	task, _ := flow.MakeTask(slip.Symbol(":name"), slip.String("tisk"))
+	scope := slip.NewScope()
+	task, _ := flow.MakeTask(scope, 0, slip.Symbol(":name"), slip.String("tisk"))
 	tt.Equal(t, "/#<flow-task [0-9a-f]+>/", task.String())
 
-	task, _ = flow.MakeTask(slip.Symbol(":name"), slip.Symbol("tisk"))
+	task, _ = flow.MakeTask(scope, 0, slip.Symbol(":name"), slip.Symbol("tisk"))
 	tt.Equal(t, "/#<flow-task [0-9a-f]+>/", task.String())
 }
 

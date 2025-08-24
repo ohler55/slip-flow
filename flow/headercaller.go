@@ -15,35 +15,35 @@ type headerCaller struct {
 	caller slip.Caller
 }
 
-func (hc *headerCaller) extract(s *slip.Scope, arg slip.Object) {
+func (hc *headerCaller) extract(s *slip.Scope, arg slip.Object, depth int) {
 	if list, ok := arg.(slip.List); ok {
-		hc.header = hc.extractFromList(list)
+		hc.header = hc.extractFromList(s, list, depth)
 	} else {
 		hc.caller = cl.ResolveToCaller(s, arg, 0)
 	}
 }
 
-func (hc *headerCaller) value(s *slip.Scope, bi slip.Object) (val http.Header) {
+func (hc *headerCaller) value(s *slip.Scope, bi slip.Object, depth int) (val http.Header) {
 	val = hc.header
 	if hc.caller != nil {
 		result := hc.caller.Call(s, slip.List{bi}, 0)
 		if list, ok := result.(slip.List); ok {
-			val = hc.extractFromList(list)
+			val = hc.extractFromList(s, list, depth)
 		} else {
-			slip.PanicType("value", result, "assoc")
+			slip.TypePanic(s, depth, "value", result, "assoc")
 		}
 	}
 	return
 }
 
-func (hc *headerCaller) extractFromList(list slip.List) http.Header {
+func (hc *headerCaller) extractFromList(s *slip.Scope, list slip.List, depth int) http.Header {
 	header := http.Header{}
 	for _, v := range list {
 		cons, ok := v.(slip.List)
 		if !ok {
-			slip.PanicType("header element", v, "cons")
+			slip.TypePanic(s, depth, "header element", v, "cons")
 		}
-		header.Add(mustBeString(cons.Car(), "header key"), mustBeString(cons.Cdr(), "header value"))
+		header.Add(mustBeString(s, cons.Car(), "header key", depth), mustBeString(s, cons.Cdr(), "header value", depth))
 	}
 	return header
 }

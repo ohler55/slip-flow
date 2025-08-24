@@ -56,14 +56,14 @@ func (f *TaskTransition) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	slip.ArgCountCheck(f, args, 3, 3)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Type != taskFlavor {
-		slip.PanicType("task", args[0], "task")
+		slip.TypePanic(s, depth, "task", args[0], "task")
 	}
 	var (
 		bi       *flavors.Instance
 		linkName string
 	)
 	if bi, ok = args[1].(*flavors.Instance); !ok || boxFlavor != bi.Type {
-		slip.PanicType("box", args[1], "box")
+		slip.TypePanic(s, depth, "box", args[1], "box")
 	}
 	switch ta := args[2].(type) {
 	case nil:
@@ -73,7 +73,7 @@ func (f *TaskTransition) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	case slip.Symbol:
 		linkName = string(ta)
 	default:
-		slip.PanicType("link", ta, "nil", "string", "symbol")
+		slip.TypePanic(s, depth, "link", ta, "nil", "string", "symbol")
 	}
 	self.Any.(*task).transition(s, linkName, bi)
 
@@ -82,12 +82,12 @@ func (f *TaskTransition) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 
 type taskTransitionCaller struct{}
 
-func (caller taskTransitionCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller taskTransitionCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 
 	bi, ok := args[0].(*flavors.Instance)
 	if !ok || boxFlavor != bi.Type {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	var linkName string
 	switch ta := args[1].(type) {
@@ -98,7 +98,7 @@ func (caller taskTransitionCaller) Call(s *slip.Scope, args slip.List, _ int) (v
 	case slip.Symbol:
 		linkName = string(ta)
 	default:
-		slip.PanicType("link", ta, "nil", "string", "symbol")
+		slip.TypePanic(s, depth, "link", ta, "nil", "string", "symbol")
 	}
 	obj.Any.(*task).transition(s, linkName, bi)
 

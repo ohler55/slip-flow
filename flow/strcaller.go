@@ -23,10 +23,10 @@ func (sc *strCaller) extract(s *slip.Scope, arg slip.Object) {
 	}
 }
 
-func (sc *strCaller) value(s *slip.Scope, bi slip.Object) (val string) {
+func (sc *strCaller) value(s *slip.Scope, bi slip.Object, depth int) (val string) {
 	val = sc.str
 	if sc.caller != nil {
-		val = mustBeString(sc.caller.Call(s, slip.List{bi}, 0), "value")
+		val = mustBeString(s, sc.caller.Call(s, slip.List{bi}, 0), "value", depth)
 	}
 	return
 }
@@ -39,14 +39,14 @@ func (sc *strCaller) raw() (rv slip.Object) {
 	return
 }
 
-func mustBeString(arg slip.Object, name string) (str string) {
+func mustBeString(s *slip.Scope, arg slip.Object, name string, depth int) (str string) {
 	switch ta := arg.(type) {
 	case slip.String:
 		str = string(ta)
 	case slip.Symbol:
 		str = string(ta)
 	default:
-		slip.PanicType(name, arg, "string", "symbol")
+		slip.TypePanic(s, depth, name, arg, "string", "symbol")
 	}
 	return
 }

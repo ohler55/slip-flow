@@ -51,17 +51,17 @@ func (f *FlowWrite) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 3)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Type != flowFlavor {
-		slip.PanicType("flow", args[0], "flow")
+		slip.TypePanic(s, depth, "flow", args[0], "flow")
 	}
-	return self.Any.(*flow).write(s, args[1:])
+	return self.Any.(*flow).write(s, args[1:], depth)
 }
 
 type flowWriteCaller struct{}
 
-func (caller flowWriteCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller flowWriteCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 
-	return obj.Any.(*flow).write(s, args)
+	return obj.Any.(*flow).write(s, args, depth)
 }
 
 func (caller flowWriteCaller) FuncDocs() *slip.FuncDoc {

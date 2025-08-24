@@ -50,7 +50,7 @@ type BoxNotify struct {
 func (f *BoxNotify) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	_ = self.Receive(s, ":notify", args[1:], depth)
 
@@ -59,17 +59,17 @@ func (f *BoxNotify) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 
 type boxNotifyCaller struct{}
 
-func (caller boxNotifyCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller boxNotifyCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 
-	return notifyBox(obj, args)
+	return notifyBox(s, obj, args, depth)
 }
 
 func (caller boxNotifyCaller) FuncDocs() *slip.FuncDoc {
 	return methodDocsFromFunc(":notify", "flow-box-notify", "flow-box", "box")
 }
 
-func notifyBox(obj *flavors.Instance, args slip.List) slip.Object {
+func notifyBox(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) slip.Object {
 	bx := obj.Any.(*box)
 	var cnt int
 	if 0 < len(args) {
@@ -81,7 +81,7 @@ func notifyBox(obj *flavors.Instance, args slip.List) slip.Object {
 			case slip.Symbol:
 				key = string(tn)
 			default:
-				slip.PanicType("names", tn, "string", "symbol")
+				slip.TypePanic(s, depth, "names", tn, "string", "symbol")
 			}
 			if c := bx.watchers[key]; c != nil {
 				c <- obj

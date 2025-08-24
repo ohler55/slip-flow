@@ -193,7 +193,7 @@ func (caller canLogSetLogLevelCaller) Call(s *slip.Scope, args slip.List, depth 
 		}
 	}
 	if level < 0 {
-		slip.PanicType("level", args[0], "0", "1", "2", "3'", ":error", ":warn", ":info", "debug")
+		slip.TypePanic(s, depth, "level", args[0], "0", "1", "2", "3'", ":error", ":warn", ":info", "debug")
 	}
 	s.Set("log-level", slip.Fixnum(level))
 

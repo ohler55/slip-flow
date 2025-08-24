@@ -49,7 +49,7 @@ type BoxMerge struct {
 func (f *BoxMerge) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	_ = self.Receive(s, ":merge", args[1:], depth)
 
@@ -58,11 +58,11 @@ func (f *BoxMerge) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 
 type boxMergeCaller struct{}
 
-func (caller boxMergeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller boxMergeCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	other, _ := args[0].(*flavors.Instance)
 	if other == nil || other.Type != boxFlavor {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	obj.Any.(*box).merge(other.Any.(*box))
 

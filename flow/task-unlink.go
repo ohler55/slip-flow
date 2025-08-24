@@ -50,19 +50,19 @@ func (f *TaskUnlink) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Type != taskFlavor {
-		slip.PanicType("task", args[0], "task")
+		slip.TypePanic(s, depth, "task", args[0], "task")
 	}
-	self.Any.(*task).unlink(args[1:])
+	self.Any.(*task).unlink(s, args[1:], depth)
 
 	return nil
 }
 
 type taskUnlinkCaller struct{}
 
-func (caller taskUnlinkCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller taskUnlinkCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 
-	obj.Any.(*task).unlink(args)
+	obj.Any.(*task).unlink(s, args, depth)
 
 	return nil
 }

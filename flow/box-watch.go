@@ -53,7 +53,7 @@ type BoxWatch struct {
 func (f *BoxWatch) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	_ = self.Receive(s, ":watch", args[1:], depth)
 
@@ -62,10 +62,10 @@ func (f *BoxWatch) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 
 type boxWatchCaller struct{}
 
-func (caller boxWatchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller boxWatchCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) == 2 {
-		watchBox(obj, args[0], args[1])
+		watchBox(s, obj, args[0], args[1], depth)
 	} else {
 		slip.PanicMethodArgChoice(obj, ":watch", len(args), "2")
 	}
@@ -76,7 +76,7 @@ func (caller boxWatchCaller) FuncDocs() *slip.FuncDoc {
 	return methodDocsFromFunc(":watch", "flow-box-watch", "flow-box", "box")
 }
 
-func watchBox(obj *flavors.Instance, name, channel slip.Object) {
+func watchBox(s *slip.Scope, obj *flavors.Instance, name, channel slip.Object, depth int) {
 	var key string
 
 	switch tn := name.(type) {
@@ -85,11 +85,11 @@ func watchBox(obj *flavors.Instance, name, channel slip.Object) {
 	case slip.Symbol:
 		key = string(tn)
 	default:
-		slip.PanicType("name", tn, "string", "symbol")
+		slip.TypePanic(s, depth, "name", tn, "string", "symbol")
 	}
 	if c, ok := channel.(gi.Channel); ok {
 		obj.Any.(*box).watchers[key] = c
 	} else {
-		slip.PanicType("channel", channel, "channel")
+		slip.TypePanic(s, depth, "channel", channel, "channel")
 	}
 }

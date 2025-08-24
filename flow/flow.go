@@ -135,8 +135,8 @@ func (f *flow) running() bool {
 	return f.started
 }
 
-func (f *flow) addTask(args slip.List) *flavors.Instance {
-	inst, tsk := MakeTask(args...)
+func (f *flow) addTask(s *slip.Scope, args slip.List, depth int) *flavors.Instance {
+	inst, tsk := MakeTask(s, depth, args...)
 	if _, has := f.tasks[tsk.name]; has {
 		slip.NewPanic("Task %s already exists in flow %s.", tsk.name, f.name)
 	}
@@ -146,7 +146,7 @@ func (f *flow) addTask(args slip.List) *flavors.Instance {
 	return inst
 }
 
-func (f *flow) removeTask(name slip.Object) {
+func (f *flow) removeTask(s *slip.Scope, name slip.Object, depth int) {
 	var key string
 	switch tn := name.(type) {
 	case slip.String:
@@ -154,12 +154,12 @@ func (f *flow) removeTask(name slip.Object) {
 	case slip.Symbol:
 		key = string(tn)
 	default:
-		slip.PanicType("flow :remove-task :task", tn, "string", "symbol")
+		slip.TypePanic(s, depth, "flow :remove-task :task", tn, "string", "symbol")
 	}
 	delete(f.tasks, key)
 }
 
-func (f *flow) findTask(name slip.Object) (found slip.Object) {
+func (f *flow) findTask(s *slip.Scope, name slip.Object, depth int) (found slip.Object) {
 	var key string
 	switch tn := name.(type) {
 	case slip.String:
@@ -167,7 +167,7 @@ func (f *flow) findTask(name slip.Object) (found slip.Object) {
 	case slip.Symbol:
 		key = string(tn)
 	default:
-		slip.PanicType("flow :find-task :task-name", tn, "string", "symbol")
+		slip.TypePanic(s, depth, "flow :find-task :task-name", tn, "string", "symbol")
 	}
 	if t := f.tasks[key]; t != nil {
 		found = t.self
@@ -186,7 +186,7 @@ func (f *flow) taskList() slip.List {
 	return tasks
 }
 
-func (f *flow) setEntry(name slip.Object) (found slip.Object) {
+func (f *flow) setEntry(s *slip.Scope, name slip.Object, depth int) (found slip.Object) {
 	var key string
 	switch tn := name.(type) {
 	case nil:
@@ -197,7 +197,7 @@ func (f *flow) setEntry(name slip.Object) (found slip.Object) {
 	case slip.Symbol:
 		key = string(tn)
 	default:
-		slip.PanicType("flow :set-entry :task-name", tn, "string", "symbol")
+		slip.TypePanic(s, depth, "flow :set-entry :task-name", tn, "string", "symbol")
 	}
 	if t := f.tasks[key]; t != nil {
 		found = t.self
@@ -208,29 +208,29 @@ func (f *flow) setEntry(name slip.Object) (found slip.Object) {
 	return
 }
 
-func (f *flow) link(args slip.List) {
+func (f *flow) link(s *slip.Scope, args slip.List, depth int) {
 	// Argument count already checked.
 	var (
 		from *task
 		to   *task
 	)
-	name := strFromArg(args[0], "flow :link :link-name")
-	if from = f.tasks[strFromArg(args[1], "flow :link :from")]; from == nil {
+	name := strFromArg(s, args[0], "flow :link :link-name", depth)
+	if from = f.tasks[strFromArg(s, args[1], "flow :link :from", depth)]; from == nil {
 		slip.NewPanic("task %s not found", args[1])
 	}
-	if to = f.tasks[strFromArg(args[2], "flow :link :to")]; to == nil {
+	if to = f.tasks[strFromArg(s, args[2], "flow :link :to", depth)]; to == nil {
 		slip.NewPanic("task %s not found", args[2])
 	}
 	lnk := link{task: to}
 	if 3 < len(args) {
-		lnk.mids = checkMidPoints(args[3])
+		lnk.mids = checkMidPoints(s, args[3], depth)
 	}
 	from.links[name] = &lnk
 }
 
-func checkMidPoints(arg slip.Object) slip.List {
+func checkMidPoints(s *slip.Scope, arg slip.Object, depth int) slip.List {
 	badFun := func(v slip.Object) {
-		slip.PanicType("link mid-points", v, "list of fixnum pairs")
+		slip.TypePanic(s, depth, "link mid-points", v, "list of fixnum pairs")
 	}
 	mids, ok := arg.(slip.List)
 	if !ok {
@@ -265,7 +265,7 @@ func (f *flow) exit(bi slip.Object) {
 	}
 }
 
-func (f *flow) submit(s *slip.Scope, data, watcher slip.Object) slip.Object {
+func (f *flow) submit(s *slip.Scope, data, watcher slip.Object, depth int) slip.Object {
 	if f.entry == nil {
 		slip.NewPanic("no entry task has been set for the %s flow", f.name)
 	}
@@ -283,12 +283,12 @@ func (f *flow) submit(s *slip.Scope, data, watcher slip.Object) slip.Object {
 			bx.content = inst.Any
 			bx.frozen = true
 		default:
-			slip.PanicType("box", data, "flow-box", "bag-flavor")
+			slip.TypePanic(s, depth, "box", data, "flow-box", "bag-flavor")
 		}
 	} else {
 		var bx *box
 		bi, bx = MakeBox(gi.NewUUID())
-		bx.content = bag.ObjectToBag(data)
+		bx.content = bag.ObjectToBag(s, data, 0)
 	}
 	if watcher != nil {
 		if sym, ok := watcher.(slip.Symbol); ok {
@@ -297,7 +297,7 @@ func (f *flow) submit(s *slip.Scope, data, watcher slip.Object) slip.Object {
 				bi.Any.(*box).watchers[string(sym)] = gc
 			}
 		} else {
-			slip.PanicType(":watch", watcher, "symbol bound to a gi:channel")
+			slip.TypePanic(s, depth, ":watch", watcher, "symbol bound to a gi:channel")
 		}
 	}
 	f.entry.receive(s, bi)
@@ -332,7 +332,7 @@ func (f *flow) resetMetrics() {
 	}
 }
 
-func (f *flow) write(s *slip.Scope, args slip.List) slip.Object {
+func (f *flow) write(s *slip.Scope, args slip.List, depth int) slip.Object {
 	var b []byte
 
 	clos := 2 <= len(args) && args[1] != nil
@@ -371,7 +371,7 @@ func (f *flow) write(s *slip.Scope, args slip.List) slip.Object {
 			os = args[0].(slip.Stream)
 		default:
 			if ta != slip.True {
-				slip.PanicType("destination", ta, "output-stream", "t", "nil")
+				slip.TypePanic(s, depth, "destination", ta, "output-stream", "t", "nil")
 			}
 		}
 	}
@@ -554,7 +554,7 @@ func (f *flow) height() (h slip.Fixnum) {
 	return
 }
 
-func strFromArg(arg slip.Object, argName string) (str string) {
+func strFromArg(s *slip.Scope, arg slip.Object, argName string, depth int) (str string) {
 	switch ta := arg.(type) {
 	case nil:
 		str = ""
@@ -563,14 +563,14 @@ func strFromArg(arg slip.Object, argName string) (str string) {
 	case slip.Symbol:
 		str = string(ta)
 	default:
-		slip.PanicType(argName, ta, "string", "symbol")
+		slip.TypePanic(s, depth, argName, ta, "string", "symbol")
 	}
 	return
 }
 
 type flowInitCaller struct{}
 
-func (caller flowInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller flowInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
@@ -584,7 +584,7 @@ func (caller flowInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 			case slip.Symbol:
 				flo.name = string(tv)
 			default:
-				slip.PanicType("flow :init :name", args[i+1], "string", "symbol")
+				slip.TypePanic(s, depth, "flow :init :name", args[i+1], "string", "symbol")
 			}
 		}
 	}

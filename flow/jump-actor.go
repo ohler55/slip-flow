@@ -41,7 +41,7 @@ type jumpCtx struct {
 
 type jumpInitCaller struct{}
 
-func (caller jumpInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller jumpInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
@@ -56,7 +56,7 @@ func (caller jumpInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 			case slip.Symbol:
 				jc.target = string(ta)
 			default:
-				slip.PanicType(":target", args[pos+1], "string", "symbol")
+				slip.TypePanic(s, depth, ":target", args[pos+1], "string", "symbol")
 			}
 		}
 	}
@@ -105,7 +105,7 @@ func (caller jumpActorStartCaller) FuncDocs() *slip.FuncDoc {
 
 type jumpActorPerformCaller struct{}
 
-func (caller jumpActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller jumpActorPerformCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	jc := obj.Any.(*jumpCtx)
 	if jc.task.flow == nil || jc.task.flow.group == nil {
@@ -115,7 +115,7 @@ func (caller jumpActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	if f == nil {
 		slip.NewPanic("flow %s is not in the same group that %s is in", jc.target, jc.task.flow.name)
 	}
-	f.submit(s, args[0], nil)
+	f.submit(s, args[0], nil, depth)
 
 	return slip.List{nil, nil}
 }

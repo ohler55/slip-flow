@@ -57,22 +57,22 @@ type BoxGet struct {
 func (f *BoxGet) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	return self.Receive(s, ":get", args[1:], depth)
 }
 
 type boxGetCaller struct{}
 
-func (caller boxGetCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller boxGetCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 	switch len(args) {
 	case 0:
-		value = getBox(obj, nil, false)
+		value = getBox(s, obj, nil, false, depth)
 	case 1:
-		value = getBox(obj, args[0], false)
+		value = getBox(s, obj, args[0], false, depth)
 	case 2:
-		value = getBox(obj, args[0], args[1] != nil)
+		value = getBox(s, obj, args[0], args[1] != nil, depth)
 	default:
 		slip.PanicMethodArgCount(obj, ":get", len(args), 0, 2)
 	}
@@ -83,7 +83,7 @@ func (caller boxGetCaller) FuncDocs() *slip.FuncDoc {
 	return methodDocsFromFunc(":get", "flow-box-get", "flow-box", "box")
 }
 
-func getBox(obj *flavors.Instance, path slip.Object, asBag bool) slip.Object {
+func getBox(s *slip.Scope, obj *flavors.Instance, path slip.Object, asBag bool, depth int) slip.Object {
 	var x jp.Expr
 	switch p := path.(type) {
 	case nil:
@@ -92,7 +92,7 @@ func getBox(obj *flavors.Instance, path slip.Object, asBag bool) slip.Object {
 	case bag.Path:
 		x = jp.Expr(p)
 	default:
-		slip.PanicType("path", p, "string", "bag-path")
+		slip.TypePanic(s, depth, "path", p, "string", "bag-path")
 	}
 	bx := obj.Any.(*box)
 	var value any

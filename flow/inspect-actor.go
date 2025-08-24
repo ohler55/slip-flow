@@ -56,13 +56,13 @@ type inspectCtx struct {
 
 type inspectInitCaller struct{}
 
-func (caller inspectInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller inspectInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
 	var ic inspectCtx
-	ic.pw, ic.full, ic.prty, ic.output = parseBoxWriteOptions(args, true)
+	ic.pw, ic.full, ic.prty, ic.output = parseBoxWriteOptions(s, args, true, depth)
 	self.Any = &ic
 
 	return nil
@@ -157,7 +157,7 @@ func (caller inspectActorStartCaller) FuncDocs() *slip.FuncDoc {
 
 type inspectActorPerformCaller struct{}
 
-func (caller inspectActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller inspectActorPerformCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	bx := args[0].(*flavors.Instance).Any.(*box)
 	ic := obj.Any.(*inspectCtx)
@@ -169,7 +169,7 @@ func (caller inspectActorPerformCaller) Call(s *slip.Scope, args slip.List, _ in
 	case slip.Symbol:
 		tsk.self.Receive(s, string(level), slip.List{slip.String(b)}, 0)
 	default:
-		slip.PanicType("output", level, "nil", "symbol")
+		slip.TypePanic(s, depth, "output", level, "nil", "symbol")
 	}
 	return slip.List{slip.String("ok"), args[0]}
 }

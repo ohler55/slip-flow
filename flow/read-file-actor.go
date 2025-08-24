@@ -45,13 +45,13 @@ type readFileCtx struct {
 
 type readFileInitCaller struct{}
 
-func (caller readFileInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller readFileInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
 	var rfc readFileCtx
-	rfc.parseArgs(s, args)
+	rfc.parseArgs(s, args, depth)
 
 	self.Any = &rfc
 
@@ -103,19 +103,19 @@ func (caller readFileActorStartCaller) FuncDocs() *slip.FuncDoc {
 
 type readFileActorPerformCaller struct{}
 
-func (caller readFileActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller readFileActorPerformCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	rfc := obj.Any.(*readFileCtx)
 	bi := args[0].(*flavors.Instance)
 
-	filename := rfc.filename.value(s, bi)
+	filename := rfc.filename.value(s, bi, depth)
 	f, err := os.Open(filename)
 	if err != nil {
 		panic(err)
 	}
 	defer func() { _ = f.Close() }()
 
-	return rfc.readText(f, bi)
+	return rfc.readText(s, f, bi, depth)
 }
 
 func (caller readFileActorPerformCaller) FuncDocs() *slip.FuncDoc {

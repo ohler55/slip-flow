@@ -53,7 +53,7 @@ type BoxScan struct {
 func (f *BoxScan) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	return self.Receive(s, ":scan", args[1:], depth)
 }
@@ -69,12 +69,12 @@ func (caller boxScanCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 	if ss, ok := args[0].(slip.String); ok {
 		flowName = string(ss)
 	} else {
-		slip.PanicType("flow-name", args[0], "string")
+		slip.TypePanic(s, depth, "flow-name", args[0], "string")
 	}
 	if ss, ok := args[1].(slip.String); ok {
 		taskName = string(ss)
 	} else {
-		slip.PanicType("task-name", args[1], "string")
+		slip.TypePanic(s, depth, "task-name", args[1], "string")
 	}
 	obj.Any.(*box).track.Scan(flowName, taskName)
 

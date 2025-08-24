@@ -49,19 +49,19 @@ func (f *FlowRemoveTask) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Type != flowFlavor {
-		slip.PanicType("flow", args[0], "flow")
+		slip.TypePanic(s, depth, "flow", args[0], "flow")
 	}
-	self.Any.(*flow).removeTask(args[1])
+	self.Any.(*flow).removeTask(s, args[1], depth)
 
 	return nil
 }
 
 type flowRemoveTaskCaller struct{}
 
-func (caller flowRemoveTaskCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller flowRemoveTaskCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 
-	obj.Any.(*flow).removeTask(args[0])
+	obj.Any.(*flow).removeTask(s, args[0], depth)
 
 	return nil
 }

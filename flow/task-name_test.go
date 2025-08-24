@@ -12,7 +12,7 @@ import (
 
 func TestTaskNameOk(t *testing.T) {
 	scope := slip.NewScope()
-	task, _ := flow.MakeTask(slip.Symbol(":name"), slip.String("tisk"))
+	task, _ := flow.MakeTask(scope, 0, slip.Symbol(":name"), slip.String("tisk"))
 	scope.Let("task", task)
 	(&sliptest.Function{
 		Scope:  scope,
@@ -35,7 +35,7 @@ func TestTaskNameNotTask(t *testing.T) {
 
 func TestTaskNameArgCount(t *testing.T) {
 	scope := slip.NewScope()
-	task, _ := flow.MakeTask(slip.Symbol(":name"), slip.String("tisk"))
+	task, _ := flow.MakeTask(scope, 0, slip.Symbol(":name"), slip.String("tisk"))
 	scope.Let("task", task)
 	(&sliptest.Function{
 		Scope:     scope,

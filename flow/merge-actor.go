@@ -111,7 +111,7 @@ func (mc *mergeCtx) addBox(bx *box) (full *box) {
 
 type mergeInitCaller struct{}
 
-func (caller mergeInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller mergeInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
@@ -124,13 +124,13 @@ func (caller mergeInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 < num {
 				mc.timeout = time.Duration(num) * time.Second
 			} else {
-				slip.PanicType(":timeout", args[pos+1], "positive fixnum")
+				slip.TypePanic(s, depth, ":timeout", args[pos+1], "positive fixnum")
 			}
 		case ":number":
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 < num {
 				mc.number = int(num)
 			} else {
-				slip.PanicType(":number", args[pos+1], "positive fixnum")
+				slip.TypePanic(s, depth, ":number", args[pos+1], "positive fixnum")
 			}
 		}
 	}

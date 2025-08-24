@@ -42,18 +42,18 @@ type group struct {
 	mu    sync.Mutex
 }
 
-func (g *group) add(obj slip.Object) {
+func (g *group) add(s *slip.Scope, obj slip.Object, depth int) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	if fi, _ := obj.(*flavors.Instance); fi != nil && fi.Type == flowFlavor {
 		g.flows[fi.Any.(*flow).name] = fi.Any.(*flow)
 		fi.Any.(*flow).group = g
 	} else {
-		slip.PanicType("flow", obj, "flow")
+		slip.TypePanic(s, depth, "flow", obj, "flow")
 	}
 }
 
-func (g *group) remove(obj slip.Object) {
+func (g *group) remove(s *slip.Scope, obj slip.Object, depth int) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	var name string
@@ -63,7 +63,7 @@ func (g *group) remove(obj slip.Object) {
 	case slip.Symbol:
 		name = string(tn)
 	default:
-		slip.PanicType("group :remove flow", tn, "string", "symbol")
+		slip.TypePanic(s, depth, "group :remove flow", tn, "string", "symbol")
 	}
 	if f := g.flows[name]; f != nil {
 		f.group = nil
@@ -71,7 +71,7 @@ func (g *group) remove(obj slip.Object) {
 	delete(g.flows, name)
 }
 
-func (g *group) find(obj slip.Object) (fi slip.Object) {
+func (g *group) find(s *slip.Scope, obj slip.Object, depth int) (fi slip.Object) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	var name string
@@ -81,7 +81,7 @@ func (g *group) find(obj slip.Object) (fi slip.Object) {
 	case slip.Symbol:
 		name = string(tn)
 	default:
-		slip.PanicType("group :find flow", tn, "string", "symbol")
+		slip.TypePanic(s, depth, "group :find flow", tn, "string", "symbol")
 	}
 	if f := g.flows[name]; f != nil {
 		fi = f.self

@@ -50,17 +50,17 @@ type BoxHas struct {
 func (f *BoxHas) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	return self.Receive(s, ":has", args[1:], depth)
 }
 
 type boxHasCaller struct{}
 
-func (caller boxHasCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller boxHasCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) == 1 {
-		value = hasBox(obj, args[0])
+		value = hasBox(s, obj, args[0], depth)
 	} else {
 		slip.PanicMethodArgChoice(obj, ":has", len(args), "1")
 	}
@@ -71,7 +71,7 @@ func (caller boxHasCaller) FuncDocs() *slip.FuncDoc {
 	return methodDocsFromFunc(":has", "flow-box-has", "flow-box", "box")
 }
 
-func hasBox(obj *flavors.Instance, path slip.Object) slip.Object {
+func hasBox(s *slip.Scope, obj *flavors.Instance, path slip.Object, depth int) slip.Object {
 	var x jp.Expr
 	switch p := path.(type) {
 	case nil:
@@ -80,7 +80,7 @@ func hasBox(obj *flavors.Instance, path slip.Object) slip.Object {
 	case bag.Path:
 		x = jp.Expr(p)
 	default:
-		slip.PanicType("path", p, "string", "bag-path")
+		slip.TypePanic(s, depth, "path", p, "string", "bag-path")
 	}
 	if x == nil || x.Has(obj.Any.(*box).content) {
 		return slip.True

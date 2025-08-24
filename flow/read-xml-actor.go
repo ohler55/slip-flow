@@ -56,13 +56,13 @@ type readXMLCtx struct {
 
 type readXMLInitCaller struct{}
 
-func (caller readXMLInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller readXMLInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
 	var rxc readXMLCtx
-	rxc.parseArgs(s, args)
+	rxc.parseArgs(s, args, depth)
 	for pos := 0; pos < len(args)-1; pos += 2 {
 		sym, _ := args[pos].(slip.Symbol)
 		switch string(sym) {
@@ -144,12 +144,12 @@ func (caller readXMLActorStartCaller) FuncDocs() *slip.FuncDoc {
 
 type readXMLActorPerformCaller struct{}
 
-func (caller readXMLActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller readXMLActorPerformCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	rxc := obj.Any.(*readXMLCtx)
 	bi := args[0].(*flavors.Instance)
 
-	filename := rxc.filename.value(s, bi)
+	filename := rxc.filename.value(s, bi, depth)
 	f, err := os.Open(filename)
 	if err != nil {
 		panic(err)

@@ -43,7 +43,7 @@ func (f *TaskResetMetrics) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Type != taskFlavor {
-		slip.PanicType("task", args[0], "task")
+		slip.TypePanic(s, depth, "task", args[0], "task")
 	}
 	self.Any.(*task).resetMetrics()
 

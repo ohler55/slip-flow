@@ -49,17 +49,17 @@ func (f *FlowSetEntry) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Type != flowFlavor {
-		slip.PanicType("flow", args[0], "flow")
+		slip.TypePanic(s, depth, "flow", args[0], "flow")
 	}
-	return self.Any.(*flow).setEntry(args[1])
+	return self.Any.(*flow).setEntry(s, args[1], depth)
 }
 
 type flowSetEntryCaller struct{}
 
-func (caller flowSetEntryCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller flowSetEntryCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 
-	return obj.Any.(*flow).setEntry(args[0])
+	return obj.Any.(*flow).setEntry(s, args[0], depth)
 }
 
 func (caller flowSetEntryCaller) FuncDocs() *slip.FuncDoc {

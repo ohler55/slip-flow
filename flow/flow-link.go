@@ -66,19 +66,19 @@ func (f *FlowLink) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 4, 5)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Type != flowFlavor {
-		slip.PanicType("flow", args[0], "flow")
+		slip.TypePanic(s, depth, "flow", args[0], "flow")
 	}
-	self.Any.(*flow).link(args[1:])
+	self.Any.(*flow).link(s, args[1:], depth)
 
 	return nil
 }
 
 type flowLinkCaller struct{}
 
-func (caller flowLinkCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller flowLinkCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 
-	obj.Any.(*flow).link(args)
+	obj.Any.(*flow).link(s, args, depth)
 
 	return nil
 }

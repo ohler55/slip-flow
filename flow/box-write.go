@@ -104,23 +104,23 @@ type BoxWrite struct {
 func (f *BoxWrite) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	return self.Receive(s, ":write", args[1:], depth)
 }
 
 type boxWriteCaller struct{}
 
-func (caller boxWriteCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller boxWriteCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	return writeBox(s, obj, args)
+	return writeBox(s, obj, args, depth)
 }
 
 func (caller boxWriteCaller) FuncDocs() *slip.FuncDoc {
 	return methodDocsFromFunc(":write", "flow-box-write", "flow-box", "box")
 }
 
-func writeBox(s *slip.Scope, obj *flavors.Instance, args slip.List) (result slip.Object) {
+func writeBox(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) (result slip.Object) {
 	var out io.Writer
 	if 0 < len(args) {
 		pos := 0
@@ -137,14 +137,14 @@ func writeBox(s *slip.Scope, obj *flavors.Instance, args slip.List) (result slip
 			if ta == slip.True {
 				out = s.Get("*standard-output*").(io.Writer)
 			} else {
-				slip.PanicType("stream", ta, "nil", "t", "output-stream")
+				slip.TypePanic(s, depth, "stream", ta, "nil", "t", "output-stream")
 			}
 			pos++
 		}
 		args = args[pos:]
 	}
 	bx := obj.Any.(*box)
-	pw, full, prty, _ := parseBoxWriteOptions(args, false)
+	pw, full, prty, _ := parseBoxWriteOptions(s, args, false, depth)
 	b := bx.toString(pw, full, prty)
 	if out == nil {
 		return slip.String(b)
@@ -185,7 +185,12 @@ func (bx *box) toString(pw *pretty.Writer, full, prty bool) (b []byte) {
 	return
 }
 
-func parseBoxWriteOptions(args slip.List, hasOutput bool) (pw *pretty.Writer, full, prty bool, output slip.Object) {
+func parseBoxWriteOptions(
+	s *slip.Scope,
+	args slip.List,
+	hasOutput bool,
+	depth int) (pw *pretty.Writer, full, prty bool, output slip.Object) {
+
 	dp := slip.DefaultPrinter()
 	pw = &pretty.Writer{
 		Options:  options,
@@ -203,7 +208,7 @@ func parseBoxWriteOptions(args slip.List, hasOutput bool) (pw *pretty.Writer, fu
 		case ":depth":
 			num, ok := args[pos+1].(slip.Fixnum)
 			if !ok {
-				slip.PanicType(":depth", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, ":depth", args[pos+1], "fixnum")
 			}
 			pw.MaxDepth = int(num)
 			if pw.MaxDepth <= 0 {
@@ -212,13 +217,13 @@ func parseBoxWriteOptions(args slip.List, hasOutput bool) (pw *pretty.Writer, fu
 		case ":right-margin":
 			num, ok := args[pos+1].(slip.Fixnum)
 			if !ok {
-				slip.PanicType(":right-margin", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, ":right-margin", args[pos+1], "fixnum")
 			}
 			pw.Width = int(num)
 		case ":indent":
 			num, ok := args[pos+1].(slip.Fixnum)
 			if !ok {
-				slip.PanicType(":indent", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, ":indent", args[pos+1], "fixnum")
 			}
 			pw.Indent = int(num)
 		case ":time-format":
@@ -228,7 +233,7 @@ func parseBoxWriteOptions(args slip.List, hasOutput bool) (pw *pretty.Writer, fu
 			case slip.String:
 				pw.TimeFormat = string(ta)
 			default:
-				slip.PanicType(":time-format", args[pos+1], "string")
+				slip.TypePanic(s, depth, ":time-format", args[pos+1], "string")
 			}
 		case ":time-wrap":
 			switch ta := args[pos+1].(type) {
@@ -237,7 +242,7 @@ func parseBoxWriteOptions(args slip.List, hasOutput bool) (pw *pretty.Writer, fu
 			case slip.String:
 				pw.TimeWrap = string(ta)
 			default:
-				slip.PanicType(":time-wrap", args[pos+1], "string")
+				slip.TypePanic(s, depth, ":time-wrap", args[pos+1], "string")
 			}
 		case ":json":
 			pw.SEN = args[pos+1] == nil
@@ -248,7 +253,7 @@ func parseBoxWriteOptions(args slip.List, hasOutput bool) (pw *pretty.Writer, fu
 		case ":output":
 			output = args[pos+1]
 		default:
-			slip.PanicType("keyword", sym, ":pretty", ":depth", ":right-margin", "indent",
+			slip.TypePanic(s, depth, "keyword", sym, ":pretty", ":depth", ":right-margin", "indent",
 				":time-format", ":time-wrap", ":json", ":color", "full")
 		}
 	}

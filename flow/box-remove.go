@@ -50,7 +50,7 @@ type BoxRemove struct {
 func (f *BoxRemove) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	_ = self.Receive(s, ":remove", args[1:], depth)
 
@@ -59,10 +59,10 @@ func (f *BoxRemove) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 
 type boxRemoveCaller struct{}
 
-func (caller boxRemoveCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller boxRemoveCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) == 1 {
-		removeBox(obj, args[0])
+		removeBox(s, obj, args[0], depth)
 	} else {
 		slip.PanicMethodArgChoice(obj, ":remove", len(args), "1")
 	}
@@ -73,7 +73,7 @@ func (caller boxRemoveCaller) FuncDocs() *slip.FuncDoc {
 	return methodDocsFromFunc(":remove", "flow-box-remove", "flow-box", "box")
 }
 
-func removeBox(obj *flavors.Instance, path slip.Object) {
+func removeBox(s *slip.Scope, obj *flavors.Instance, path slip.Object, depth int) {
 	var x jp.Expr
 	switch p := path.(type) {
 	case nil:
@@ -82,7 +82,7 @@ func removeBox(obj *flavors.Instance, path slip.Object) {
 	case bag.Path:
 		x = jp.Expr(p)
 	default:
-		slip.PanicType("path", p, "string")
+		slip.TypePanic(s, depth, "path", p, "string")
 	}
 	bx := obj.Any.(*box)
 	if x == nil {

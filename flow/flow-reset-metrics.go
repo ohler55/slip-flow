@@ -43,7 +43,7 @@ func (f *FlowResetMetrics) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Type != flowFlavor {
-		slip.PanicType("flow", args[0], "flow")
+		slip.TypePanic(s, depth, "flow", args[0], "flow")
 	}
 	self.Any.(*flow).resetMetrics()
 

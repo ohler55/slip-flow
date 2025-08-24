@@ -51,7 +51,7 @@ type BoxUnwatch struct {
 func (f *BoxUnwatch) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	_ = self.Receive(s, ":unwatch", args[1:], depth)
 
@@ -60,13 +60,13 @@ func (f *BoxUnwatch) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 
 type boxUnwatchCaller struct{}
 
-func (caller boxUnwatchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller boxUnwatchCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	switch len(args) {
 	case 0:
-		unwatchBox(obj, nil)
+		unwatchBox(s, obj, nil, depth)
 	case 1:
-		unwatchBox(obj, args[0])
+		unwatchBox(s, obj, args[0], depth)
 	default:
 		slip.PanicMethodArgChoice(obj, ":unwatch", len(args), "0 or 1")
 	}
@@ -77,7 +77,7 @@ func (caller boxUnwatchCaller) FuncDocs() *slip.FuncDoc {
 	return methodDocsFromFunc(":unwatch", "flow-box-unwatch", "flow-box", "box")
 }
 
-func unwatchBox(obj *flavors.Instance, name slip.Object) {
+func unwatchBox(s *slip.Scope, obj *flavors.Instance, name slip.Object, depth int) {
 	if name == nil {
 		obj.Any.(*box).watchers = map[string]gi.Channel{}
 	} else {
@@ -88,7 +88,7 @@ func unwatchBox(obj *flavors.Instance, name slip.Object) {
 		case slip.Symbol:
 			key = string(tn)
 		default:
-			slip.PanicType("name", tn, "string", "symbol")
+			slip.TypePanic(s, depth, "name", tn, "string", "symbol")
 		}
 		delete(obj.Any.(*box).watchers, key)
 	}

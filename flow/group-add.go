@@ -48,19 +48,19 @@ func (f *GroupAdd) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Type != groupFlavor {
-		slip.PanicType("group", args[0], "group")
+		slip.TypePanic(s, depth, "group", args[0], "group")
 	}
-	self.Any.(*group).add(args[1])
+	self.Any.(*group).add(s, args[1], depth)
 
 	return nil
 }
 
 type groupAddCaller struct{}
 
-func (caller groupAddCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller groupAddCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 
-	obj.Any.(*group).add(args[0])
+	obj.Any.(*group).add(s, args[0], depth)
 
 	return nil
 }

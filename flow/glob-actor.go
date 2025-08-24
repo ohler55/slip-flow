@@ -50,13 +50,13 @@ type globCtx struct {
 
 type globInitCaller struct{}
 
-func (caller globInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller globInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
 	var rdc globCtx
-	rdc.parseArgs(s, args)
+	rdc.parseArgs(s, args, depth)
 	for pos := 0; pos < len(args)-1; pos += 2 {
 		if slip.Symbol(":with-info") == args[pos] {
 			rdc.info = args[pos+1] != nil
@@ -117,12 +117,12 @@ func (caller globActorStartCaller) FuncDocs() *slip.FuncDoc {
 
 type globActorPerformCaller struct{}
 
-func (caller globActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller globActorPerformCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	rdc := obj.Any.(*globCtx)
 	bi := args[0].(*flavors.Instance)
 
-	pattern := rdc.filename.value(s, bi)
+	pattern := rdc.filename.value(s, bi, depth)
 	paths, err := filepath.Glob(pattern)
 	if err != nil {
 		panic(err)

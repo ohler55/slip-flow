@@ -90,7 +90,7 @@ func setTimeFormat(value slip.Object) {
 	case slip.String:
 		options.TimeFormat = string(tv)
 	default:
-		slip.PanicType("*bag-time-format*", value, "string")
+		slip.TypePanic(slip.NewScope(), 0, "*bag-time-format*", value, "string")
 	}
 	updateConverter()
 }
@@ -111,7 +111,7 @@ func setTimeWrap(value slip.Object) {
 	case slip.String:
 		options.TimeWrap = string(tv)
 	default:
-		slip.PanicType("*bag-time-wrap*", value, "string")
+		slip.TypePanic(slip.NewScope(), 0, "*bag-time-wrap*", value, "string")
 	}
 	updateConverter()
 }

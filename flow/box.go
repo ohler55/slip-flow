@@ -108,21 +108,21 @@ func (caller boxInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 			if inst, ok := args[i+1].(*flavors.Instance); ok && inst.Type == trackFlavor {
 				bx.track = *inst.Any.(*track)
 			} else {
-				slip.PanicType("box :init :track", args[i+1], "flow-track instance")
+				slip.TypePanic(s, depth, "box :init :track", args[i+1], "flow-track instance")
 			}
 		case slip.Symbol(":set"):
 			if inst, ok := args[i+1].(*flavors.Instance); ok {
 				if inst.Type != bag.Flavor() {
-					slip.PanicType("box :init :set", args[i+1], "bag-flavor instance")
+					slip.TypePanic(s, depth, "box :init :set", args[i+1], "bag-flavor instance")
 				}
 				bx.content = inst.Any
 			} else {
-				bx.content = bag.ObjectToBag(args[i+1])
+				bx.content = bag.ObjectToBag(s, args[i+1], depth)
 			}
 		case slip.Symbol(":parse"):
 			so, ok := args[i+1].(slip.String)
 			if !ok {
-				slip.PanicType("box :init :parse", args[i+1], "string")
+				slip.TypePanic(s, depth, "box :init :parse", args[i+1], "string")
 			}
 			bx.content = sen.MustParse([]byte(so))
 			if options.Converter != nil {
@@ -131,7 +131,7 @@ func (caller boxInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 		case slip.Symbol(":read"):
 			r, ok := args[i+1].(io.Reader)
 			if !ok {
-				slip.PanicType("box :init :read", args[i+1], "input-stream")
+				slip.TypePanic(s, depth, "box :init :read", args[i+1], "input-stream")
 			}
 			bx.content = sen.MustParseReader(r)
 			if options.Converter != nil {
@@ -140,16 +140,16 @@ func (caller boxInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 		case slip.Symbol(":watch"):
 			sym, ok := args[i+1].(slip.Symbol)
 			if !ok {
-				slip.PanicType("box :init :watch", args[i+1], "symbol bound to a gi:channel")
+				slip.TypePanic(s, depth, "box :init :watch", args[i+1], "symbol bound to a gi:channel")
 			}
 			var sc gi.Channel
 			if sc, ok = sym.Eval(s, depth+1).(gi.Channel); ok {
 				bx.watchers[string(sym)] = sc
 			} else {
-				slip.PanicType("box :init :watch", sym, "symbol bound to a gi:channel")
+				slip.TypePanic(s, depth, "box :init :watch", sym, "symbol bound to a gi:channel")
 			}
 		default:
-			slip.PanicType("box :init", args[i], ":tracking-id", ":track", ":set")
+			slip.TypePanic(s, depth, "box :init", args[i], ":tracking-id", ":track", ":set")
 		}
 	}
 	if bx.track.id == nil {

@@ -46,13 +46,13 @@ type readJSONCtx struct {
 
 type readJSONInitCaller struct{}
 
-func (caller readJSONInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller readJSONInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
 	var rjc readJSONCtx
-	rjc.parseArgs(s, args)
+	rjc.parseArgs(s, args, depth)
 	self.Any = &rjc
 
 	return nil
@@ -108,12 +108,12 @@ func (caller readJSONActorStartCaller) FuncDocs() *slip.FuncDoc {
 
 type readJSONActorPerformCaller struct{}
 
-func (caller readJSONActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller readJSONActorPerformCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	rjc := obj.Any.(*readJSONCtx)
 	bi := args[0].(*flavors.Instance)
 
-	filename := rjc.filename.value(s, bi)
+	filename := rjc.filename.value(s, bi, depth)
 	f, err := os.Open(filename)
 	if err != nil {
 		panic(err)

@@ -48,17 +48,17 @@ func (f *GroupFind) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Type != groupFlavor {
-		slip.PanicType("group", args[0], "group")
+		slip.TypePanic(s, depth, "group", args[0], "group")
 	}
-	return self.Any.(*group).find(args[1])
+	return self.Any.(*group).find(s, args[1], depth)
 }
 
 type groupFindCaller struct{}
 
-func (caller groupFindCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller groupFindCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 
-	return obj.Any.(*group).find(args[0])
+	return obj.Any.(*group).find(s, args[0], depth)
 }
 
 func (caller groupFindCaller) FuncDocs() *slip.FuncDoc {

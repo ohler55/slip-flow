@@ -54,24 +54,24 @@ func (f *FlowSubmit) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	slip.ArgCountCheck(f, args, 2, 3)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Type != flowFlavor {
-		slip.PanicType("flow", args[0], "flow")
+		slip.TypePanic(s, depth, "flow", args[0], "flow")
 	}
 	var watcher slip.Object
 	if 2 < len(args) {
 		watcher = args[2]
 	}
-	return self.Any.(*flow).submit(s, args[1], watcher)
+	return self.Any.(*flow).submit(s, args[1], watcher, depth)
 }
 
 type flowSubmitCaller struct{}
 
-func (caller flowSubmitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller flowSubmitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	var watcher slip.Object
 	if 1 < len(args) {
 		watcher = args[1]
 	}
-	return obj.Any.(*flow).submit(s, args[0], watcher)
+	return obj.Any.(*flow).submit(s, args[0], watcher, depth)
 }
 
 func (caller flowSubmitCaller) FuncDocs() *slip.FuncDoc {

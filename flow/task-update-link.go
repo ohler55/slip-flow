@@ -52,18 +52,18 @@ func (f *TaskUpdateLink) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	slip.ArgCountCheck(f, args, 3, 3)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Type != taskFlavor {
-		slip.PanicType("task", args[0], "task")
+		slip.TypePanic(s, depth, "task", args[0], "task")
 	}
-	self.Any.(*task).updateLink(args[1:])
+	self.Any.(*task).updateLink(s, args[1:], depth)
 
 	return nil
 }
 
 type taskUpdateLinkCaller struct{}
 
-func (caller taskUpdateLinkCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller taskUpdateLinkCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	obj.Any.(*task).updateLink(args)
+	obj.Any.(*task).updateLink(s, args, depth)
 
 	return nil
 }

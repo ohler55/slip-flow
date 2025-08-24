@@ -366,7 +366,7 @@ func (t *task) actorList() (al slip.List) {
 	return
 }
 
-func (t *task) unlink(args slip.List) {
+func (t *task) unlink(s *slip.Scope, args slip.List, depth int) {
 	var name string
 	switch ta := args[0].(type) {
 	case nil:
@@ -376,14 +376,14 @@ func (t *task) unlink(args slip.List) {
 	case slip.Symbol:
 		name = string(ta)
 	default:
-		slip.PanicType("link", ta, "string", "symbol")
+		slip.TypePanic(s, depth, "link", ta, "string", "symbol")
 	}
 	t.qmu.Lock()
 	delete(t.links, name)
 	t.qmu.Unlock()
 }
 
-func (t *task) updateLink(args slip.List) {
+func (t *task) updateLink(s *slip.Scope, args slip.List, depth int) {
 	var (
 		name string
 		mids slip.List
@@ -396,15 +396,15 @@ func (t *task) updateLink(args slip.List) {
 	case slip.Symbol:
 		name = string(ta)
 	default:
-		slip.PanicType("link-name", ta, "string", "symbol")
+		slip.TypePanic(s, depth, "link-name", ta, "string", "symbol")
 	}
 	switch ta := args[1].(type) {
 	case nil:
 		// leave empty or nil
 	case slip.List:
-		mids = checkMidPoints(ta)
+		mids = checkMidPoints(s, ta, depth)
 	default:
-		slip.PanicType("mid-points", ta, "list")
+		slip.TypePanic(s, depth, "mid-points", ta, "list")
 	}
 	t.qmu.Lock()
 	defer t.qmu.Unlock()
@@ -438,13 +438,13 @@ func (t *task) validate(s *slip.Scope) (fails slip.List) {
 }
 
 // MakeTask is only public for testing purposes.
-func MakeTask(args ...slip.Object) (self *flavors.Instance, t *task) {
+func MakeTask(s *slip.Scope, depth int, args ...slip.Object) (self *flavors.Instance, t *task) {
 	self = taskFlavor.MakeInstance().(*flavors.Instance)
-	t = makeTaskStruct(self, args)
+	t = makeTaskStruct(s, self, args, depth)
 	return
 }
 
-func makeTaskStruct(self *flavors.Instance, args slip.List) (tsk *task) {
+func makeTaskStruct(s *slip.Scope, self *flavors.Instance, args slip.List, depth int) (tsk *task) {
 	tsk = &task{self: self, links: map[string]*link{}}
 	for i := 0; i < len(args)-1; i += 2 {
 		switch args[i] {
@@ -455,7 +455,7 @@ func makeTaskStruct(self *flavors.Instance, args slip.List) (tsk *task) {
 			case slip.Symbol:
 				tsk.name = string(tv)
 			default:
-				slip.PanicType("task :init :name", args[i+1], "string", "symbol")
+				slip.TypePanic(s, depth, "task :init :name", args[i+1], "string", "symbol")
 			}
 		case slip.Symbol(":actor"):
 			val := args[i+1]
@@ -465,7 +465,7 @@ func makeTaskStruct(self *flavors.Instance, args slip.List) (tsk *task) {
 				if tv.HasMethod(":perform") {
 					tsk.actors = []*flavors.Instance{tv}
 				} else {
-					slip.PanicType("task :init :actor", val, "instance with :perform method", "function", "list")
+					slip.TypePanic(s, depth, "task :init :actor", val, "instance with :perform method", "function", "list")
 				}
 			case slip.List:
 				tsk.actors = make([]*flavors.Instance, len(tv))
@@ -473,7 +473,7 @@ func makeTaskStruct(self *flavors.Instance, args slip.List) (tsk *task) {
 					if a, ok := sv.(*flavors.Instance); ok && a.HasMethod(":perform") {
 						tsk.actors[j] = a
 					} else {
-						slip.PanicType("task :init :actor", val, "instance with :perform method", "function", "list")
+						slip.TypePanic(s, depth, "task :init :actor", val, "instance with :perform method", "function", "list")
 					}
 				}
 			case *slip.Lambda:
@@ -485,26 +485,26 @@ func makeTaskStruct(self *flavors.Instance, args slip.List) (tsk *task) {
 				val = slip.FindFunc(string(tv))
 				goto Actor
 			default:
-				slip.PanicType("task :init :actor", val, "instance with :perform method", "function", "list")
+				slip.TypePanic(s, depth, "task :init :actor", val, "instance with :perform method", "function", "list")
 			}
 		case slip.Symbol(":workers"):
 			if num, ok := args[i+1].(slip.Fixnum); ok {
 				tsk.workers = int(num)
 			} else {
-				slip.PanicType("task :init :workers", args[i+1], "fixnum")
+				slip.TypePanic(s, depth, "task :init :workers", args[i+1], "fixnum")
 			}
 		case slip.Symbol(":depth"):
 			if num, ok := args[i+1].(slip.Fixnum); ok && 0 < num {
 				tsk.depth = int(num)
 			} else {
-				slip.PanicType("task :init :depth", args[i+1], "fixnum greater than 0")
+				slip.TypePanic(s, depth, "task :init :depth", args[i+1], "fixnum greater than 0")
 			}
 		case slip.Symbol(":x"):
 			if args[i+1] != nil {
 				if num, ok := args[i+1].(slip.Fixnum); ok {
 					self.Let("x", num)
 				} else {
-					slip.PanicType("task :init :x", args[i+1], "fixnum")
+					slip.TypePanic(s, depth, "task :init :x", args[i+1], "fixnum")
 				}
 			}
 		case slip.Symbol(":y"):
@@ -512,7 +512,7 @@ func makeTaskStruct(self *flavors.Instance, args slip.List) (tsk *task) {
 				if num, ok := args[i+1].(slip.Fixnum); ok {
 					self.Let("y", num)
 				} else {
-					slip.PanicType("task :init :x", args[i+1], "fixnum")
+					slip.TypePanic(s, depth, "task :init :x", args[i+1], "fixnum")
 				}
 			}
 		case slip.Symbol(":svg"):
@@ -520,7 +520,7 @@ func makeTaskStruct(self *flavors.Instance, args slip.List) (tsk *task) {
 				if str, ok := args[i+1].(slip.String); ok {
 					self.Let("svg", str)
 				} else {
-					slip.PanicType("task :init :svg", args[i+1], "string")
+					slip.TypePanic(s, depth, "task :init :svg", args[i+1], "string")
 				}
 			}
 		}
@@ -532,12 +532,12 @@ func makeTaskStruct(self *flavors.Instance, args slip.List) (tsk *task) {
 
 type taskInitCaller struct{}
 
-func (caller taskInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller taskInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
-	_ = makeTaskStruct(self, args)
+	_ = makeTaskStruct(s, self, args, depth)
 
 	return nil
 }

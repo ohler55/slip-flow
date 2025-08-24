@@ -57,14 +57,14 @@ type readCSVCtx struct {
 
 type readCSVInitCaller struct{}
 
-func (caller readCSVInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller readCSVInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
 	var rcc readCSVCtx
 	rcc.sep = ','
-	rcc.parseArgs(s, args)
+	rcc.parseArgs(s, args, depth)
 	for pos := 0; pos < len(args)-1; pos += 2 {
 		sym, _ := args[pos].(slip.Symbol)
 		switch string(sym) {
@@ -72,13 +72,13 @@ func (caller readCSVInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 			if c, ok := args[pos+1].(slip.Character); ok {
 				rcc.sep = rune(c)
 			} else {
-				slip.PanicType(":separator", args[pos+1], "character")
+				slip.TypePanic(s, depth, ":separator", args[pos+1], "character")
 			}
 		case ":comment":
 			if c, ok := args[pos+1].(slip.Character); ok {
 				rcc.comment = rune(c)
 			} else {
-				slip.PanicType(":comment", args[pos+1], "character")
+				slip.TypePanic(s, depth, ":comment", args[pos+1], "character")
 			}
 		case ":trim":
 			rcc.trim = args[pos+1] != nil
@@ -162,12 +162,12 @@ func (caller readCSVActorStartCaller) FuncDocs() *slip.FuncDoc {
 
 type readCSVActorPerformCaller struct{}
 
-func (caller readCSVActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller readCSVActorPerformCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	rcc := obj.Any.(*readCSVCtx)
 	bi := args[0].(*flavors.Instance)
 
-	filename := rcc.filename.value(s, bi)
+	filename := rcc.filename.value(s, bi, depth)
 	f, err := os.Open(filename)
 	if err != nil {
 		panic(err)

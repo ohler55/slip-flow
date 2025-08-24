@@ -45,7 +45,7 @@ type foreachCtx struct {
 
 type foreachInitCaller struct{}
 
-func (caller foreachInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller foreachInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
@@ -63,7 +63,7 @@ func (caller foreachInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 			case slip.Symbol:
 				fec.dest = bag.Path(jp.MustParse([]byte(ta)))
 			default:
-				slip.PanicType(":destination", args[pos+1], "string", "symbol")
+				slip.TypePanic(s, depth, ":destination", args[pos+1], "string", "symbol")
 			}
 		}
 	}
@@ -117,12 +117,12 @@ func (caller foreachActorStartCaller) FuncDocs() *slip.FuncDoc {
 
 type foreachActorPerformCaller struct{}
 
-func (caller foreachActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller foreachActorPerformCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	fec := obj.Any.(*foreachCtx)
 	bi := args[0].(*flavors.Instance)
 
-	list := fec.list.value(s, bi)
+	list := fec.list.value(s, bi, depth)
 	for _, v := range list {
 		var bx *box
 		bi, bx = boxDup(bi)

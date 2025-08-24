@@ -35,7 +35,7 @@ func (dc *durCaller) extract(s *slip.Scope, arg slip.Object) {
 	}
 }
 
-func (dc *durCaller) value(s *slip.Scope, bi slip.Object) (val time.Duration) {
+func (dc *durCaller) value(s *slip.Scope, bi slip.Object, depth int) (val time.Duration) {
 	val = dc.dur
 	if dc.caller != nil {
 		switch tv := dc.caller.Call(s, slip.List{bi}, 0).(type) {
@@ -54,7 +54,7 @@ func (dc *durCaller) value(s *slip.Scope, bi slip.Object) (val time.Duration) {
 		case slip.Fixnum:
 			dc.dur = time.Duration(tv) * time.Second
 		default:
-			slip.PanicType("value", tv, "fixnum", "string", "symbol")
+			slip.TypePanic(s, depth, "value", tv, "fixnum", "string", "symbol")
 		}
 	}
 	return

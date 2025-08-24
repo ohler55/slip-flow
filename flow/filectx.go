@@ -20,7 +20,7 @@ type fileCtx struct {
 	count    bag.Path
 }
 
-func (fc *fileCtx) parseArgs(s *slip.Scope, args slip.List) {
+func (fc *fileCtx) parseArgs(s *slip.Scope, args slip.List, depth int) {
 	for pos := 0; pos < len(args)-1; pos += 2 {
 		sym, _ := args[pos].(slip.Symbol)
 		switch string(sym) {
@@ -33,7 +33,7 @@ func (fc *fileCtx) parseArgs(s *slip.Scope, args slip.List) {
 			case slip.Symbol:
 				fc.dest = bag.Path(jp.MustParse([]byte(ta)))
 			default:
-				slip.PanicType(":destination", args[pos+1], "string", "symbol")
+				slip.TypePanic(s, depth, ":destination", args[pos+1], "string", "symbol")
 			}
 		case ":count":
 			switch ta := args[pos+1].(type) {
@@ -42,13 +42,13 @@ func (fc *fileCtx) parseArgs(s *slip.Scope, args slip.List) {
 			case slip.Symbol:
 				fc.count = bag.Path(jp.MustParse([]byte(ta)))
 			default:
-				slip.PanicType(":count", args[pos+1], "string", "symbol")
+				slip.TypePanic(s, depth, ":count", args[pos+1], "string", "symbol")
 			}
 		}
 	}
 }
 
-func (fc *fileCtx) readText(r io.Reader, bi *flavors.Instance) slip.List {
+func (fc *fileCtx) readText(s *slip.Scope, r io.Reader, bi *flavors.Instance, depth int) slip.List {
 	var content []byte
 	buf := make([]byte, 4096)
 	for {
@@ -61,7 +61,7 @@ func (fc *fileCtx) readText(r io.Reader, bi *flavors.Instance) slip.List {
 		}
 		content = append(content, buf[:cnt]...)
 	}
-	setBox(bi, slip.String(content), fc.dest)
+	setBox(s, bi, slip.String(content), fc.dest, depth)
 
 	return slip.List{slip.String("ok"), bi}
 }

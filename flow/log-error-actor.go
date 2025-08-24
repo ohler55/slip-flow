@@ -62,13 +62,13 @@ type logErrorCtx struct {
 
 type logErrorInitCaller struct{}
 
-func (caller logErrorInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller logErrorInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
 	var lec logErrorCtx
-	lec.pw, lec.full, lec.prty, _ = parseBoxWriteOptions(args, false)
+	lec.pw, lec.full, lec.prty, _ = parseBoxWriteOptions(s, args, false, depth)
 	self.Any = &lec
 
 	return nil
@@ -157,7 +157,7 @@ func (caller logErrorActorStartCaller) FuncDocs() *slip.FuncDoc {
 
 type logErrorActorPerformCaller struct{}
 
-func (caller logErrorActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller logErrorActorPerformCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	bx := args[0].(*flavors.Instance).Any.(*box)
 	lec := obj.Any.(*logErrorCtx)
@@ -184,7 +184,7 @@ func (caller logErrorActorPerformCaller) Call(s *slip.Scope, args slip.List, _ i
 		notifiers = tn
 	}
 	if bi, ok := args[0].(*flavors.Instance); ok && bi.Type == boxFlavor {
-		notifyBox(bi, notifiers)
+		notifyBox(s, bi, notifiers, depth)
 	}
 	tsk.flow.exit(args[0])
 

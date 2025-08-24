@@ -41,13 +41,13 @@ type deleteFileCtx struct {
 
 type deleteFileInitCaller struct{}
 
-func (caller deleteFileInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller deleteFileInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
 	var dfc deleteFileCtx
-	dfc.parseArgs(s, args)
+	dfc.parseArgs(s, args, depth)
 	self.Any = &dfc
 
 	return nil
@@ -93,12 +93,12 @@ func (caller deleteFileActorStartCaller) FuncDocs() *slip.FuncDoc {
 
 type deleteFileActorPerformCaller struct{}
 
-func (caller deleteFileActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller deleteFileActorPerformCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	dfc := obj.Any.(*deleteFileCtx)
 	bi := args[0].(*flavors.Instance)
 
-	_ = os.RemoveAll(dfc.filename.value(s, bi))
+	_ = os.RemoveAll(dfc.filename.value(s, bi, depth))
 
 	return slip.List{slip.String("ok"), bi}
 }

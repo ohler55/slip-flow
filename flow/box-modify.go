@@ -66,7 +66,7 @@ type BoxModify struct {
 func (f *BoxModify) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	_ = self.Receive(s, ":modify", args[1:], depth)
 
@@ -99,13 +99,13 @@ func modifyBox(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) 
 		case bag.Path:
 			x = jp.Expr(p)
 		default:
-			slip.PanicType("path", p, "string")
+			slip.TypePanic(s, depth, "path", p, "string")
 		}
 		if 2 < len(args) {
 			for pos := 2; pos < len(args); pos += 2 {
 				sym, ok := args[pos].(slip.Symbol)
 				if !ok {
-					slip.PanicType("keyword", args[pos], "keyword")
+					slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 				}
 				if len(args)-1 <= pos {
 					slip.NewPanic("keyword %s is missing a value", sym)
@@ -113,7 +113,7 @@ func modifyBox(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) 
 				if strings.EqualFold(string(sym), ":as-bag") {
 					asBag = args[pos+1] != nil
 				} else {
-					slip.PanicType("keyword", sym, ":as-bag")
+					slip.TypePanic(s, depth, "keyword", sym, ":as-bag")
 				}
 			}
 		}

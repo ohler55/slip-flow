@@ -60,7 +60,7 @@ func (caller exitActorStartCaller) FuncDocs() *slip.FuncDoc {
 
 type exitActorPerformCaller struct{}
 
-func (caller exitActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller exitActorPerformCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 
 	var notifiers slip.List
@@ -73,7 +73,7 @@ func (caller exitActorPerformCaller) Call(s *slip.Scope, args slip.List, _ int) 
 		notifiers = tn
 	}
 	if bi, ok := args[0].(*flavors.Instance); ok && bi.Type == boxFlavor {
-		notifyBox(bi, notifiers)
+		notifyBox(s, bi, notifiers, depth)
 	}
 	obj.Any.(*flow).exit(args[0])
 

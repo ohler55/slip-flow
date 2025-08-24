@@ -57,7 +57,7 @@ type BoxSet struct {
 func (f *BoxSet) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self, ok := args[0].(*flavors.Instance)
 	if !ok {
-		slip.PanicType("box", args[0], "box")
+		slip.TypePanic(s, depth, "box", args[0], "box")
 	}
 	_ = self.Receive(s, ":set", args[1:], depth)
 
@@ -66,13 +66,13 @@ func (f *BoxSet) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 
 type boxSetCaller struct{}
 
-func (caller boxSetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller boxSetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	switch len(args) {
 	case 1:
-		setBox(obj, args[0], nil)
+		setBox(s, obj, args[0], nil, depth)
 	case 2:
-		setBox(obj, args[0], args[1])
+		setBox(s, obj, args[0], args[1], depth)
 	default:
 		slip.PanicMethodArgChoice(obj, ":set", len(args), "1 or 2")
 	}
@@ -83,7 +83,7 @@ func (caller boxSetCaller) FuncDocs() *slip.FuncDoc {
 	return methodDocsFromFunc(":set", "flow-box-set", "flow-box", "box")
 }
 
-func setBox(obj *flavors.Instance, value, path slip.Object) {
+func setBox(s *slip.Scope, obj *flavors.Instance, value, path slip.Object, depth int) {
 	var x jp.Expr
 	switch p := path.(type) {
 	case nil:
@@ -92,9 +92,9 @@ func setBox(obj *flavors.Instance, value, path slip.Object) {
 	case bag.Path:
 		x = jp.Expr(p)
 	default:
-		slip.PanicType("path", p, "string")
+		slip.TypePanic(s, depth, "path", p, "string")
 	}
-	setBx(obj.Any.(*box), bag.ObjectToBag(value), x)
+	setBx(obj.Any.(*box), bag.ObjectToBag(s, value, depth), x)
 }
 
 func setBx(bx *box, value any, x jp.Expr) {
