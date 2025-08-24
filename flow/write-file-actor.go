@@ -52,7 +52,7 @@ type writeFileCtx struct {
 
 type writeFileInitCaller struct{}
 
-func (caller writeFileInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller writeFileInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
@@ -85,7 +85,7 @@ func (caller writeFileInitCaller) Call(s *slip.Scope, args slip.List, _ int) sli
 			case slip.Fixnum:
 				wfc.perm = fs.FileMode(ta)
 			default:
-				slip.PanicType(":permissions", args[pos+1], "string", "symbol", "fixnum")
+				slip.TypePanic(s, depth, ":permissions", args[pos+1], "string", "symbol", "fixnum")
 			}
 		}
 	}

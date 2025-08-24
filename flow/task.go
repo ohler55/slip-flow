@@ -239,7 +239,7 @@ func (t *task) handleResult(s *slip.Scope, result slip.Object) {
 			return
 		}
 	}
-	slip.NewPanic("Actor did not return a list of link name and box instance.")
+	slip.ErrorPanic(s, 0, "Actor did not return a list of link name and box instance.")
 }
 
 func (t *task) transition(s *slip.Scope, linkName string, bi *flavors.Instance) {
@@ -411,7 +411,7 @@ func (t *task) updateLink(s *slip.Scope, args slip.List, depth int) {
 	if lnk := t.links[name]; lnk != nil {
 		lnk.mids = mids
 	} else {
-		slip.NewPanic("task %s has no %s link", t.name, name)
+		slip.ErrorPanic(s, depth, "task %s has no %s link", t.name, name)
 	}
 }
 

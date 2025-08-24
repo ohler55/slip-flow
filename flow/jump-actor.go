@@ -109,11 +109,11 @@ func (caller jumpActorPerformCaller) Call(s *slip.Scope, args slip.List, depth i
 	obj := s.Get("self").(*flavors.Instance)
 	jc := obj.Any.(*jumpCtx)
 	if jc.task.flow == nil || jc.task.flow.group == nil {
-		slip.NewPanic("task is not in a flow that is in a group")
+		slip.ErrorPanic(s, depth, "task is not in a flow that is in a group")
 	}
 	f := jc.task.flow.group.flows[jc.target]
 	if f == nil {
-		slip.NewPanic("flow %s is not in the same group that %s is in", jc.target, jc.task.flow.name)
+		slip.ErrorPanic(s, depth, "flow %s is not in the same group that %s is in", jc.target, jc.task.flow.name)
 	}
 	f.submit(s, args[0], nil, depth)
 

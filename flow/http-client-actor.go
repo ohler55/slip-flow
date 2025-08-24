@@ -175,7 +175,7 @@ func (caller httpClientActorPerformCaller) Call(s *slip.Scope, args slip.List, d
 	hcc := obj.Any.(*httpClientCtx)
 	method := hcc.method.value(s, bi, depth)
 	url := hcc.url.value(s, bi, depth)
-	body := hcc.body.value(s, bi)
+	body := hcc.body.value(s, bi, depth)
 	timeout := hcc.timeout.value(s, bi, depth)
 	ctx := context.Background()
 	if 0 < timeout {

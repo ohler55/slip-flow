@@ -138,7 +138,7 @@ func (f *flow) running() bool {
 func (f *flow) addTask(s *slip.Scope, args slip.List, depth int) *flavors.Instance {
 	inst, tsk := MakeTask(s, depth, args...)
 	if _, has := f.tasks[tsk.name]; has {
-		slip.NewPanic("Task %s already exists in flow %s.", tsk.name, f.name)
+		slip.ErrorPanic(s, depth, "Task %s already exists in flow %s.", tsk.name, f.name)
 	}
 	tsk.flow = f
 	f.tasks[tsk.name] = tsk
@@ -203,7 +203,7 @@ func (f *flow) setEntry(s *slip.Scope, name slip.Object, depth int) (found slip.
 		found = t.self
 		f.entry = t
 	} else {
-		slip.NewPanic("task %s not found", key)
+		slip.ErrorPanic(s, depth, "task %s not found", key)
 	}
 	return
 }
@@ -216,10 +216,10 @@ func (f *flow) link(s *slip.Scope, args slip.List, depth int) {
 	)
 	name := strFromArg(s, args[0], "flow :link :link-name", depth)
 	if from = f.tasks[strFromArg(s, args[1], "flow :link :from", depth)]; from == nil {
-		slip.NewPanic("task %s not found", args[1])
+		slip.ErrorPanic(s, depth, "task %s not found", args[1])
 	}
 	if to = f.tasks[strFromArg(s, args[2], "flow :link :to", depth)]; to == nil {
-		slip.NewPanic("task %s not found", args[2])
+		slip.ErrorPanic(s, depth, "task %s not found", args[2])
 	}
 	lnk := link{task: to}
 	if 3 < len(args) {
@@ -267,7 +267,7 @@ func (f *flow) exit(bi slip.Object) {
 
 func (f *flow) submit(s *slip.Scope, data, watcher slip.Object, depth int) slip.Object {
 	if f.entry == nil {
-		slip.NewPanic("no entry task has been set for the %s flow", f.name)
+		slip.ErrorPanic(s, depth, "no entry task has been set for the %s flow", f.name)
 	}
 	if !f.started {
 		f.start(s)
@@ -376,7 +376,7 @@ func (f *flow) write(s *slip.Scope, args slip.List, depth int) slip.Object {
 		}
 	}
 	if _, err := w.Write(b); err != nil {
-		slip.PanicStream(os, "write failed. %s", err)
+		slip.StreamPanic(s, depth, os, "write failed. %s", err)
 	}
 	return nil
 }

@@ -24,7 +24,7 @@ func (sc *streamCaller) extract(s *slip.Scope, arg slip.Object) {
 	}
 }
 
-func (sc *streamCaller) value(s *slip.Scope, bi slip.Object) (val io.Reader) {
+func (sc *streamCaller) value(s *slip.Scope, bi slip.Object, depth int) (val io.Reader) {
 	if sc.caller != nil {
 		switch tv := sc.caller.Call(s, slip.List{bi}, 0).(type) {
 		case slip.String:
@@ -32,7 +32,7 @@ func (sc *streamCaller) value(s *slip.Scope, bi slip.Object) (val io.Reader) {
 		case io.Reader:
 			val = tv
 		default:
-			slip.PanicType("value", tv, "string", "symbol")
+			slip.TypePanic(s, depth, "value", tv, "string", "symbol")
 		}
 	} else {
 		val = &slip.InputStream{Reader: strings.NewReader(sc.str)}
