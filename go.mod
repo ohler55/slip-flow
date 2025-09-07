@@ -3,14 +3,14 @@ module github.com/ohler55/slip-flow
 go 1.25
 
 require (
-	github.com/ohler55/ojg v1.26.9
-	github.com/ohler55/slip v1.1.0
+	github.com/ohler55/ojg v1.26.10
+	github.com/ohler55/slip v1.2.0
 )
 
 require (
-	golang.org/x/sys v0.21.0 // indirect
-	golang.org/x/term v0.21.0 // indirect
-	golang.org/x/text v0.19.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/term v0.34.0 // indirect
+	golang.org/x/text v0.28.0 // indirect
 )
 
 replace github.com/ohler55/slip => ../slip
