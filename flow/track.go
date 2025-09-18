@@ -29,7 +29,7 @@ _flow-box_ is traverses a flow.`),
 		&Pkg,
 	)
 	trackFlavor.Final = true
-	// trackFlavor.GoMakeOnly = true
+	trackFlavor.GoMakeOnly = true
 	trackFlavor.DefMethod(":id", "", trackIDCaller{}) // TBD change id to something else, conflict with vanilla
 	trackFlavor.DefMethod(":history", "", trackHistoryCaller{})
 	trackFlavor.DefMethod(":merge", "", trackMergeCaller{})

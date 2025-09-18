@@ -112,3 +112,10 @@ func TestTrackMergeBadOther(t *testing.T) {
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
+
+func TestTrackGoMakeOnly(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(make-instance 'flow-track)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
