@@ -28,14 +28,14 @@ func (sc *streamCaller) value(s *slip.Scope, bi slip.Object, depth int) (val io.
 	if sc.caller != nil {
 		switch tv := sc.caller.Call(s, slip.List{bi}, 0).(type) {
 		case slip.String:
-			val = &slip.InputStream{Reader: strings.NewReader(string(tv))}
+			val = slip.NewInputStream(strings.NewReader(string(tv)))
 		case io.Reader:
 			val = tv
 		default:
 			slip.TypePanic(s, depth, "value", tv, "string", "symbol")
 		}
 	} else {
-		val = &slip.InputStream{Reader: strings.NewReader(sc.str)}
+		val = slip.NewInputStream(strings.NewReader(sc.str))
 	}
 	return
 }

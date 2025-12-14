@@ -3,7 +3,7 @@ module github.com/ohler55/slip-flow
 go 1.25
 
 require (
-	github.com/ohler55/ojg v1.26.10
+	github.com/ohler55/ojg v1.27.0
 	github.com/ohler55/slip v1.2.0
 )
 
